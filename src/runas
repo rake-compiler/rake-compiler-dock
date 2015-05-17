@@ -1,0 +1,9 @@
+#!/bin/bash
+
+groupadd -g $GID $GROUP
+useradd -g $GID -u $UID $USER
+
+HOME=$(bash <<< "echo ~$USER")
+ln -s /usr/local/rake-compiler $HOME/.rake-compiler
+
+sudo -u $USER --set-home -- "$@"

@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+pwd = Dir.pwd
+uid = Process.uid
+gid = Process.gid
+user = `id -nu`.chomp
+group = `id -ng`.chomp
+
+cmd = ["docker", "run", "--rm", "-i",
+       "-v", "#{pwd}:#{pwd}",
+       "-e", "UID=#{uid}",
+       "-e", "GID=#{gid}",
+       "-e", "USER=#{user}",
+       "-e", "GROUP=#{group}",
+       "-w", pwd,
+       "larskanis/rake-compiler-dock",
+       "sigfw", "runas", *ARGV]
+
+puts cmd.join(" ")
+system *cmd
