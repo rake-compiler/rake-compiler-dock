@@ -36,7 +36,7 @@ RUN bash -c " \
 # Install rake-compiler and typical gems in all Rubies
 # do not generate documentation for gems
 RUN echo "gem: --no-ri --no-rdoc" >> ~/.gemrc && \
-    bash -c "rvm all do gem install bundler rake-compiler hoe jeweler mini_portile rubygems-tasks"
+    bash -c "rvm all do gem install bundler rake-compiler hoe mini_portile rubygems-tasks"
 
 # Install rake-compiler's cross rubies in global dir instead of /root
 RUN mkdir -p /usr/local/rake-compiler && \
