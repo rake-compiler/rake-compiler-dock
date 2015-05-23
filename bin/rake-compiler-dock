@@ -5,8 +5,9 @@ uid = Process.uid
 gid = Process.gid
 user = `id -nu`.chomp
 group = `id -ng`.chomp
+args = ARGV.empty? ? ['bash'] : ARGV
 
-cmd = ["docker", "run", "--rm", "-i",
+cmd = ["docker", "run", "--rm", "-i", "-t",
        "-v", "#{pwd}:#{pwd}",
        "-e", "UID=#{uid}",
        "-e", "GID=#{gid}",
@@ -14,7 +15,7 @@ cmd = ["docker", "run", "--rm", "-i",
        "-e", "GROUP=#{group}",
        "-w", pwd,
        "larskanis/rake-compiler-dock",
-       "sigfw", "runas", *ARGV]
+       "sigfw", "runas", *args]
 
 puts cmd.join(" ")
 system *cmd

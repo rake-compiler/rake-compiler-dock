@@ -2,36 +2,51 @@
 
 A docker image for using rake-compiler.
 
-This is similair to [rake-compiler-dev-box](https://github.com/tjschuck/rake-compiler-dev-box) but is based on lightwight Docker containers and is wrapped as a gem for easier usage.
+This is similar to [rake-compiler-dev-box](https://github.com/tjschuck/rake-compiler-dev-box) but is based on lightweight Docker containers and is wrapped as a gem for easier usage.
 
 ## Installation
 
-Install it as prebuilt docker image:
+Make sure docker is installed:
 
     $ sudo apt-get install docker.io
+
+Install rake-compiler-dock as a gem. The docker image is downloaded at the first run:
+
     $ gem install rake-compiler-dock
 
-... or build your own image:
+... or build your own gem and docker image:
 
-    $ sudo apt-get install docker.io
     $ git clone https://github.com/larskanis/rake-compiler-dock
     $ rake install
 
 ## Usage
 
-`rake-compiler-dock` can be used to issue commands within the docker image. The first run will download the image.
-It mounts the current directory into the docker environment and makes sure, that all commands are executed with the host user and group permissions.
+`rake-compiler-dock` can be used to issue commands within the docker image.
+It mounts the current directory into the docker environment.
+All commands are executed with the user and group of the host.
+
+`rake-compiler-dock` without arguments starts an interactive shell session.
+You can choose between different ruby versions by `rvm use <version>` .
+All changes within the current working directory are shared with the host.
+All other changes to the file system are dropped at the end of the session.
+
+`rake-compiler-dock` can also take the build command(s) from STDIN or as command arguments.
 
 To build win32/win64 binary gems, it is typically called like this:
 
     $ cd your-gem-dir/
-    $ rake-compiler-dock /usr/local/rvm/wrappers/ruby-2.2.2/rake cross native gem RUBY_CC_VERSION=1.9.3:2.0.0:2.1.6:2.2.2
+    $ rake-compiler-dock /usr/local/rvm/wrappers/2.2/rake cross native gem RUBYOPT=--disable-rubygems
 
-The versions in `RUBY_CC_VERSION` must match the cross ruby versions in the docker image.
+The environment variable `RUBY_CC_VERSION` is predefined and includes all Mingw versions of ruby from 1.8.7 to 2.2.
 
 A java gem can be built per:
+
     $ cd your-gem-dir/
-    $ rake-compiler-dock /usr/local/rvm/wrappers/jruby-1.7.19/rake gem
+    $ rake-compiler-dock /usr/local/rvm/wrappers/jruby/rake gem
+
+If your Rakefile requires additional gems, you can install them as specified in your Gemfile:
+
+    $ rake-compiler-dock bash -c "rvm use jruby && bundle && rake gem"
 
 ## Contributing
 
