@@ -49,18 +49,26 @@ RUN sudo mkdir -p /usr/local/rake-compiler && \
     sudo chown rvm.rvm /usr/local/rake-compiler && \
     ln -s /usr/local/rake-compiler ~/.rake-compiler
 
+# Patch rake-compiler to avoid build of ruby extensions
+ADD src/rake-compiler-without-exts.diff /home/rvm/
+RUN cd /usr/local/rvm/gems/ruby-1.8.7-p374/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/rake-compiler-without-exts.diff && \
+    cd /usr/local/rvm/gems/ruby-1.9.3-p551/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/rake-compiler-without-exts.diff && \
+    cd /usr/local/rvm/gems/ruby-2.2.2/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/rake-compiler-without-exts.diff
+
 # Build 1.8.7 with mingw32 compiler (GCC 4.2)
 # Use just one CPU for building 1.8.7 and 1.9.3
 RUN bash -c "rvm use 1.8.7-p374 && \
+    export CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
     rake-compiler cross-ruby VERSION=1.8.7-p374 HOST=i586-mingw32msvc && \
     rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources"
 
 RUN bash -c "rvm use 1.9.3 && \
+    export CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
     rake-compiler cross-ruby VERSION=1.9.3-p550 HOST=i586-mingw32msvc && \
     rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources"
 
 RUN bash -c "rvm use 2.2.2 --default && \
-    export MAKE=\"make -j`nproc`\" && \
+    export MAKE=\"make -j`nproc`\" CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
     rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=i686-w64-mingw32 && \
     rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=x86_64-w64-mingw32 && \
     rake-compiler cross-ruby VERSION=2.1.6 HOST=i686-w64-mingw32 && \
