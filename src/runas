@@ -1,7 +1,7 @@
 #!/bin/bash
 
 groupadd -g $GID $GROUP
-useradd -g $GID -u $UID -G rvm -p "" $USER
+useradd -g $GID -u $UID -G rvm,sudo -p "" $USER
 
 HOME=$(bash <<< "echo ~$USER")
 ln -s /usr/local/rake-compiler $HOME/.rake-compiler
