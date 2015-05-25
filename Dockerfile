@@ -1,7 +1,7 @@
 FROM ubuntu:14.04
 
 RUN apt-get -y update && \
-    apt-get install -y curl git-core mingw32 xz-utils build-essential openjdk-7-jdk
+    apt-get install -y curl git-core mingw32 xz-utils build-essential
 
 RUN mkdir -p /opt/mingw && \
     curl -SL http://sunet.dl.sourceforge.net/project/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/rubenvb/gcc-4.7-release/i686-w64-mingw32-gcc-4.7.2-release-linux64_rubenvb.tar.xz | \
@@ -31,7 +31,8 @@ ENV BASH_ENV /etc/rubybashrc
 
 # install rubies and fix permissions on
 RUN bash -c " \
-    for v in 1.8.7-p374 1.9.3 2.2.2 jruby ; do \
+    export CFLAGS='-s -O3 -fno-fast-math -fPIC' && \
+    for v in 1.8.7-p374 1.9.3 2.2.2 ; do \
         rvm install \$v; \
     done && \
     rvm cleanup all && \
@@ -81,8 +82,7 @@ RUN bash -c "rvm use 2.2.2 --default && \
 RUN bash -c " \
     rvm alias create 1.8 1.8.7-p374 && \
     rvm alias create 1.9 1.9.3 && \
-    rvm alias create 2.2 2.2.2 && \
-    rvm alias create jruby jruby "
+    rvm alias create 2.2 2.2.2 "
 
 USER root
 
