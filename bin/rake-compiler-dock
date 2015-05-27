@@ -2,9 +2,16 @@
 
 require 'rake_compiler_dock'
 
-pwd = Dir.pwd
-uid = Process.uid
-gid = Process.gid
+if RUBY_PLATFORM =~ /mingw|mswin/
+  # Change Path from "C:\Path" to "/c/Path" as used by boot2docker
+  pwd = Dir.pwd.gsub(/^([a-z]):/i){ "/#{$1.downcase}" }
+  uid = 1000
+  gid = 1000
+else
+  pwd = Dir.pwd
+  uid = Process.uid
+  gid = Process.gid
+end
 user = `id -nu`.chomp
 group = `id -ng`.chomp
 args = ARGV.empty? ? ['bash'] : ARGV

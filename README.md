@@ -7,9 +7,11 @@ This is similar to [rake-compiler-dev-box](https://github.com/tjschuck/rake-comp
 
 ## Installation
 
-Make sure docker is installed:
+Install docker natively on Linux:
 
     $ sudo apt-get install docker.io
+
+... or use the installer on Windows: [boot2docker](https://docs.docker.com/installation/windows)
 
 Install rake-compiler-dock as a gem. This will download the docker image at the first run:
 
