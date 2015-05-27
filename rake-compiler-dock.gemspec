@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = RakeCompilerDock::VERSION
   spec.authors       = ["Lars Kanis"]
   spec.email         = ["lars@greiz-reinsdorf.de"]
-  spec.summary       = %q{run rake-compiler build environment}
-  spec.description   = %q{run rake-compiler build environment with docker}
+  spec.summary       = %q{Docker based cross compiler environment for building binary windows gems.}
+  spec.description   = %q{Use rake-compiler-dock to enter an interactive shell session.}
   spec.homepage      = "https://github.com/larskanis/rake-compiler-dock"
   spec.license       = "MIT"
 

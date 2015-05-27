@@ -1,11 +1,14 @@
 #!/usr/bin/env ruby
 
+require 'rake_compiler_dock'
+
 pwd = Dir.pwd
 uid = Process.uid
 gid = Process.gid
 user = `id -nu`.chomp
 group = `id -ng`.chomp
 args = ARGV.empty? ? ['bash'] : ARGV
+image = ENV['RAKE_COMPILER_DOCK_IMAGE'] || "larskanis/rake-compiler-dock:#{RakeCompilerDock::VERSION}"
 
 cmd = ["docker", "run", "--rm", "-i", "-t",
        "-v", "#{pwd}:#{pwd}",
@@ -14,7 +17,7 @@ cmd = ["docker", "run", "--rm", "-i", "-t",
        "-e", "USER=#{user}",
        "-e", "GROUP=#{group}",
        "-w", pwd,
-       "larskanis/rake-compiler-dock",
+       image,
        "sigfw", "runas", *args]
 
 puts cmd.join(" ")
