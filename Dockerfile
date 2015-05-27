@@ -90,6 +90,14 @@ USER root
 RUN sed -i -- "s:/root/.rake-compiler:/usr/local/rake-compiler:g" /usr/local/rake-compiler/config.yml && \
     echo "source /etc/profile.d/rvm.sh" >> /etc/bash.bashrc
 
+# Install wrappers for strip commands as a workaround for "Protocol error" in boot2docker.
+RUN mv /opt/mingw/mingw32/bin/i686-w64-mingw32-strip /opt/mingw/mingw32/bin/i686-w64-mingw32-strip.bin &&
+  mv /opt/mingw/mingw64/bin/x86_64-w64-mingw32-strip /opt/mingw/mingw64/bin/x86_64-w64-mingw32-strip.bin &&
+  mv /usr/bin/i586-mingw32msvc-strip /usr/bin/i586-mingw32msvc-strip.bin
+ADD src/strip_wrapper /opt/mingw/mingw32/bin/i686-w64-mingw32-strip
+ADD src/strip_wrapper /opt/mingw/mingw64/bin/x86_64-w64-mingw32-strip
+ADD src/strip_wrapper /usr/bin/i586-mingw32msvc-strip
+
 ADD src/sigfw.c /root/
 RUN gcc $HOME/sigfw.c -o /usr/local/bin/sigfw
 ADD src/runas /usr/local/bin/
