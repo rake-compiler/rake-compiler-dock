@@ -28,4 +28,5 @@ cmd = ["docker", "run", "--rm", "-i", "-t",
        "sigfw", "runas", *args]
 
 puts cmd.join(" ")
-system *cmd
+system(*cmd)
+exit $?.exitstatus
