@@ -51,6 +51,16 @@ The environment variable `RUBY_CC_VERSION` is predefined and includes all these 
 
 Overwrite it, if the given gem does not support all of them.
 
+### Add to your Rakefile
+
+Rake-compiler-dock can be easily integrated into your Rakefile:
+
+    require 'rake_compiler_dock'
+
+    task 'gem:windows' do
+      RakeCompilerDock.sh "bundle && rake cross native gem"
+    end
+
 ## Contributing
 
 1. Fork it ( https://github.com/larskanis/rake-compiler-dock/fork )

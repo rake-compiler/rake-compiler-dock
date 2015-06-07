@@ -2,31 +2,7 @@
 
 require 'rake_compiler_dock'
 
-if RUBY_PLATFORM =~ /mingw|mswin/
-  # Change Path from "C:\Path" to "/c/Path" as used by boot2docker
-  pwd = Dir.pwd.gsub(/^([a-z]):/i){ "/#{$1.downcase}" }
-  uid = 1000
-  gid = 1000
-else
-  pwd = Dir.pwd
-  uid = Process.uid
-  gid = Process.gid
-end
-user = `id -nu`.chomp
-group = `id -ng`.chomp
 args = ARGV.empty? ? ['bash'] : ARGV
-image = ENV['RAKE_COMPILER_DOCK_IMAGE'] || "larskanis/rake-compiler-dock:#{RakeCompilerDock::VERSION}"
-
-cmd = ["docker", "run", "--rm", "-i", "-t",
-       "-v", "#{pwd}:#{pwd}",
-       "-e", "UID=#{uid}",
-       "-e", "GID=#{gid}",
-       "-e", "USER=#{user}",
-       "-e", "GROUP=#{group}",
-       "-w", pwd,
-       image,
-       "sigfw", "runas", *args]
-
-puts cmd.join(" ")
-system(*cmd)
-exit $?.exitstatus
+RakeCompilerDock.exec(*args) do |ok, res|
+  exit(res.exitstatus)
+end
