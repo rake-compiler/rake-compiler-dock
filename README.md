@@ -55,9 +55,8 @@ Overwrite `RUBY_CC_VERSION`, if your gem does not support all available versions
 
 Rake-compiler-dock can be easily integrated into your Rakefile like this:
 
-    require 'rake_compiler_dock'
-
     task 'gem:windows' do
+      require 'rake_compiler_dock'
       RakeCompilerDock.sh "bundle && rake cross native gem"
     end
 
