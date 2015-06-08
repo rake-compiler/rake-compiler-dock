@@ -106,4 +106,7 @@ RUN gcc $HOME/sigfw.c -o /usr/local/bin/sigfw
 # Install user mapper
 ADD src/runas /usr/local/bin/
 
+# Install sudoers configuration
+ADD src/sudoers /etc/sudoers.d/
+
 CMD bash

@@ -53,6 +53,9 @@ module RakeCompilerDock
           "-e", "GID=#{gid}",
           "-e", "USER=#{user}",
           "-e", "GROUP=#{group}",
+          "-e", "ftp_proxy=#{ENV['ftp_proxy']}",
+          "-e", "http_proxy=#{ENV['http_proxy']}",
+          "-e", "https_proxy=#{ENV['https_proxy']}",
           "-w", pwd,
           image_name,
           "sigfw", "runas", *args]
