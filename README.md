@@ -60,7 +60,7 @@ Rake-compiler-dock can be easily integrated into your Rakefile like this:
       RakeCompilerDock.sh "bundle && rake cross native gem"
     end
 
-See [the wiki](https://github.com/larskanis/rake-compiler-dock/wiki) for projects which use rake-compiler-dock.
+See [the wiki](https://github.com/larskanis/rake-compiler-dock/wiki/Projects-using-rake-compiler) for projects which use rake-compiler-dock.
 
 ## Contributing
 
