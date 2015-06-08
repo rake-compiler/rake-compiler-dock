@@ -107,6 +107,6 @@ RUN gcc $HOME/sigfw.c -o /usr/local/bin/sigfw
 ADD src/runas /usr/local/bin/
 
 # Install sudoers configuration
-ADD src/sudoers /etc/sudoers.d/
+ADD src/sudoers /etc/sudoers.d/rake-compiler-dock
 
 CMD bash
