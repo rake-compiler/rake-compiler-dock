@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Lars Kanis"]
   spec.email         = ["lars@greiz-reinsdorf.de"]
   spec.summary       = %q{Docker based cross compiler environment for building binary windows gems.}
-  spec.description   = %q{Docker based cross compiler environment for building binary windows gems.
-Use rake-compiler-dock to enter an interactive shell session or add a task to your Rakefile to automate your cross built.}
+  spec.description   = %q{Easy to use Docker based cross compiler environment for building binary windows gems.
+Use rake-compiler-dock to enter an interactive shell session or add a task to your Rakefile to automate your cross build.}
   spec.homepage      = "https://github.com/larskanis/rake-compiler-dock"
   spec.license       = "MIT"
 

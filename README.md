@@ -1,8 +1,8 @@
 # rake-compiler-dock
 
-Docker based cross compiler environment for building binary windows gems.
+Easy to use Docker based cross compiler environment for building binary windows gems.
 
-This is similar to [rake-compiler-dev-box](https://github.com/tjschuck/rake-compiler-dev-box) but is based on lightweight Docker containers and is wrapped as a gem for easier usage.
+This is similar to [rake-compiler-dev-box](https://github.com/tjschuck/rake-compiler-dev-box) but is based on lightweight Docker containers and is wrapped as a gem for easier usage and integration.
 
 
 ## Installation
@@ -11,9 +11,9 @@ Install docker natively on Linux:
 
     $ sudo apt-get install docker.io
 
-... or use the installer on Windows: [boot2docker](https://docs.docker.com/installation/windows)
+... or install boot2docker on [Windows](https://github.com/boot2docker/windows-installer/releases) or [OS X](https://github.com/boot2docker/osx-installer/releases) .
 
-Install rake-compiler-dock as a gem. This will download the docker image at the first run:
+Install rake-compiler-dock as a gem. The docker image is downloaded later on demand:
 
     $ gem install rake-compiler-dock
 
@@ -32,7 +32,7 @@ All commands are executed with the current user and group of the host.
 `rake-compiler-dock` without arguments starts an interactive shell session.
 You can choose between different ruby versions by `rvm use <version>` .
 All changes within the current working directory are shared with the host.
-But all other changes to the file system are dropped at the end of the session.
+But note, that all other changes to the file system are dropped at the end of the session.
 
 `rake-compiler-dock` can also take the build command(s) from STDIN or as command arguments.
 
@@ -49,17 +49,19 @@ The environment variable `RUBY_CC_VERSION` is predefined and includes all these 
 
     $ rake-compiler-dock bash -c 'echo $RUBY_CC_VERSION'    # =>  1.8.7:1.9.3:2.0.0:2.1.6:2.2.2
 
-Overwrite it, if the given gem does not support all of them.
+Overwrite `RUBY_CC_VERSION`, if your gem does not support all available versions.
 
 ### Add to your Rakefile
 
-Rake-compiler-dock can be easily integrated into your Rakefile:
+Rake-compiler-dock can be easily integrated into your Rakefile like this:
 
     require 'rake_compiler_dock'
 
     task 'gem:windows' do
       RakeCompilerDock.sh "bundle && rake cross native gem"
     end
+
+See [the wiki](https://github.com/larskanis/rake-compiler-dock/wiki) for projects which use rake-compiler-dock.
 
 ## Contributing
 
