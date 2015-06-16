@@ -2,6 +2,9 @@ require "shellwords"
 require "rake_compiler_dock/version"
 
 module RakeCompilerDock
+  class DockerIsNotAvailable < RuntimeError
+  end
+
   # Run the command cmd within a fresh rake-compiler-dock container and within a shell.
   #
   # If a block is given, upon command completion the block is called with an OK flag (true on a zero exit status) and a Process::Status object.
@@ -45,6 +48,8 @@ module RakeCompilerDock
   #   RakeCompilerDock.exec 'bash', '-c', 'echo $RUBY_CC_VERSION'
   def exec(*args)
     options = (Hash === args.last) ? args.pop : {}
+
+    check_docker
 
     if RUBY_PLATFORM =~ /mingw|mswin/
       # Change Path from "C:\Path" to "/c/Path" as used by boot2docker
@@ -92,5 +97,43 @@ module RakeCompilerDock
     end
   end
 
-  module_function :exec, :sh, :image_name, :verbose_flag
+  @@docker_checked = false
+
+  def check_docker
+    return if @@docker_checked
+
+    version_text = `docker version` rescue SystemCallError
+    if version_text.to_s =~ /version/
+      @@docker_checked = true
+    else
+      case RUBY_PLATFORM
+      when /mingw|mswin/
+        $stderr.puts "Docker is not available. Please download and install boot2docker:"
+        $stderr.puts "   https://github.com/boot2docker/windows-installer/releases"
+        $stderr.puts
+        $stderr.puts "Then execute 'boot2docker start' and follow the instuctions"
+      when /linux/
+        $stderr.puts "Docker is not available."
+        $stderr.puts
+        $stderr.puts "Install on Ubuntu/Debian:"
+        $stderr.puts "   sudo apt-get install docker.io"
+        $stderr.puts
+        $stderr.puts "Install on Fedora/Centos/RHEL"
+        $stderr.puts "   sudo yum install docker"
+        $stderr.puts "   sudo systemctl start docker"
+        $stderr.puts
+        $stderr.puts "Install on SuSE"
+        $stderr.puts "   sudo zypper install docker"
+        $stderr.puts "   sudo systemctl start docker"
+      when /darwin/
+        $stderr.puts "Docker is not available. Please download and install boot2docker:"
+        $stderr.puts "   https://github.com/boot2docker/osx-installer/releases"
+      else
+        $stderr.puts "Docker is not available."
+      end
+      raise DockerIsNotAvailable, "Docker is not available"
+    end
+  end
+
+  module_function :exec, :sh, :image_name, :verbose_flag, :check_docker
 end
