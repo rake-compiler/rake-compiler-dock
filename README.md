@@ -6,7 +6,7 @@ It provides cross compilers and Ruby environments for all versions of the [RubyI
 They are prepared for use with [rake-compiler](https://github.com/rake-compiler/rake-compiler) .
 
 This is similar to [rake-compiler-dev-box](https://github.com/tjschuck/rake-compiler-dev-box) but is based on lightweight Docker containers and is wrapped as a gem for easier setup, usage and integration.
-It is also a bit more reliable, since using it doesn't make any changes to the underlying docker image.
+It is also a bit more reliable, since the underlying docker images are versioned and kept unchanged while building.
 
 ## Installation
 
