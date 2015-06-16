@@ -10,6 +10,7 @@ strip = "#{File.basename($0)}.bin"
 
 files = ARGV.reject{|f| f=~/^-/ }.map do |arg|
   tmp = Tempfile.new 'strip'
+  tmp.close
   FileUtils.cp arg, tmp.path
   [tmp, arg]
 end
