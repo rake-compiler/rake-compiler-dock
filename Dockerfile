@@ -6,14 +6,12 @@ RUN apt-get -y update && \
 RUN mkdir -p /opt/mingw && \
     curl -SL http://sunet.dl.sourceforge.net/project/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/rubenvb/gcc-4.7-release/i686-w64-mingw32-gcc-4.7.2-release-linux64_rubenvb.tar.xz | \
     tar -xJC /opt/mingw && \
-    echo "export PATH=\$PATH:/opt/mingw/mingw32/bin" >> /etc/rubybashrc && \
-    ln -s /opt/mingw/mingw32/bin/* /usr/local/bin/
+    echo "export PATH=\$PATH:/opt/mingw/mingw32/bin" >> /etc/rubybashrc
 
 RUN mkdir -p /opt/mingw && \
     curl -SL http://softlayer-ams.dl.sourceforge.net/project/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/rubenvb/gcc-4.7-release/x86_64-w64-mingw32-gcc-4.7.2-release-linux64_rubenvb.tar.xz | \
     tar -xJC /opt/mingw && \
-    echo "export PATH=\$PATH:/opt/mingw/mingw64/bin" >> /etc/rubybashrc && \
-    ln -s /opt/mingw/mingw64/bin/* /usr/local/bin/
+    echo "export PATH=\$PATH:/opt/mingw/mingw64/bin" >> /etc/rubybashrc
 
 # Add "rvm" as system group, to avoid conflicts with host GIDs typically starting with 1000
 RUN groupadd -r rvm && useradd -r -g rvm -G sudo -p "" --create-home rvm && \
@@ -86,9 +84,11 @@ RUN bash -c " \
 
 USER root
 
-# Fix paths in rake-compiler/config.yml and add rvm to the global bashrc
+# Fix paths in rake-compiler/config.yml and add rvm and mingw-tools to the global bashrc
 RUN sed -i -- "s:/root/.rake-compiler:/usr/local/rake-compiler:g" /usr/local/rake-compiler/config.yml && \
-    echo "source /etc/profile.d/rvm.sh" >> /etc/bash.bashrc
+    echo "source /etc/profile.d/rvm.sh" >> /etc/bash.bashrc && \
+    echo "export PATH=\$PATH:/opt/mingw/mingw32/bin" >> /etc/bash.bashrc && \
+    echo "export PATH=\$PATH:/opt/mingw/mingw64/bin" >> /etc/bash.bashrc
 
 # Install wrappers for strip commands as a workaround for "Protocol error" in boot2docker.
 ADD src/strip_wrapper /root/
