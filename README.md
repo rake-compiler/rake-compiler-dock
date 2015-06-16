@@ -1,9 +1,12 @@
 # rake-compiler-dock
 
-Easy to use Docker based cross compiler environment for building binary windows gems.
+Easy to use Docker based cross compiler environment for building binary Windows gems.
 
-This is similar to [rake-compiler-dev-box](https://github.com/tjschuck/rake-compiler-dev-box) but is based on lightweight Docker containers and is wrapped as a gem for easier usage and integration.
+It provides cross compilers and Ruby environments for all versions of the [RubyInstaller](http://rubyinstaller.org/) .
+They are prepared for use with [rake-compiler](https://github.com/rake-compiler/rake-compiler) .
 
+This is similar to [rake-compiler-dev-box](https://github.com/tjschuck/rake-compiler-dev-box) but is based on lightweight Docker containers and is wrapped as a gem for easier setup, usage and integration.
+It is also a bit more reliable, since using it doesn't make any changes to the underlying docker image.
 
 ## Installation
 
@@ -32,7 +35,7 @@ All commands are executed with the current user and group of the host.
 `rake-compiler-dock` without arguments starts an interactive shell session.
 You can choose between different ruby versions by `rvm use <version>` .
 All changes within the current working directory are shared with the host.
-But note, that all other changes to the file system are dropped at the end of the session.
+But note, that all other changes to the file system are dropped at the end of the session - the docker image is stateless.
 
 `rake-compiler-dock` can also take the build command(s) from STDIN or as command arguments.
 
