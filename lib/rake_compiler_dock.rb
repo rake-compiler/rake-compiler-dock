@@ -103,7 +103,7 @@ module RakeCompilerDock
     return if @@docker_checked
 
     version_text = `docker version` rescue SystemCallError
-    if version_text.to_s =~ /version/
+    if $?.exitstatus == 0 && version_text.to_s =~ /version/
       @@docker_checked = true
     else
       case RUBY_PLATFORM
