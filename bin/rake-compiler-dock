@@ -3,6 +3,10 @@
 require 'rake_compiler_dock'
 
 args = ARGV.empty? ? ['bash'] : ARGV
-RakeCompilerDock.exec(*args) do |ok, res|
-  exit(res.exitstatus)
+begin
+  RakeCompilerDock.exec(*args) do |ok, res|
+    exit(res.exitstatus)
+  end
+rescue RakeCompilerDock::DockerIsNotAvailable
+  exit(-1)
 end
