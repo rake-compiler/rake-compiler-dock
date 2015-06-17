@@ -42,6 +42,7 @@ module RakeCompilerDock
   #
   # Option +:verbose+ can be set to enable printing of the command line.
   # If not set, the rake verbose_flag is used.
+  # Option +:check_docker+ can be set to false to disable the docker check.
   #
   # Examples:
   #
@@ -49,7 +50,7 @@ module RakeCompilerDock
   def exec(*args)
     options = (Hash === args.last) ? args.pop : {}
 
-    check_docker
+    check_docker if options.fetch(:check_docker){ true }
 
     if RUBY_PLATFORM =~ /mingw|mswin/
       # Change Path from "C:\Path" to "/c/Path" as used by boot2docker
