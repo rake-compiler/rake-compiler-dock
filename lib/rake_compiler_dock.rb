@@ -107,30 +107,32 @@ module RakeCompilerDock
     if $?.exitstatus == 0 && version_text.to_s =~ /version/
       @@docker_checked = true
     else
-      case RUBY_PLATFORM
-      when /mingw|mswin/
-        $stderr.puts "Docker is not available. Please download and install boot2docker:"
-        $stderr.puts "   https://github.com/boot2docker/windows-installer/releases"
-        $stderr.puts
-        $stderr.puts "Then execute 'boot2docker start' and follow the instuctions"
-      when /linux/
-        $stderr.puts "Docker is not available."
-        $stderr.puts
-        $stderr.puts "Install on Ubuntu/Debian:"
-        $stderr.puts "   sudo apt-get install docker.io"
-        $stderr.puts
-        $stderr.puts "Install on Fedora/Centos/RHEL"
-        $stderr.puts "   sudo yum install docker"
-        $stderr.puts "   sudo systemctl start docker"
-        $stderr.puts
-        $stderr.puts "Install on SuSE"
-        $stderr.puts "   sudo zypper install docker"
-        $stderr.puts "   sudo systemctl start docker"
-      when /darwin/
-        $stderr.puts "Docker is not available. Please download and install boot2docker:"
-        $stderr.puts "   https://github.com/boot2docker/osx-installer/releases"
-      else
-        $stderr.puts "Docker is not available."
+      at_exit do
+        case RUBY_PLATFORM
+        when /mingw|mswin/
+          $stderr.puts "Docker is not available. Please download and install boot2docker:"
+          $stderr.puts "   https://github.com/boot2docker/windows-installer/releases"
+          $stderr.puts
+          $stderr.puts "Then execute 'boot2docker start' and follow the instuctions"
+        when /linux/
+          $stderr.puts "Docker is not available."
+          $stderr.puts
+          $stderr.puts "Install on Ubuntu/Debian:"
+          $stderr.puts "   sudo apt-get install docker.io"
+          $stderr.puts
+          $stderr.puts "Install on Fedora/Centos/RHEL"
+          $stderr.puts "   sudo yum install docker"
+          $stderr.puts "   sudo systemctl start docker"
+          $stderr.puts
+          $stderr.puts "Install on SuSE"
+          $stderr.puts "   sudo zypper install docker"
+          $stderr.puts "   sudo systemctl start docker"
+        when /darwin/
+          $stderr.puts "Docker is not available. Please download and install boot2docker:"
+          $stderr.puts "   https://github.com/boot2docker/osx-installer/releases"
+        else
+          $stderr.puts "Docker is not available."
+        end
       end
       raise DockerIsNotAvailable, "Docker is not available"
     end
