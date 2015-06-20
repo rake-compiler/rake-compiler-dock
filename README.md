@@ -28,16 +28,14 @@ Install rake-compiler-dock as a gem. The docker image is downloaded later on dem
 
 ## Usage
 
-`rake-compiler-dock` can be used to issue commands within the docker image.
-It mounts the current working directory into the docker environment.
+Rake-compiler-dock offers the shell command `rake-compiler-dock` and a [ruby API for issuing commands within the docker image](http://www.rubydoc.info/gems/rake-compiler-dock/RakeCompilerDock).
+Both mount the current working directory into the docker environment.
 All commands are executed with the current user and group of the host.
+This is done by copying account data into the container and sudo to it.
 
 `rake-compiler-dock` without arguments starts an interactive shell session.
-You can choose between different ruby versions by `rvm use <version>` .
-All changes within the current working directory are shared with the host.
-But note, that all other changes to the file system are dropped at the end of the session - the docker image is stateless.
-
-`rake-compiler-dock` can also take the build command(s) from STDIN or as command arguments.
+All changes below the current working directory are shared with the host.
+But note, that all other changes to the file system of the contanier are dropped at the end of the session - the docker image is stateless. `rake-compiler-dock` can also take the build command(s) from STDIN or as command arguments.
 
 To build x86- and x64 Windows (Mingw) binary gems, it is typically called like this:
 
@@ -48,11 +46,13 @@ The installed cross rubies can be listed like this:
 
     $ rake-compiler-dock bash -c 'rvmsudo rake-compiler update-config'
 
-The environment variable `RUBY_CC_VERSION` is predefined and includes all these versions:
+The environment variable `RUBY_CC_VERSION` is predefined and includes all these cross ruby versions:
 
     $ rake-compiler-dock bash -c 'echo $RUBY_CC_VERSION'    # =>  1.8.7:1.9.3:2.0.0:2.1.6:2.2.2
 
 Overwrite `RUBY_CC_VERSION`, if your gem does not support all available versions.
+
+You can also choose between different executable ruby versions by `rvm use <version>` . Current default is 2.2.
 
 ### Add to your Rakefile
 

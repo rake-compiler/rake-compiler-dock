@@ -17,8 +17,9 @@ module RakeCompilerDock
   #
   #   RakeCompilerDock.sh 'bundle && rake cross native gem'
   #
-  #   # check exit status after command runs
-  #   sh %{bundle && rake cross native gem}, verbose: true do |ok, res|
+  # Check exit status after command runs:
+  #
+  #   sh %{bundle && rake cross native gem}, verbose: false do |ok, res|
   #     if ! ok
   #       puts "windows cross build failed (status = #{res.exitstatus})"
   #     end
@@ -42,6 +43,7 @@ module RakeCompilerDock
   #
   # Option +:verbose+ can be set to enable printing of the command line.
   # If not set, the rake verbose_flag is used.
+  #
   # Option +:check_docker+ can be set to false to disable the docker check.
   #
   # Examples:
@@ -108,6 +110,7 @@ module RakeCompilerDock
       @@docker_checked = true
     else
       at_exit do
+        $stderr.puts
         case RUBY_PLATFORM
         when /mingw|mswin/
           $stderr.puts "Docker is not available. Please download and install boot2docker:"
