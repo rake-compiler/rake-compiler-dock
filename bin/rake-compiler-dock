@@ -2,7 +2,7 @@
 
 require 'rake_compiler_dock'
 
-args = ARGV.empty? ? ['bash'] : ARGV
+args = ARGV.empty? ? ['bash', {:sigfw => false}] : ARGV
 begin
   RakeCompilerDock.exec(*args) do |ok, res|
     exit(res.exitstatus)

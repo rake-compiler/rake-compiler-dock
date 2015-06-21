@@ -11,7 +11,7 @@ module RakeCompilerDock
   # Without a block a RuntimeError is raised when the command exits non-zero.
   #
   # Option +:verbose+ can be set to enable printing of the command line.
-  # If not set, the rake verbose_flag is used.
+  # If not set, rake's verbose flag is used.
   #
   # Examples:
   #
@@ -41,18 +41,22 @@ module RakeCompilerDock
   # If a block is given, upon command completion the block is called with an OK flag (true on a zero exit status) and a Process::Status object.
   # Without a block a RuntimeError is raised when the command exits non-zero.
   #
-  # Option +:verbose+ can be set to enable printing of the command line.
-  # If not set, the rake verbose_flag is used.
-  #
-  # Option +:check_docker+ can be set to false to disable the docker check.
+  # * Option +:verbose+ can be set to enable printing of the command line.
+  #   If not set, rake's verbose flag is used.
+  # * Option +:check_docker+ can be set to false to disable the docker check.
+  # * Option +:sigfw+ can be set to false to not stop the container on Ctrl-C.
+  # * Option +:runas+ can be set to false to execute the command as user root.
   #
   # Examples:
   #
   #   RakeCompilerDock.exec 'bash', '-c', 'echo $RUBY_CC_VERSION'
   def exec(*args)
     options = (Hash === args.last) ? args.pop : {}
+    runargs = args.dup
 
     check_docker if options.fetch(:check_docker){ true }
+    runargs.unshift("sigfw") if options.fetch(:sigfw){ true }
+    runargs.unshift("runas") if options.fetch(:runas){ true }
 
     if RUBY_PLATFORM =~ /mingw|mswin/
       # Change Path from "C:\Path" to "/c/Path" as used by boot2docker
@@ -78,7 +82,7 @@ module RakeCompilerDock
           "-e", "https_proxy=#{ENV['https_proxy']}",
           "-w", pwd,
           image_name,
-          "sigfw", "runas", *args]
+          *runargs]
 
     cmdline = Shellwords.join(cmd)
     if verbose_flag(options) == true
