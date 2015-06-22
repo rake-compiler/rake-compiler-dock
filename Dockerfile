@@ -25,13 +25,14 @@ RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3 && \
         source /etc/rubybashrc && \
         rvmsudo rvm cleanup all "
 
+ADD patches /home/rvm/patches
 ENV BASH_ENV /etc/rubybashrc
 
 # install rubies and fix permissions on
 RUN bash -c " \
     export CFLAGS='-s -O3 -fno-fast-math -fPIC' && \
     for v in 1.8.7-p374 1.9.3 2.2.2 ; do \
-        rvm install \$v; \
+        rvm install \$v --patch \$(echo ~/patches/ruby-\$v/* | tr ' ' ','); \
     done && \
     rvm cleanup all && \
     find /usr/local/rvm -type d | sudo xargs chmod g+sw "
@@ -63,7 +64,7 @@ RUN bash -c "rvm use 1.8.7-p374 && \
 
 RUN bash -c "rvm use 1.9.3 && \
     export CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
-    rake-compiler cross-ruby VERSION=1.9.3-p550 HOST=i586-mingw32msvc && \
+    rake-compiler cross-ruby VERSION=1.9.3-p551 HOST=i586-mingw32msvc && \
     rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources"
 
 RUN bash -c "rvm use 2.2.2 --default && \
