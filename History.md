@@ -1,3 +1,10 @@
+0.3.1 / 2015-06-24
+------------------
+* Add :sigfw and :runas options.
+* Don't stop the container on Ctrl-C when running interactively.
+* Workaround an issue with sendfile() leading to broken files when using boot2docker on Windows.
+
+
 0.3.0 / 2015-06-17
 ------------------
 * Workaround an issue with broken DLLs when building on Windows.
