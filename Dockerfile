@@ -4,12 +4,12 @@ RUN apt-get -y update && \
     apt-get install -y curl git-core mingw32 xz-utils build-essential wget
 
 RUN mkdir -p /opt/mingw && \
-    curl -SL http://sunet.dl.sourceforge.net/project/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/rubenvb/gcc-4.7-release/i686-w64-mingw32-gcc-4.7.2-release-linux64_rubenvb.tar.xz | \
+    curl -SL http://downloads.sourceforge.net/mingw-w64/i686-w64-mingw32-gcc-4.7.2-release-linux64_rubenvb.tar.xz | \
     tar -xJC /opt/mingw && \
     echo "export PATH=\$PATH:/opt/mingw/mingw32/bin" >> /etc/rubybashrc
 
 RUN mkdir -p /opt/mingw && \
-    curl -SL http://softlayer-ams.dl.sourceforge.net/project/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/rubenvb/gcc-4.7-release/x86_64-w64-mingw32-gcc-4.7.2-release-linux64_rubenvb.tar.xz | \
+    curl -SL http://downloads.sourceforge.net/mingw-w64/x86_64-w64-mingw32-gcc-4.7.2-release-linux64_rubenvb.tar.xz | \
     tar -xJC /opt/mingw && \
     echo "export PATH=\$PATH:/opt/mingw/mingw64/bin" >> /etc/rubybashrc
 
