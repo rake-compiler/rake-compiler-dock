@@ -58,11 +58,16 @@ module RakeCompilerDock
     runargs.unshift("sigfw") if options.fetch(:sigfw){ true }
     runargs.unshift("runas") if options.fetch(:runas){ true }
 
-    if RUBY_PLATFORM =~ /mingw|mswin/
+    case RUBY_PLATFORM
+    when /mingw|mswin/
       # Change Path from "C:\Path" to "/c/Path" as used by boot2docker
       pwd = Dir.pwd.gsub(/^([a-z]):/i){ "/#{$1.downcase}" }
       uid = 1000
       gid = 1000
+    when /darwin/
+      pwd = Dir.pwd
+      uid = 1000
+      gid = Process.gid
     else
       pwd = Dir.pwd
       uid = Process.uid
