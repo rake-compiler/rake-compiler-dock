@@ -1,13 +1,13 @@
 #!/bin/bash
 
-groupadd -g $GID $GROUP
+groupadd -g "$GID" "$GROUP"
 mkdir -p /tmp/home
-useradd -g $GID -u $UID -G rvm,sudo -p "" -b /tmp/home -m $USER
+useradd -g "$GID" -u "$UID" -G rvm,sudo -p "" -b /tmp/home -m "$USER"
 
 HOME=$(bash <<< "echo ~$USER")
-ln -s /usr/local/rake-compiler $HOME/.rake-compiler
+ln -s /usr/local/rake-compiler "$HOME"/.rake-compiler
 
-sudo -u $USER --set-home \
+sudo -u "$USER" --set-home \
     BASH_ENV=/etc/rubybashrc \
     RUBY_CC_VERSION=1.8.7:1.9.3:2.0.0:2.1.6:2.2.2 \
     -- "$@"
