@@ -62,14 +62,17 @@ module RakeCompilerDock
     when /mingw|mswin/
       # Change Path from "C:\Path" to "/c/Path" as used by boot2docker
       pwd = Dir.pwd.gsub(/^([a-z]):/i){ "/#{$1.downcase}" }
+      # Virtualbox shared folders don't care about file permissions, so we use generic ids.
       uid = 1000
       gid = 1000
     when /darwin/
       pwd = Dir.pwd
       uid = 1000
-      gid = Process.gid
+      gid = 1000
     else
       pwd = Dir.pwd
+      # Docker mounted volumes also share file uid/gid and permissions with the host.
+      # Therefore we use the same attributes inside and outside the container.
       uid = Process.uid
       gid = Process.gid
     end
