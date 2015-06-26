@@ -25,6 +25,7 @@ module RakeCompilerDock
         check_docker if options.fetch(:check_docker){ true }
         runargs.unshift("sigfw") if options.fetch(:sigfw){ true }
         runargs.unshift("runas") if options.fetch(:runas){ true }
+        docker_opts = options.fetch(:options){ ["--rm", "-i"] }
 
         case RUBY_PLATFORM
         when /mingw|mswin/
@@ -47,7 +48,7 @@ module RakeCompilerDock
         user = make_valid_name(`id -nu`.chomp)
         group = make_valid_name(`id -ng`.chomp)
 
-        cmd = ["docker", "run", "--rm", "-i", "-t",
+        cmd = ["docker", "run",
             "-v", "#{pwd}:#{pwd}",
             "-e", "UID=#{uid}",
             "-e", "GID=#{gid}",
@@ -57,6 +58,7 @@ module RakeCompilerDock
             "-e", "http_proxy=#{ENV['http_proxy']}",
             "-e", "https_proxy=#{ENV['https_proxy']}",
             "-w", pwd,
+            *docker_opts,
             image_name,
             *runargs]
 

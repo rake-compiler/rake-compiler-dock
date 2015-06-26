@@ -41,6 +41,7 @@ module RakeCompilerDock
   # * Option +:check_docker+ can be set to false to disable the docker check.
   # * Option +:sigfw+ can be set to false to not stop the container on Ctrl-C.
   # * Option +:runas+ can be set to false to execute the command as user root.
+  # * Option +:options+ can be an Array of additional options to the 'docker run' command.
   #
   # Examples:
   #

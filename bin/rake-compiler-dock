@@ -2,7 +2,13 @@
 
 require 'rake_compiler_dock'
 
-args = ARGV.empty? ? ['bash', {:sigfw => false}] : ARGV
+args = ARGV.empty? ? ['bash'] : ARGV.dup
+
+if $stdin.tty?
+  # start interactive session
+  args << {sigfw: false, options: ['--rm', '-it']}
+end
+
 begin
   RakeCompilerDock.exec(*args) do |ok, res|
     exit(res.exitstatus)
