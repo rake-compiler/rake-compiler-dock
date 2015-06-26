@@ -28,19 +28,23 @@ Install rake-compiler-dock as a gem. The docker image is downloaded later on dem
 
 ## Usage
 
-Rake-compiler-dock offers the shell command `rake-compiler-dock` and a [ruby API for issuing commands within the docker image](http://www.rubydoc.info/gems/rake-compiler-dock/RakeCompilerDock).
-Both mount the current working directory into the docker environment.
-All commands are executed with the current user and group of the host.
-This is done by copying account data into the container and sudo to it.
+Rake-compiler-dock offers the shell command `rake-compiler-dock` and a [ruby API for issuing commands within the docker image](http://www.rubydoc.info/gems/rake-compiler-dock/RakeCompilerDock) described below.
 
 `rake-compiler-dock` without arguments starts an interactive shell session.
+This is best suited to try out and debug a build.
+It mounts the current working directory into the docker environment.
 All changes below the current working directory are shared with the host.
-But note, that all other changes to the file system of the contanier are dropped at the end of the session - the docker image is stateless. `rake-compiler-dock` can also take the build command(s) from STDIN or as command arguments.
+But note, that all other changes to the file system of the container are dropped at the end of the session - the docker image is stateless. `rake-compiler-dock` can also take the build command(s) from STDIN or as command arguments.
 
-To build x86- and x64 Windows (Mingw) binary gems, it is typically called like this:
+All commands are executed with the same user and group of the host.
+This is done by copying user account data into the container and sudo to it.
 
-    $ cd your-gem-dir/
-    $ rake-compiler-dock bash -c "bundle && rake cross native gem RUBYOPT=--disable-rubygems"
+To build x86- and x64 Windows (RubyInstaller) binary gems, it is typically called like this:
+
+    user@host:$ cd your-gem-dir/
+    user@host:$ rake-compiler-dock   # this enters a container with an interactive shell
+    user@5b53794ada92:$ bundle
+    user@5b53794ada92:$ rake cross native gem
 
 The installed cross rubies can be listed like this:
 
