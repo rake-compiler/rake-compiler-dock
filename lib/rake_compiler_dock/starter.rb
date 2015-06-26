@@ -44,8 +44,8 @@ module RakeCompilerDock
           uid = Process.uid
           gid = Process.gid
         end
-        user = `id -nu`.chomp
-        group = `id -ng`.chomp
+        user = make_valid_name(`id -nu`.chomp)
+        group = make_valid_name(`id -ng`.chomp)
 
         cmd = ["docker", "run", "--rm", "-i", "-t",
             "-v", "#{pwd}:#{pwd}",
@@ -78,6 +78,14 @@ module RakeCompilerDock
         verbose = options.fetch(:verbose) do
           Object.const_defined?(:Rake) && Rake.const_defined?(:FileUtilsExt) ? Rake::FileUtilsExt.verbose_flag : false
         end
+      end
+
+      def make_valid_name(name)
+        name = name.downcase
+        # Convert disallowed characters
+        name = name[0..0].gsub(/[^a-z_]/, "_") + name[1..-2].gsub(/[^a-z0-9_-]/, "_") + name[-1..-1].gsub(/[^a-z0-9_$-]/, "_")
+        # Limit to 32 characters
+        name.sub( /^(.{16}).{2,}(.{15})$/ ){ $1+"-"+$2 }
       end
 
       @@docker_checked = false
