@@ -1,3 +1,11 @@
+0.4.0 / 2015-06-29
+------------------
+* Add support for OS-X.
+* Fix usage of STDIN for sending data/commands into the container.
+* Limit to ruby-1.9.3 or newer.
+* Allow spaces in user name and path on the host side.
+
+
 0.3.1 / 2015-06-24
 ------------------
 * Add :sigfw and :runas options.
