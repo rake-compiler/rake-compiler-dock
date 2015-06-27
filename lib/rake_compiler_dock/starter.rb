@@ -25,7 +25,11 @@ module RakeCompilerDock
         check_docker if options.fetch(:check_docker){ true }
         runargs.unshift("sigfw") if options.fetch(:sigfw){ true }
         runargs.unshift("runas") if options.fetch(:runas){ true }
-        docker_opts = options.fetch(:options){ ["--rm", "-i"] }
+        docker_opts = options.fetch(:options) do
+          opts = ["--rm", "-i"]
+          opts << "-t" if $stdin.tty?
+          opts
+        end
 
         case RUBY_PLATFORM
         when /mingw|mswin/

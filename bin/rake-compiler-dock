@@ -5,8 +5,8 @@ require 'rake_compiler_dock'
 args = ARGV.empty? ? ['bash'] : ARGV.dup
 
 if $stdin.tty?
-  # start interactive session
-  args << {sigfw: false, options: ['--rm', '-it']}
+  # An interactive session should not leave the container on Ctrl-C
+  args << {sigfw: false}
 end
 
 begin
