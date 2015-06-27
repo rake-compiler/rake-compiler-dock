@@ -53,7 +53,7 @@ module RakeCompilerDock
         group = make_valid_name(`id -ng`.chomp)
 
         cmd = ["docker", "run",
-            "-v", "#{pwd}:#{pwd}",
+            "-v", "#{pwd}:#{make_valid_path(pwd)}",
             "-e", "UID=#{uid}",
             "-e", "GID=#{gid}",
             "-e", "USER=#{user}",
@@ -61,7 +61,7 @@ module RakeCompilerDock
             "-e", "ftp_proxy=#{ENV['ftp_proxy']}",
             "-e", "http_proxy=#{ENV['http_proxy']}",
             "-e", "https_proxy=#{ENV['https_proxy']}",
-            "-w", pwd,
+            "-w", make_valid_path(pwd),
             *docker_opts,
             image_name,
             *runargs]
@@ -92,6 +92,11 @@ module RakeCompilerDock
         name = name[0..0].gsub(/[^a-z_]/, "_") + name[1..-2].gsub(/[^a-z0-9_-]/, "_") + name[-1..-1].gsub(/[^a-z0-9_$-]/, "_")
         # Limit to 32 characters
         name.sub( /^(.{16}).{2,}(.{15})$/ ){ $1+"-"+$2 }
+      end
+
+      def make_valid_path(name)
+        # Convert problematic characters
+        name = name.gsub(/[ ]/i, "_")
       end
 
       @@docker_checked = false
