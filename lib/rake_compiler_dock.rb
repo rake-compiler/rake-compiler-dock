@@ -1,4 +1,5 @@
 require "rake_compiler_dock/version"
+require "rake_compiler_dock/docker_check"
 require "rake_compiler_dock/starter"
 
 module RakeCompilerDock

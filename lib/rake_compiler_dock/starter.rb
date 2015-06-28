@@ -99,79 +99,23 @@ module RakeCompilerDock
         name = name.gsub(/[ ]/i, "_")
       end
 
-      @@docker_checked = false
+      @@docker_checked = nil
 
       def check_docker
         return if @@docker_checked
-        if check_docker_only
-          @@docker_checked = true
-        elsif try_boot2docker
-          @@docker_checked = true
-        else
+
+        check = DockerCheck.new
+        unless check.ok?
           at_exit do
-            print_docker_install
+            $stderr.puts
+            $stderr.puts check.help_text
           end
           raise DockerIsNotAvailable, "Docker is not available"
         end
+
+        @@docker_checked = check
       end
 
-      def check_docker_only
-        version_text = `docker version 2>&1` rescue SystemCallError
-        $?.exitstatus == 0 && version_text.to_s =~ /version/
-      end
-
-      def try_boot2docker
-        version_text = `boot2docker version 2>&1` rescue SystemCallError
-        if $?.exitstatus == 0 && version_text.to_s =~ /version/
-          $stderr.puts
-          $stderr.puts "boot2docker is available, but not ready to use. Trying to start."
-          start_text = `boot2docker start` rescue SystemCallError
-          if $?.exitstatus == 0
-            start_text.scan(/(unset |Remove-Item Env:\\)(?<key>.+?)$/) do |r, |
-              $stderr.puts "    unset #{key}"
-              ENV.delete(key)
-            end
-            start_text.scan(/(export |\$Env:)(?<key>.+?)(=| = ")(?<val>.*?)(|\")$/) do |key, val|
-              ENV[key] = val
-              $stderr.puts "    set #{key}=#{val}"
-            end
-            return check_docker_only
-          else
-            false
-          end
-        else
-          false
-        end
-      end
-    end
-
-    def print_docker_install
-      $stderr.puts
-      case RUBY_PLATFORM
-      when /mingw|mswin/
-        $stderr.puts "Docker is not available. Please download and install boot2docker:"
-        $stderr.puts "   https://github.com/boot2docker/windows-installer/releases"
-        $stderr.puts
-        $stderr.puts "Then execute 'boot2docker start' and follow the instuctions"
-      when /linux/
-        $stderr.puts "Docker is not available."
-        $stderr.puts
-        $stderr.puts "Install on Ubuntu/Debian:"
-        $stderr.puts "   sudo apt-get install docker.io"
-        $stderr.puts
-        $stderr.puts "Install on Fedora/Centos/RHEL"
-        $stderr.puts "   sudo yum install docker"
-        $stderr.puts "   sudo systemctl start docker"
-        $stderr.puts
-        $stderr.puts "Install on SuSE"
-        $stderr.puts "   sudo zypper install docker"
-        $stderr.puts "   sudo systemctl start docker"
-      when /darwin/
-        $stderr.puts "Docker is not available. Please download and install boot2docker:"
-        $stderr.puts "   https://github.com/boot2docker/osx-installer/releases"
-      else
-        $stderr.puts "Docker is not available."
-      end
     end
   end
 end

@@ -1,8 +1,9 @@
 0.4.0 / 2015-06-29
 ------------------
 * Add support for OS-X.
+* Try boot2docker init and start, when docker is not available.
 * Fix usage of STDIN for sending data/commands into the container.
-* Limit to ruby-1.9.3 or newer.
+* Limit gemspec to ruby-1.9.3 or newer.
 * Allow spaces in user name and path on the host side.
 
 
