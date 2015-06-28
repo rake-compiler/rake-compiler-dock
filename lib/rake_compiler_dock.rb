@@ -46,8 +46,8 @@ module RakeCompilerDock
   # Examples:
   #
   #   RakeCompilerDock.exec 'bash', '-c', 'echo $RUBY_CC_VERSION'
-  def exec(*args)
-    Starter.exec(*args)
+  def exec(*args, &block)
+    Starter.exec(*args, &block)
   end
 
   module_function :exec, :sh, :image_name
