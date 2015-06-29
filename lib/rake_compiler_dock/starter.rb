@@ -104,11 +104,11 @@ module RakeCompilerDock
       def check_docker
         return if @@docker_checked
 
-        check = DockerCheck.new
+        check = DockerCheck.new($stderr)
         unless check.ok?
           at_exit do
             $stderr.puts
-            $stderr.puts check.help_text
+            check.print_help_text
           end
           raise DockerIsNotAvailable, "Docker is not available"
         end

@@ -1,14 +1,27 @@
+require "rake_compiler_dock/colors"
+
 module RakeCompilerDock
   class DockerCheck
-    def initialize
+    include Colors
+
+    attr_reader :io
+
+    def initialize(io)
+      @io = io
+      if !io.tty? || (RUBY_PLATFORM=~/mingw|mswin/ && RUBY_VERSION[/^\d+/] < '2')
+        disable_colors
+      else
+        enable_colors
+      end
+
       docker_version
 
       unless ok?
         b2d_version
 
         if b2d_avail?
-          $stderr.puts
-          $stderr.puts "boot2docker is available, but not ready to use. Trying to start."
+          io.puts
+          io.puts yellow("boot2docker is available, but not ready to use. Trying to start.")
 
           b2d_init
           if b2d_init_ok?
@@ -57,12 +70,12 @@ module RakeCompilerDock
 
       if @b2d_start_status == 0
         @b2d_start_text.scan(/(unset |Remove-Item Env:\\)(?<key>.+?)$/) do |r, |
-          $stderr.puts "    unset #{key}"
+          io.puts "    unset #{key}"
           ENV.delete(key)
         end
         @b2d_start_text.scan(/(export |\$Env:)(?<key>.+?)(=| = ")(?<val>.*?)(|\")$/) do |key, val|
           ENV[key] = val
-          $stderr.puts "    set #{key}=#{val}"
+          io.puts "    set #{key}=#{val}"
         end
       end
     end
@@ -74,63 +87,71 @@ module RakeCompilerDock
     def help_text
       help = []
       if !ok? && docker_client_avail? && !b2d_avail?
-        help << "Docker client tools work, but connection to the local docker server failed."
+        help << red("Docker client tools work, but connection to the local docker server failed.")
         case RUBY_PLATFORM
         when /linux/
-          help << "Please make sure the docker daemon is running."
+          help << yellow("Please make sure the docker daemon is running.")
           help << ""
-          help << "On Ubuntu/Debian:"
+          help << yellow("On Ubuntu/Debian:")
           help << "   sudo service docker start"
+          help << yellow("or")
+          help << "   sudo service docker.io start"
           help << ""
-          help << "On Fedora/Centos/RHEL"
+          help << yellow("On Fedora/Centos/RHEL")
           help << "   sudo systemctl start docker"
           help << ""
-          help << "On SuSE"
+          help << yellow("On SuSE")
           help << "   sudo systemctl start docker"
           help << ""
-          help << "And re-check with 'docker version'"
+          help << yellow("And re-check with '") + white("docker version") + yellow("'")
         else
-          help << "    Please check why 'docker version' fails."
+          help << yellow("    Please check why '") + white("docker version") + yellow("' fails.")
         end
       elsif !ok? && !b2d_avail?
         case RUBY_PLATFORM
         when /mingw|mswin/
-          help << "Docker is not available. Please download and install boot2docker:"
-          help << "   https://github.com/boot2docker/windows-installer/releases"
+          help << red("Docker is not available.")
+          help << yellow("Please download and install boot2docker:")
+          help << yellow("    https://github.com/boot2docker/windows-installer/releases")
         when /linux/
-          help << "Docker is not available."
+          help << red("Docker is not available.")
           help << ""
-          help << "Install on Ubuntu/Debian:"
-          help << "   sudo apt-get install docker.io"
+          help << yellow("Install on Ubuntu/Debian:")
+          help << "    sudo apt-get install docker.io"
           help << ""
-          help << "Install on Fedora/Centos/RHEL"
-          help << "   sudo yum install docker"
-          help << "   sudo systemctl start docker"
+          help << yellow("Install on Fedora/Centos/RHEL")
+          help << "    sudo yum install docker"
+          help << "    sudo systemctl start docker"
           help << ""
-          help << "Install on SuSE"
-          help << "   sudo zypper install docker"
-          help << "   sudo systemctl start docker"
+          help << yellow("Install on SuSE")
+          help << "    sudo zypper install docker"
+          help << "    sudo systemctl start docker"
         when /darwin/
-          help << "Docker is not available. Please download and install boot2docker:"
-          help << "   https://github.com/boot2docker/osx-installer/releases"
+          help << red("Docker is not available.")
+          help << yellow("Please download and install boot2docker:")
+          help << yellow("    https://github.com/boot2docker/osx-installer/releases")
         else
-          help << "Docker is not available."
+          help << red("Docker is not available.")
         end
       elsif !ok? && !b2d_init_ok?
-        help << "boot2docker is installed but couldn't be initialized."
+        help << red("boot2docker is installed but couldn't be initialized.")
         help << ""
-        help << "    Please check why 'boot2docker init' fails."
+        help << yellow("    Please check why '") + white("boot2docker init") + yellow("' fails.")
       elsif !ok? && !b2d_start_ok?
-        help << "boot2docker is installed but couldn't be started."
+        help << red("boot2docker is installed but couldn't be started.")
         help << ""
-        help << "    Please check why 'boot2docker start' fails."
+        help << yellow("    Please check why '") + white("boot2docker start") + yellow("' fails.")
       elsif !ok? && b2d_start_ok?
-        help << "boot2docker is installed and started, but 'docker version' failed."
+        help << red("boot2docker is installed and started, but 'docker version' failed.")
         help << ""
-        help << "    Please check why 'docker version' fails."
+        help << yellow("    Please check why '") + white("docker version") + yellow("' fails.")
       end
 
       help.join("\n")
+    end
+
+    def print_help_text
+      io.puts(help_text)
     end
   end
 end
