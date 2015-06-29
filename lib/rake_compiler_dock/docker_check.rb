@@ -141,10 +141,12 @@ module RakeCompilerDock
         help << red("boot2docker is installed but couldn't be started.")
         help << ""
         help << yellow("    Please check why '") + white("boot2docker start") + yellow("' fails.")
+        help << yellow("    You might need to re-init with '") + white("boot2docker delete") + yellow("'.")
       elsif !ok? && b2d_start_ok?
         help << red("boot2docker is installed and started, but 'docker version' failed.")
         help << ""
         help << yellow("    Please check why '") + white("docker version") + yellow("' fails.")
+        help << yellow("    You might need to re-init with '") + white("boot2docker delete") + yellow("'.")
       end
 
       help.join("\n")
