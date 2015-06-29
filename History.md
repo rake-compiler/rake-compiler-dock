@@ -2,6 +2,7 @@
 ------------------
 * Add support for OS-X.
 * Try boot2docker init and start, when docker is not available.
+* Add colorized terminal output.
 * Fix usage of STDIN for sending data/commands into the container.
 * Limit gemspec to ruby-1.9.3 or newer.
 * Allow spaces in user name and path on the host side.
