@@ -28,7 +28,7 @@ Install rake-compiler-dock as a gem. The docker image is downloaded later on dem
 
 ## Usage
 
-Rake-compiler-dock offers the shell command `rake-compiler-dock` and a [ruby API for issuing commands within the docker image](http://www.rubydoc.info/gems/rake-compiler-dock/RakeCompilerDock) described below.
+Rake-compiler-dock offers the shell command `rake-compiler-dock` and a [ruby API](http://www.rubydoc.info/gems/rake-compiler-dock/RakeCompilerDock) for issuing commands within the docker image, described below.
 
 `rake-compiler-dock` without arguments starts an interactive shell session.
 This is best suited to try out and debug a build.
@@ -39,12 +39,15 @@ But note, that all other changes to the file system of the container are dropped
 All commands are executed with the same user and group of the host.
 This is done by copying user account data into the container and sudo to it.
 
-To build x86- and x64 Windows (RubyInstaller) binary gems, it is typically called like this:
+To build x86- and x64 Windows (RubyInstaller) binary gems interactively, it can be called like this:
 
     user@host:$ cd your-gem-dir/
     user@host:$ rake-compiler-dock   # this enters a container with an interactive shell
     user@5b53794ada92:$ bundle
     user@5b53794ada92:$ rake cross native gem
+    user@5b53794ada92:$ exit
+    user@host:$ ls pkg/*.gem
+    your-gem-1.0.0.gem  your-gem-1.0.0-x64-mingw32.gem  your-gem-1.0.0-x86-mingw32.gem
 
 The installed cross rubies can be listed like this:
 
