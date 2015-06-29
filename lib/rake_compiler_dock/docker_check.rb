@@ -70,12 +70,12 @@ module RakeCompilerDock
 
       if @b2d_start_status == 0
         @b2d_start_text.scan(/(unset |Remove-Item Env:\\)(?<key>.+?)$/) do |r, |
-          io.puts "    unset #{key}"
+          io.puts "    #{$&}"
           ENV.delete(key)
         end
         @b2d_start_text.scan(/(export |\$Env:)(?<key>.+?)(=| = ")(?<val>.*?)(|\")$/) do |key, val|
+          io.puts "    #{$&}"
           ENV[key] = val
-          io.puts "    set #{key}=#{val}"
         end
       end
     end
