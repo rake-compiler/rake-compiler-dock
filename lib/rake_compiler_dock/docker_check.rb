@@ -103,9 +103,11 @@ module RakeCompilerDock
           help << yellow("On SuSE")
           help << "   sudo systemctl start docker"
           help << ""
-          help << yellow("And re-check with '") + white("docker version") + yellow("'")
+          help << yellow("Then re-check with '") + white("docker version") + yellow("'")
+          help << yellow("or have a look at the FAQs: http://git.io/vtD2Z")
         else
-          help << yellow("    Please check why '") + white("docker version") + yellow("' fails.")
+          help << yellow("    Please check why '") + white("docker version") + yellow("' fails")
+          help << yellow("    or have a look at the FAQs: http://git.io/vtD2Z")
         end
       elsif !ok? && !b2d_avail?
         case RUBY_PLATFORM
@@ -136,17 +138,20 @@ module RakeCompilerDock
       elsif !ok? && !b2d_init_ok?
         help << red("boot2docker is installed but couldn't be initialized.")
         help << ""
-        help << yellow("    Please check why '") + white("boot2docker init") + yellow("' fails.")
+        help << yellow("    Please check why '") + white("boot2docker init") + yellow("' fails")
+        help << yellow("    or have a look at the FAQs: http://git.io/vtDBH")
       elsif !ok? && !b2d_start_ok?
         help << red("boot2docker is installed but couldn't be started.")
         help << ""
         help << yellow("    Please check why '") + white("boot2docker start") + yellow("' fails.")
-        help << yellow("    You might need to re-init with '") + white("boot2docker delete") + yellow("'.")
+        help << yellow("    You might need to re-init with '") + white("boot2docker delete") + yellow("'")
+        help << yellow("    or have a look at the FAQs: http://git.io/vtDBH")
       elsif !ok? && b2d_start_ok?
         help << red("boot2docker is installed and started, but 'docker version' failed.")
         help << ""
         help << yellow("    Please check why '") + white("docker version") + yellow("' fails.")
-        help << yellow("    You might need to re-init with '") + white("boot2docker delete") + yellow("'.")
+        help << yellow("    You might need to re-init with '") + white("boot2docker delete") + yellow("'")
+        help << yellow("    or have a look at the FAQs: http://git.io/vtDBH")
       end
 
       help.join("\n")
