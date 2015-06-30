@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
 Use rake-compiler-dock to enter an interactive shell session or add a task to your Rakefile to automate your cross build.}
   spec.homepage      = "https://github.com/larskanis/rake-compiler-dock"
   spec.license       = "MIT"
-  spec.required_ruby_version = '>= 1.9.3'
+  spec.required_ruby_version = '>= 1.9.2'
 
   spec.files         = `git ls-files -z`.split("\x0")
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
