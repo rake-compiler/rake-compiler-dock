@@ -67,21 +67,32 @@ module RakeCompilerDock
     def b2d_start
       @b2d_start_text = `boot2docker start` rescue SystemCallError
       @b2d_start_status = $?.exitstatus
+      @b2d_start_envset = false
 
       if @b2d_start_status == 0
         @b2d_start_text.scan(/(unset |Remove-Item Env:\\)(?<key>.+?)$/) do |r, |
           io.puts "    #{$&}"
           ENV.delete(key)
+          @b2d_start_envset = true
         end
         @b2d_start_text.scan(/(export |\$Env:)(?<key>.+?)(=| = ")(?<val>.*?)(|\")$/) do |key, val|
           io.puts "    #{$&}"
           ENV[key] = val
+          @b2d_start_envset = true
         end
+      end
+
+      if @b2d_start_envset
+        io.puts yellow("Using environment variables for further commands.")
       end
     end
 
     def b2d_start_ok?
       @b2d_start_status == 0
+    end
+
+    def b2d_start_has_env?
+      @b2d_start_envset
     end
 
     def help_text
@@ -149,7 +160,12 @@ module RakeCompilerDock
       elsif !ok? && b2d_start_ok?
         help << red("boot2docker is installed and started, but 'docker version' failed.")
         help << ""
-        help << yellow("    Please check why '") + white("docker version") + yellow("' fails.")
+        if b2d_start_has_env?
+          help << yellow("    Please copy and paste above environment variables to your terminal")
+          help << yellow("    and check why '") + white("docker version") + yellow("' fails.")
+        else
+          help << yellow("    Please check why '") + white("docker version") + yellow("' fails.")
+        end
         help << yellow("    You might need to re-init with '") + white("boot2docker delete") + yellow("'")
         help << yellow("    or have a look at the FAQs: http://git.io/vtDBH")
       end
