@@ -1,3 +1,10 @@
+0.4.1 / 2015-07-01
+------------------
+* Make rake-compiler-dock compatible to ruby-1.8 to ease the usage in gems still supporting 1.8.
+* Use separate VERSION and IMAGE_VERSION, to avoid unnecessary image downloads.
+* Finetune help texts and add FAQ links.
+
+
 0.4.0 / 2015-06-29
 ------------------
 * Add support for OS-X.
