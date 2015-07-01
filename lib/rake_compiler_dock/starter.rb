@@ -15,7 +15,7 @@ module RakeCompilerDock
       end
 
       def image_name
-        ENV['RAKE_COMPILER_DOCK_IMAGE'] || "larskanis/rake-compiler-dock:#{VERSION}"
+        ENV['RAKE_COMPILER_DOCK_IMAGE'] || "larskanis/rake-compiler-dock:#{IMAGE_VERSION}"
       end
 
       def exec(*args)
