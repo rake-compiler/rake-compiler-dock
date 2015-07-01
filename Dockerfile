@@ -1,7 +1,7 @@
 FROM ubuntu:14.04
 
 RUN apt-get -y update && \
-    apt-get install -y curl git-core mingw32 xz-utils build-essential wget
+    apt-get install -y curl git-core mingw32 xz-utils build-essential wget unzip
 
 RUN mkdir -p /opt/mingw && \
     curl -SL http://downloads.sourceforge.net/mingw-w64/i686-w64-mingw32-gcc-4.7.2-release-linux64_rubenvb.tar.xz | \
