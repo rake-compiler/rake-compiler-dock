@@ -52,6 +52,8 @@ module RakeCompilerDock
         user = make_valid_name(`id -nu`.chomp)
         group = make_valid_name(`id -ng`.chomp)
 
+        drun_args = docker_opts + [image_name] + runargs
+
         cmd = ["docker", "run",
             "-v", "#{pwd}:#{make_valid_path(pwd)}",
             "-e", "UID=#{uid}",
@@ -62,9 +64,7 @@ module RakeCompilerDock
             "-e", "http_proxy=#{ENV['http_proxy']}",
             "-e", "https_proxy=#{ENV['https_proxy']}",
             "-w", make_valid_path(pwd),
-            *docker_opts,
-            image_name,
-            *runargs]
+            *drun_args]
 
         cmdline = Shellwords.join(cmd)
         if verbose_flag(options) == true
@@ -107,7 +107,6 @@ module RakeCompilerDock
         check = DockerCheck.new($stderr)
         unless check.ok?
           at_exit do
-            $stderr.puts
             check.print_help_text
           end
           raise DockerIsNotAvailable, "Docker is not available"

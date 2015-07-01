@@ -70,20 +70,19 @@ module RakeCompilerDock
       @b2d_start_envset = false
 
       if @b2d_start_status == 0
-        @b2d_start_text.scan(/(unset |Remove-Item Env:\\)(?<key>.+?)$/) do |r, |
-          io.puts "    #{$&}"
+        io.puts @b2d_start_text
+        @b2d_start_text.scan(/(unset |Remove-Item Env:\\)(.+?)$/) do |_, key|
           ENV.delete(key)
           @b2d_start_envset = true
         end
-        @b2d_start_text.scan(/(export |\$Env:)(?<key>.+?)(=| = ")(?<val>.*?)(|\")$/) do |key, val|
-          io.puts "    #{$&}"
+        @b2d_start_text.scan(/(export |\$Env:)(.+?)(=| = ")(.*?)(|\")$/) do |_, key, _, val, _|
           ENV[key] = val
           @b2d_start_envset = true
         end
       end
 
       if @b2d_start_envset
-        io.puts yellow("Using environment variables for further commands.")
+        io.puts yellow("Using above environment variables for starting rake-compiler-dock.")
       end
     end
 

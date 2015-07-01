@@ -1,10 +1,3 @@
-
-# We do ruby version check at runtime, so this file should be kept ruby-1.8 compatible.
-if (m=RUBY_VERSION.match(/^(\d+)\.(\d+)\.(\d+)/)) &&
-    m.captures.map(&:to_i).pack("N*") < [1,9,2].pack("N*")
-  raise "rake-compiler-dock requires at least RUBY_VERSION >= 1.9.2"
-end
-
 require "rake_compiler_dock/colors"
 require "rake_compiler_dock/docker_check"
 require "rake_compiler_dock/starter"

@@ -6,7 +6,7 @@ args = ARGV.empty? ? ['bash'] : ARGV.dup
 
 if $stdin.tty?
   # An interactive session should not leave the container on Ctrl-C
-  args << {sigfw: false}
+  args << {:sigfw => false}
 end
 
 begin
