@@ -1,3 +1,8 @@
+0.4.2 / 2015-07-02
+------------------
+* Add unzip tool to docker image.
+
+
 0.4.1 / 2015-07-01
 ------------------
 * Make rake-compiler-dock compatible to ruby-1.8 to ease the usage in gems still supporting 1.8.
