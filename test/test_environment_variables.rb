@@ -1,4 +1,5 @@
 require 'rake_compiler_dock'
+require 'rbconfig'
 require 'test/unit'
 begin
   require 'test/unit/notify'
