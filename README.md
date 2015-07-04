@@ -1,12 +1,13 @@
 # rake-compiler-dock
 
-Easy to use Docker based cross compiler environment for building binary Windows gems.
+Easy to use and reliable cross compiler environment for building Windows binary gems.
 
 It provides cross compilers and Ruby environments for all versions of the [RubyInstaller](http://rubyinstaller.org/) .
 They are prepared for use with [rake-compiler](https://github.com/rake-compiler/rake-compiler) .
 
-This is similar to [rake-compiler-dev-box](https://github.com/tjschuck/rake-compiler-dev-box) but is based on lightweight Docker containers and is wrapped as a gem for easier setup, usage and integration.
-It is also a bit more reliable, since the underlying docker images are versioned and kept unchanged while building.
+This is kind of successor of [rake-compiler-dev-box](https://github.com/tjschuck/rake-compiler-dev-box).
+It is wrapped as a gem for easier setup, usage and integration and is based on lightweight Docker containers.
+It is also more reliable, since the underlying docker images are sematic versioned and kept unchanged while building.
 
 ## Installation
 
@@ -63,14 +64,24 @@ You can also choose between different executable ruby versions by `rvm use <vers
 
 ### Add to your Rakefile
 
-Rake-compiler-dock can be easily integrated into your Rakefile like this:
+To make the build process reproduceable for other parties, it is recommended to add rake-compiler-dock to your Rakefile. This can be done like this:
 
     task 'gem:windows' do
       require 'rake_compiler_dock'
       RakeCompilerDock.sh "bundle && rake cross native gem"
     end
 
-See [the wiki](https://github.com/larskanis/rake-compiler-dock/wiki/Projects-using-rake-compiler-dock) for projects which use rake-compiler-dock.
+Rake-compiler-dock uses [semantic versioning](http://semver.org/), so you should add it into your Gemfile, to make sure, that future changes will not break your build.
+
+    gem 'rake-compiler-dock', '~> 0.4.0'
+
+See [the wiki](https://github.com/larskanis/rake-compiler-dock/wiki/Projects-using-rake-compiler-dock) for projects which make use of rake-compiler-dock.
+
+
+## More information
+
+See [Frequently asked questions](https://github.com/larskanis/rake-compiler-dock/wiki/FAQ) for more details.
+
 
 ## Contributing
 
