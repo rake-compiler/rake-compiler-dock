@@ -1,5 +1,7 @@
-0.4.2 / 2015-07-02
+0.4.2 / 2015-07-04
 ------------------
+* Describe use of environment variables in README.
+* Provide RCD_IMAGE, RCD_HOST_RUBY_PLATFORM and RCD_HOST_RUBY_VERSION to the container.
 * Add unzip tool to docker image.
 
 
