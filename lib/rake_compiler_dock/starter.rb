@@ -84,7 +84,7 @@ module RakeCompilerDock
       end
 
       def verbose_flag(options)
-        verbose = options.fetch(:verbose) do
+        options.fetch(:verbose) do
           Object.const_defined?(:Rake) && Rake.const_defined?(:FileUtilsExt) ? Rake::FileUtilsExt.verbose_flag : false
         end
       end
