@@ -78,6 +78,30 @@ Rake-compiler-dock uses [semantic versioning](http://semver.org/), so you should
 See [the wiki](https://github.com/larskanis/rake-compiler-dock/wiki/Projects-using-rake-compiler-dock) for projects which make use of rake-compiler-dock.
 
 
+## Variables
+
+Rake-compiler-dock makes use of several environment variables.
+
+The following variables are recognized by rake-compiler-dock:
+
+* `RCD_IMAGE` - The docker image that is downloaded and started. Defaults to "larskanis/rake-compiler-dock:IMAGE_VERSION" with an image version that is determined by the gem version.
+
+The following variables are passed through to the docker container without modification:
+
+* `http_proxy`, `https_proxy`, `ftp_proxy` - See [Frequently asked questions](https://github.com/larskanis/rake-compiler-dock/wiki/FAQ) for more details.
+
+The following variables are provided to the running docker container:
+
+* `RCD_IMAGE` - The full docker image name the container is running on.
+* `RCD_HOST_RUBY_PLATFORM` - The `RUBY_PLATFORM` of the host ruby.
+* `RCD_HOST_RUBY_VERSION` - The `RUBY_VERSION` of the host ruby.
+* `RUBY_CC_VERSION` - The target ruby versions for rake-compiler. The default is defined in the [Dockerfile](https://github.com/larskanis/rake-compiler-dock/blob/master/Dockerfile), but can be changed as a parameter to rake.
+
+Other environment variables can be set or passed through to the container like this:
+
+    RakeCompilerDock.sh "rake cross native gem OPENSSL_VERSION=#{ENV['OPENSSL_VERSION']}"
+
+
 ## More information
 
 See [Frequently asked questions](https://github.com/larskanis/rake-compiler-dock/wiki/FAQ) for more details.
