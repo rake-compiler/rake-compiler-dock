@@ -15,7 +15,7 @@ module RakeCompilerDock
       end
 
       def image_name
-        ENV['RAKE_COMPILER_DOCK_IMAGE'] || "larskanis/rake-compiler-dock:#{IMAGE_VERSION}"
+        ENV['RCD_IMAGE'] || ENV['RAKE_COMPILER_DOCK_IMAGE'] || "larskanis/rake-compiler-dock:#{IMAGE_VERSION}"
       end
 
       def exec(*args)
@@ -63,6 +63,9 @@ module RakeCompilerDock
             "-e", "ftp_proxy=#{ENV['ftp_proxy']}",
             "-e", "http_proxy=#{ENV['http_proxy']}",
             "-e", "https_proxy=#{ENV['https_proxy']}",
+            "-e", "RCD_HOST_RUBY_PLATFORM=#{RUBY_PLATFORM}",
+            "-e", "RCD_HOST_RUBY_VERSION=#{RUBY_VERSION}",
+            "-e", "RCD_IMAGE=#{image_name}",
             "-w", make_valid_path(pwd),
             *drun_args]
 
