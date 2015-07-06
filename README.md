@@ -7,7 +7,7 @@ They are prepared for use with [rake-compiler](https://github.com/rake-compiler/
 
 This is kind of successor of [rake-compiler-dev-box](https://github.com/tjschuck/rake-compiler-dev-box).
 It is wrapped as a gem for easier setup, usage and integration and is based on lightweight Docker containers.
-It is also more reliable, since the underlying docker images are sematic versioned and kept unchanged while building.
+It is also more reliable, since the underlying docker images are versioned and kept unchanged while building.
 
 ## Installation
 
@@ -35,7 +35,7 @@ Rake-compiler-dock offers the shell command `rake-compiler-dock` and a [ruby API
 This is best suited to try out and debug a build.
 It mounts the current working directory into the docker environment.
 All changes below the current working directory are shared with the host.
-But note, that all other changes to the file system of the container are dropped at the end of the session - the docker image is stateless. `rake-compiler-dock` can also take the build command(s) from STDIN or as command arguments.
+But note, that all other changes to the file system of the container are dropped at the end of the session - the docker image is static for a given version. `rake-compiler-dock` can also take the build command(s) from STDIN or as command arguments.
 
 All commands are executed with the same user and group of the host.
 This is done by copying user account data into the container and sudo to it.
@@ -50,21 +50,25 @@ To build x86- and x64 Windows (RubyInstaller) binary gems interactively, it can 
     user@host:$ ls pkg/*.gem
     your-gem-1.0.0.gem  your-gem-1.0.0-x64-mingw32.gem  your-gem-1.0.0-x86-mingw32.gem
 
-The installed cross rubies can be listed like this:
+Or non-interactive:
 
-    $ rake-compiler-dock bash -c 'rvmsudo rake-compiler update-config'
+    user@host:$ rake-compiler-dock bash -c "bundle && rake cross native gem"
 
-The environment variable `RUBY_CC_VERSION` is predefined and includes all these cross ruby versions:
+The environment variable `RUBY_CC_VERSION` is predefined as described [below](#environment-variables).
 
-    $ rake-compiler-dock bash -c 'echo $RUBY_CC_VERSION'    # =>  1.8.7:1.9.3:2.0.0:2.1.6:2.2.2
+If necessary, additional software from the Ubuntu repositories can be installed, prior to the build command.
+This is local to the running session, only:
 
-Overwrite `RUBY_CC_VERSION`, if your gem does not support all available versions.
+    sudo apt-get update && sudo apt-get install your-package
 
-You can also choose between different executable ruby versions by `rvm use <version>` . Current default is 2.2.
+You can also choose between different executable ruby versions by `rvm use <version>` .
+Current default is 2.2.
+
 
 ### Add to your Rakefile
 
-To make the build process reproduceable for other parties, it is recommended to add rake-compiler-dock to your Rakefile. This can be done like this:
+To make the build process reproduceable for other parties, it is recommended to add rake-compiler-dock to your Rakefile.
+This can be done like this:
 
     task 'gem:windows' do
       require 'rake_compiler_dock'
@@ -78,13 +82,14 @@ Rake-compiler-dock uses [semantic versioning](http://semver.org/), so you should
 See [the wiki](https://github.com/larskanis/rake-compiler-dock/wiki/Projects-using-rake-compiler-dock) for projects which make use of rake-compiler-dock.
 
 
-## Variables
+## Environment Variables
 
 Rake-compiler-dock makes use of several environment variables.
 
 The following variables are recognized by rake-compiler-dock:
 
-* `RCD_IMAGE` - The docker image that is downloaded and started. Defaults to "larskanis/rake-compiler-dock:IMAGE_VERSION" with an image version that is determined by the gem version.
+* `RCD_IMAGE` - The docker image that is downloaded and started.
+    Defaults to "larskanis/rake-compiler-dock:IMAGE_VERSION" with an image version that is determined by the gem version.
 
 The following variables are passed through to the docker container without modification:
 
@@ -95,7 +100,8 @@ The following variables are provided to the running docker container:
 * `RCD_IMAGE` - The full docker image name the container is running on.
 * `RCD_HOST_RUBY_PLATFORM` - The `RUBY_PLATFORM` of the host ruby.
 * `RCD_HOST_RUBY_VERSION` - The `RUBY_VERSION` of the host ruby.
-* `RUBY_CC_VERSION` - The target ruby versions for rake-compiler. The default is defined in the [Dockerfile](https://github.com/larskanis/rake-compiler-dock/blob/master/Dockerfile), but can be changed as a parameter to rake.
+* `RUBY_CC_VERSION` - The target ruby versions for rake-compiler.
+    The default is defined in the [Dockerfile](https://github.com/larskanis/rake-compiler-dock/blob/master/Dockerfile), but can be changed as a parameter to rake.
 
 Other environment variables can be set or passed through to the container like this:
 
