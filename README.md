@@ -1,7 +1,5 @@
 # rake-compiler-dock
 
-[![Join the chat at https://gitter.im/larskanis/rake-compiler-dock](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/larskanis/rake-compiler-dock?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 Easy to use and reliable cross compiler environment for building Windows binary gems.
 
 It provides cross compilers and Ruby environments for all versions of the [RubyInstaller](http://rubyinstaller.org/) .
@@ -112,7 +110,7 @@ Other environment variables can be set or passed through to the container like t
 
 ## More information
 
-See [Frequently asked questions](https://github.com/larskanis/rake-compiler-dock/wiki/FAQ) for more details.
+See [Frequently asked questions](https://github.com/larskanis/rake-compiler-dock/wiki/FAQ) and [![Join the chat at https://gitter.im/larskanis/rake-compiler-dock](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/larskanis/rake-compiler-dock?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 
 ## Contributing
