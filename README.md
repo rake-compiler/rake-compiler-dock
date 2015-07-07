@@ -1,6 +1,6 @@
 # rake-compiler-dock
 
-Easy to use and reliable cross compiler environment for building Windows binary gems.
+**Easy to use and reliable cross compiler environment for building Windows binary gems.**
 
 It provides cross compilers and Ruby environments for all versions of the [RubyInstaller](http://rubyinstaller.org/) .
 They are prepared for use with [rake-compiler](https://github.com/rake-compiler/rake-compiler) .
