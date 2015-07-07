@@ -1,5 +1,7 @@
 # rake-compiler-dock
 
+[![Join the chat at https://gitter.im/larskanis/rake-compiler-dock](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/larskanis/rake-compiler-dock?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Easy to use and reliable cross compiler environment for building Windows binary gems.
 
 It provides cross compilers and Ruby environments for all versions of the [RubyInstaller](http://rubyinstaller.org/) .
