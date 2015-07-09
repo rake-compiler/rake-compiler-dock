@@ -49,8 +49,8 @@ module RakeCompilerDock
           uid = Process.uid
           gid = Process.gid
         end
-        user = make_valid_name(`id -nu`.chomp)
-        group = make_valid_name(`id -ng`.chomp)
+        user = make_valid_user_name(`id -nu`.chomp)
+        group = make_valid_group_name(`id -ng`.chomp)
 
         drun_args = docker_opts + [image_name] + runargs
 
@@ -95,6 +95,16 @@ module RakeCompilerDock
         name = name[0..0].gsub(/[^a-z_]/, "_") + name[1..-2].gsub(/[^a-z0-9_-]/, "_") + name[-1..-1].gsub(/[^a-z0-9_$-]/, "_")
         # Limit to 32 characters
         name.sub( /^(.{16}).{2,}(.{15})$/ ){ $1+"-"+$2 }
+      end
+
+      def make_valid_user_name(name)
+        name = make_valid_name(name)
+        PredefinedUsers.include?(name) ? make_valid_name("_#{name}") : name
+      end
+
+      def make_valid_group_name(name)
+        name = make_valid_name(name)
+        PredefinedGroups.include?(name) ? make_valid_name("_#{name}") : name
       end
 
       def make_valid_path(name)

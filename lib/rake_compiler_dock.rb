@@ -2,6 +2,7 @@ require "rake_compiler_dock/colors"
 require "rake_compiler_dock/docker_check"
 require "rake_compiler_dock/starter"
 require "rake_compiler_dock/version"
+require "rake_compiler_dock/predefined_user_group"
 
 module RakeCompilerDock
 
