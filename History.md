@@ -1,4 +1,4 @@
-0.4.3 / unreleased
+0.4.3 / 2015-07-09
 ------------------
 * Ensure the user and group names doesn't clash with names in the image.
 
