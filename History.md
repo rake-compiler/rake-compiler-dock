@@ -1,3 +1,8 @@
+0.4.3 / unreleased
+------------------
+* Ensure the user and group names doesn't clash with names in the image.
+
+
 0.4.2 / 2015-07-04
 ------------------
 * Describe use of environment variables in README.
