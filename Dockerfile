@@ -25,7 +25,7 @@ RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3 && \
         source /etc/rubybashrc && \
         rvmsudo rvm cleanup all "
 
-ADD patches /home/rvm/patches
+COPY build/patches/ruby-* /home/rvm/patches
 ENV BASH_ENV /etc/rubybashrc
 
 # install rubies and fix permissions on
@@ -50,10 +50,11 @@ RUN sudo mkdir -p /usr/local/rake-compiler && \
     ln -s /usr/local/rake-compiler ~/.rake-compiler
 
 # Patch rake-compiler to avoid build of ruby extensions
-ADD src/rake-compiler-without-exts.diff /home/rvm/
-RUN cd /usr/local/rvm/gems/ruby-1.8.7-p374/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/rake-compiler-without-exts.diff && \
-    cd /usr/local/rvm/gems/ruby-1.9.3-p551/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/rake-compiler-without-exts.diff && \
-    cd /usr/local/rvm/gems/ruby-2.2.2/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/rake-compiler-without-exts.diff
+COPY build/patches/rake-compiler-* /home/rvm/patches
+RUN cd /usr/local/rvm/gems/ruby-1.8.7-p374/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/patches/rake-compiler-0.9.5/without-exts.diff ; \
+    cd /usr/local/rvm/gems/ruby-1.9.3-p551/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/patches/rake-compiler-0.9.5/without-exts.diff ; \
+    cd /usr/local/rvm/gems/ruby-2.2.2/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/patches/rake-compiler-0.9.5/without-exts.diff ; \
+    true
 
 # Build 1.8.7 with mingw32 compiler (GCC 4.2)
 # Use just one CPU for building 1.8.7 and 1.9.3
@@ -92,7 +93,7 @@ RUN sed -i -- "s:/root/.rake-compiler:/usr/local/rake-compiler:g" /usr/local/rak
     echo "export PATH=\$PATH:/opt/mingw/mingw64/bin" >> /etc/bash.bashrc
 
 # Install wrappers for strip commands as a workaround for "Protocol error" in boot2docker.
-ADD src/strip_wrapper /root/
+COPY build/strip_wrapper /root/
 RUN mv /opt/mingw/mingw32/bin/i686-w64-mingw32-strip /opt/mingw/mingw32/bin/i686-w64-mingw32-strip.bin && \
     mv /opt/mingw/mingw64/bin/x86_64-w64-mingw32-strip /opt/mingw/mingw64/bin/x86_64-w64-mingw32-strip.bin && \
     mv /usr/bin/i586-mingw32msvc-strip /usr/bin/i586-mingw32msvc-strip.bin && \
@@ -101,14 +102,14 @@ RUN mv /opt/mingw/mingw32/bin/i686-w64-mingw32-strip /opt/mingw/mingw32/bin/i686
     ln /root/strip_wrapper /usr/bin/i586-mingw32msvc-strip
 
 # Install SIGINT forwarder
-ADD src/sigfw.c /root/
+COPY build/sigfw.c /root/
 RUN gcc $HOME/sigfw.c -o /usr/local/bin/sigfw
 
 # Install user mapper
-ADD src/runas /usr/local/bin/
+COPY build/runas /usr/local/bin/
 
 # Install sudoers configuration
-ADD src/sudoers /etc/sudoers.d/rake-compiler-dock
+COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 
 ENV RUBY_CC_VERSION 1.8.7:1.9.3:2.0.0:2.1.6:2.2.2
 
