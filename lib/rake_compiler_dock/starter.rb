@@ -1,4 +1,5 @@
 require "shellwords"
+require "etc"
 require "rake_compiler_dock/version"
 
 module RakeCompilerDock
@@ -49,8 +50,8 @@ module RakeCompilerDock
           uid = Process.uid
           gid = Process.gid
         end
-        user = make_valid_user_name(`id -nu`.chomp)
-        group = make_valid_group_name(`id -ng`.chomp)
+        user = options.fetch(:username){ current_user }
+        group = options.fetch(:groupname){ current_group }
 
         drun_args = docker_opts + [image_name] + runargs
 
@@ -89,10 +90,25 @@ module RakeCompilerDock
         end
       end
 
+      def current_user
+        make_valid_user_name(Etc.getlogin)
+      end
+
+      def current_group
+        group_obj = Etc.getgrgid
+        make_valid_group_name(group_obj ? group_obj.name : "dummygroup")
+      end
+
       def make_valid_name(name)
-        name = name.downcase
+        name = name.to_s.downcase
+        name = "_" if name.empty?
         # Convert disallowed characters
-        name = name[0..0].gsub(/[^a-z_]/, "_") + name[1..-2].gsub(/[^a-z0-9_-]/, "_") + name[-1..-1].gsub(/[^a-z0-9_$-]/, "_")
+        if name.length > 1
+          name = name[0..0].gsub(/[^a-z_]/, "_") + name[1..-2].to_s.gsub(/[^a-z0-9_-]/, "_") + name[-1..-1].to_s.gsub(/[^a-z0-9_$-]/, "_")
+        else
+          name = name.gsub(/[^a-z_]/, "_")
+        end
+
         # Limit to 32 characters
         name.sub( /^(.{16}).{2,}(.{15})$/ ){ $1+"-"+$2 }
       end

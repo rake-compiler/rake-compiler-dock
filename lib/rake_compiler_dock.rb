@@ -45,6 +45,8 @@ module RakeCompilerDock
   # * Option +:sigfw+ can be set to false to not stop the container on Ctrl-C.
   # * Option +:runas+ can be set to false to execute the command as user root.
   # * Option +:options+ can be an Array of additional options to the 'docker run' command.
+  # * Option +:username+ can be used to overwrite the user name in the container
+  # * Option +:groupname+ can be used to overwrite the group name in the container
   #
   # Examples:
   #
