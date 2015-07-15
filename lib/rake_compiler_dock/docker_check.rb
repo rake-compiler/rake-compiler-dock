@@ -114,10 +114,10 @@ module RakeCompilerDock
           help << "   sudo systemctl start docker"
           help << ""
           help << yellow("Then re-check with '") + white("docker version") + yellow("'")
-          help << yellow("or have a look at the FAQs: http://git.io/vtD2Z")
+          help << yellow("or have a look at the FAQs: http://git.io/vm8AL")
         else
           help << yellow("    Please check why '") + white("docker version") + yellow("' fails")
-          help << yellow("    or have a look at the FAQs: http://git.io/vtD2Z")
+          help << yellow("    or have a look at the FAQs: http://git.io/vm8AL")
         end
       elsif !ok? && !b2d_avail?
         case RUBY_PLATFORM
@@ -149,13 +149,13 @@ module RakeCompilerDock
         help << red("boot2docker is installed but couldn't be initialized.")
         help << ""
         help << yellow("    Please check why '") + white("boot2docker init") + yellow("' fails")
-        help << yellow("    or have a look at the FAQs: http://git.io/vtDBH")
+        help << yellow("    or have a look at the FAQs: http://git.io/vm8Nr")
       elsif !ok? && !b2d_start_ok?
         help << red("boot2docker is installed but couldn't be started.")
         help << ""
         help << yellow("    Please check why '") + white("boot2docker start") + yellow("' fails.")
         help << yellow("    You might need to re-init with '") + white("boot2docker delete") + yellow("'")
-        help << yellow("    or have a look at the FAQs: http://git.io/vtDBH")
+        help << yellow("    or have a look at the FAQs: http://git.io/vm8Nr")
       elsif !ok? && b2d_start_ok?
         help << red("boot2docker is installed and started, but 'docker version' failed.")
         help << ""
@@ -166,7 +166,7 @@ module RakeCompilerDock
           help << yellow("    Please check why '") + white("docker version") + yellow("' fails.")
         end
         help << yellow("    You might need to re-init with '") + white("boot2docker delete") + yellow("'")
-        help << yellow("    or have a look at the FAQs: http://git.io/vtDBH")
+        help << yellow("    or have a look at the FAQs: http://git.io/vm8Nr")
       end
 
       help.join("\n")
