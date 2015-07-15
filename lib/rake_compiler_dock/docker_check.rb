@@ -140,7 +140,12 @@ module RakeCompilerDock
           help << "    sudo systemctl start docker"
         when /darwin/
           help << red("Docker is not available.")
-          help << yellow("Please download and install boot2docker:")
+          help << yellow("Please install boot2docker per homebrew:")
+          help << "    brew cask install virtualbox"
+          help << "    brew install docker"
+          help << "    brew install boot2docker"
+          help << ""
+          help << yellow("or download and install the official boot2docker bundle:")
           help << yellow("    https://github.com/boot2docker/osx-installer/releases")
         else
           help << red("Docker is not available.")
