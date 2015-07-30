@@ -2,8 +2,9 @@
 
 **Easy to use and reliable cross compiler environment for building Windows binary gems.**
 
-It provides cross compilers and Ruby environments for all versions of the [RubyInstaller](http://rubyinstaller.org/) .
-They are prepared for use with [rake-compiler](https://github.com/rake-compiler/rake-compiler) .
+It provides cross compilers and Ruby environments for all versions of the [RubyInstaller](http://rubyinstaller.org/).
+They are prepared for use with [rake-compiler](https://github.com/rake-compiler/rake-compiler).
+It is used by [many gems with C-extentions](https://github.com/rake-compiler/rake-compiler-dock/wiki/Projects-using-rake-compiler-dock).
 
 This is kind of successor of [rake-compiler-dev-box](https://github.com/tjschuck/rake-compiler-dev-box).
 It is wrapped as a gem for easier setup, usage and integration and is based on lightweight Docker containers.
