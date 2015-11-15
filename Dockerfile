@@ -25,7 +25,8 @@ RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3 && \
         source /etc/rubybashrc && \
         rvmsudo rvm cleanup all "
 
-COPY build/patches/ruby-* /home/rvm/patches
+# Import patch files for ruby and gems
+COPY build/patches /home/rvm/patches/
 ENV BASH_ENV /etc/rubybashrc
 
 # install rubies and fix permissions on
@@ -50,7 +51,6 @@ RUN sudo mkdir -p /usr/local/rake-compiler && \
     ln -s /usr/local/rake-compiler ~/.rake-compiler
 
 # Patch rake-compiler to avoid build of ruby extensions
-COPY build/patches/rake-compiler-* /home/rvm/patches
 RUN cd /usr/local/rvm/gems/ruby-1.8.7-p374/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/patches/rake-compiler-0.9.5/without-exts.diff ; \
     cd /usr/local/rvm/gems/ruby-1.9.3-p551/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/patches/rake-compiler-0.9.5/without-exts.diff ; \
     cd /usr/local/rvm/gems/ruby-2.2.2/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/patches/rake-compiler-0.9.5/without-exts.diff ; \
