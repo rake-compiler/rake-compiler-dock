@@ -32,7 +32,7 @@ ENV BASH_ENV /etc/rubybashrc
 # install rubies and fix permissions on
 RUN bash -c " \
     export CFLAGS='-s -O3 -fno-fast-math -fPIC' && \
-    for v in 1.8.7-p374 1.9.3 2.2.2 ; do \
+    for v in 2.3.0-preview1 1.9.3 1.8.7-p374 ; do \
         rvm install \$v --patch \$(echo ~/patches/ruby-\$v/* | tr ' ' ','); \
     done && \
     rvm cleanup all && \
@@ -53,8 +53,38 @@ RUN sudo mkdir -p /usr/local/rake-compiler && \
 # Patch rake-compiler to avoid build of ruby extensions
 RUN cd /usr/local/rvm/gems/ruby-1.8.7-p374/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/patches/rake-compiler-0.9.5/without-exts.diff ; \
     cd /usr/local/rvm/gems/ruby-1.9.3-p551/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/patches/rake-compiler-0.9.5/without-exts.diff ; \
-    cd /usr/local/rvm/gems/ruby-2.2.2/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/patches/rake-compiler-0.9.5/without-exts.diff ; \
+    cd /usr/local/rvm/gems/ruby-2.3.0-preview1/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/patches/rake-compiler-0.9.5/without-exts.diff ; \
     true
+
+# Patch ruby-2.3.0-preview1 for cross build
+USER root
+RUN curl -SL http://cache.ruby-lang.org/pub/ruby/2.3/ruby-2.3.0-preview1.tar.xz | tar -xJC /root/ && \
+    cd /root/ruby-2.3.0-preview1 && \
+    git apply /home/rvm/patches/ruby-2.3.0-preview1/*.patch && \
+    cd .. && \
+    mkdir -p /usr/local/rake-compiler/sources/ && \
+    tar cjf /usr/local/rake-compiler/sources/ruby-2.3.0-preview1.tar.bz2 ruby-2.3.0-preview1 && \
+    chown rvm /usr/local/rake-compiler -R && \
+    rm -rf /root/ruby-2.3.0-preview1
+USER rvm
+
+RUN bash -c "rvm use 2.3.0-preview1 --default && \
+    export MAKE=\"make -j`nproc`\" CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
+    rake-compiler cross-ruby VERSION=2.3.0-preview1 HOST=i686-w64-mingw32 && \
+    rake-compiler cross-ruby VERSION=2.3.0-preview1 HOST=x86_64-w64-mingw32 && \
+    rake-compiler cross-ruby VERSION=2.2.2 HOST=i686-w64-mingw32 && \
+    rake-compiler cross-ruby VERSION=2.2.2 HOST=x86_64-w64-mingw32 && \
+    rake-compiler cross-ruby VERSION=2.1.6 HOST=i686-w64-mingw32 && \
+    rake-compiler cross-ruby VERSION=2.1.6 HOST=x86_64-w64-mingw32 && \
+    rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=i686-w64-mingw32 && \
+    rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=x86_64-w64-mingw32 && \
+    rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources && \
+    find /usr/local/rvm -type d | sudo xargs chmod g+sw "
+
+RUN bash -c "rvm use 1.9.3 && \
+    export CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
+    rake-compiler cross-ruby VERSION=1.9.3-p551 HOST=i586-mingw32msvc && \
+    rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources"
 
 # Build 1.8.7 with mingw32 compiler (GCC 4.2)
 # Use just one CPU for building 1.8.7 and 1.9.3
@@ -63,26 +93,10 @@ RUN bash -c "rvm use 1.8.7-p374 && \
     rake-compiler cross-ruby VERSION=1.8.7-p374 HOST=i586-mingw32msvc && \
     rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources"
 
-RUN bash -c "rvm use 1.9.3 && \
-    export CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
-    rake-compiler cross-ruby VERSION=1.9.3-p551 HOST=i586-mingw32msvc && \
-    rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources"
-
-RUN bash -c "rvm use 2.2.2 --default && \
-    export MAKE=\"make -j`nproc`\" CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
-    rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=i686-w64-mingw32 && \
-    rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=x86_64-w64-mingw32 && \
-    rake-compiler cross-ruby VERSION=2.1.6 HOST=i686-w64-mingw32 && \
-    rake-compiler cross-ruby VERSION=2.1.6 HOST=x86_64-w64-mingw32 && \
-    rake-compiler cross-ruby VERSION=2.2.2 HOST=i686-w64-mingw32 && \
-    rake-compiler cross-ruby VERSION=2.2.2 HOST=x86_64-w64-mingw32 && \
-    rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources && \
-    find /usr/local/rvm -type d | sudo xargs chmod g+sw "
-
 RUN bash -c " \
-    rvm alias create 1.8 1.8.7-p374 && \
+    rvm alias create 2.3 2.3.0-preview1 && \
     rvm alias create 1.9 1.9.3 && \
-    rvm alias create 2.2 2.2.2 "
+    rvm alias create 1.8 1.8.7-p374 "
 
 USER root
 
@@ -111,6 +125,6 @@ COPY build/runas /usr/local/bin/
 # Install sudoers configuration
 COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 
-ENV RUBY_CC_VERSION 1.8.7:1.9.3:2.0.0:2.1.6:2.2.2
+ENV RUBY_CC_VERSION 1.8.7:1.9.3:2.0.0:2.1.6:2.2.2:2.3.0
 
 CMD bash
