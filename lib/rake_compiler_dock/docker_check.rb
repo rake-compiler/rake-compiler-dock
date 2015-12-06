@@ -79,12 +79,12 @@ module RakeCompilerDock
 
     def doma_start
       @doma_start_text, @doma_start_status = run("docker-machine start #{machine_name}", cmd: :visible, output: :visible)
-      @doma_start_envset = false
+      @doma_env_set = false
 
       if doma_start_ok?
         @doma_env_text, @doma_env_status = run("docker-machine env #{machine_name}")
         if @doma_env_status == 0 && set_env(@doma_env_text)
-          @doma_start_envset = true
+          @doma_env_set = true
         end
       end
     end
@@ -93,8 +93,12 @@ module RakeCompilerDock
       @doma_start_status == 0 || @doma_start_text =~ /already running/
     end
 
-    def doma_start_has_env?
-      @doma_start_envset
+    def doma_env_ok?
+      @doma_env_status == 0
+    end
+
+    def doma_has_env?
+      @doma_env_set
     end
 
     def b2d_version
@@ -218,18 +222,23 @@ module RakeCompilerDock
           help << yellow("    Please check why '") + white("docker-machine start") + yellow("' fails.")
           help << yellow("    You might need to re-init with '") + white("docker-machine rm") + yellow("'")
           help << yellow("    or have a look at our FAQs: http://git.io/vRzIg")
-        elsif !ok? && doma_start_ok?
+        elsif !ok? && !doma_env_ok?
+            help << red("docker-machine is installed and started, but 'docker-machine env' failed.")
+            help << ""
+            help << yellow("You might try to regenerate TLS certificates with:")
+            help << "    docker-machine regenerate-certs #{machine_name}"
+        elsif !ok?
           help << red("docker-machine is installed and started, but 'docker version' failed.")
           help << ""
-          if doma_start_has_env?
+
+          if doma_has_env?
             help << yellow("    Please copy and paste following environment variables to your terminal")
             help += @doma_env_text.each_line.reject{|l| l=~/\s*#/ }.map{|l| "        #{l.chomp}" }
             help << yellow("    and check why '") + white("docker version") + yellow("' fails.")
           else
             help << yellow("    Please check why '") + white("docker version") + yellow("' fails.")
           end
-          help << yellow("    You might need to re-init with '") + white("docker-machine rm") + yellow("'")
-          help << yellow("    or have a look at our FAQs: http://git.io/vRzIg")
+          help << yellow("    You might also have a look at our FAQs: http://git.io/vRzIg")
         end
       elsif b2d_avail?
         if !ok? && !b2d_init_ok?
