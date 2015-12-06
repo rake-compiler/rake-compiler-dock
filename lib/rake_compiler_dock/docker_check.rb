@@ -81,7 +81,7 @@ module RakeCompilerDock
       @doma_start_text, @doma_start_status = run("docker-machine start #{machine_name}", cmd: :visible, output: :visible)
       @doma_start_envset = false
 
-      if doma_create_ok?
+      if doma_start_ok?
         @doma_env_text, @doma_env_status = run("docker-machine env #{machine_name}")
         if @doma_env_status == 0 && set_env(@doma_env_text)
           @doma_start_envset = true
@@ -90,7 +90,7 @@ module RakeCompilerDock
     end
 
     def doma_start_ok?
-      @doma_start_status == 0
+      @doma_start_status == 0 || @doma_start_text =~ /already running/
     end
 
     def doma_start_has_env?
