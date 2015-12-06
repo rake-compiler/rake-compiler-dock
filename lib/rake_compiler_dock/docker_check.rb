@@ -5,9 +5,12 @@ module RakeCompilerDock
     include Colors
 
     attr_reader :io
+    attr_accessor :machine_name
 
-    def initialize(io)
+    def initialize(io, machine_name="rake-compiler-dock")
       @io = io
+      @machine_name = machine_name
+
       if !io.tty? || (RUBY_PLATFORM=~/mingw|mswin/ && RUBY_VERSION[/^\d+/] < '2')
         disable_colors
       else
@@ -17,25 +20,37 @@ module RakeCompilerDock
       docker_version
 
       unless ok?
-        b2d_version
-
-        if b2d_avail?
+        doma_version
+        if doma_avail?
           io.puts
-          io.puts yellow("boot2docker is available, but not ready to use. Trying to start.")
+          io.puts yellow("docker-machine is available, but not ready to use. Trying to start.")
 
-          b2d_init
-          if b2d_init_ok?
-            b2d_start
+          doma_create
+          if doma_create_ok?
+            doma_start
 
             docker_version
+          end
+        else
+          b2d_version
+
+          if b2d_avail?
+            io.puts
+            io.puts yellow("boot2docker is available, but not ready to use. Trying to start.")
+
+            b2d_init
+            if b2d_init_ok?
+              b2d_start
+
+              docker_version
+            end
           end
         end
       end
     end
 
     def docker_version
-      @docker_version_text = `docker version 2>&1` rescue SystemCallError
-      @docker_version_status = $?.exitstatus
+      @docker_version_text, @docker_version_status = run("docker version")
     end
 
     def ok?
@@ -44,6 +59,42 @@ module RakeCompilerDock
 
     def docker_client_avail?
       @docker_version_text =~ /version/
+    end
+
+    def doma_version
+      @doma_version_text, @doma_version_status = run("docker-machine --version")
+    end
+
+    def doma_avail?
+      @doma_version_status == 0 && @doma_version_text =~ /version/
+    end
+
+    def doma_create
+      @doma_create_text, @doma_create_status = run("docker-machine create --driver virtualbox #{machine_name}", cmd: :visible, output: :visible)
+    end
+
+    def doma_create_ok?
+      @doma_create_status == 0 || @doma_create_text =~ /already exists/
+    end
+
+    def doma_start
+      @doma_start_text, @doma_start_status = run("docker-machine start #{machine_name}", cmd: :visible, output: :visible)
+      @doma_start_envset = false
+
+      if doma_create_ok?
+        @doma_env_text, @doma_env_status = run("docker-machine env #{machine_name}")
+        if @doma_env_status == 0 && set_env(@doma_env_text)
+          @doma_start_envset = true
+        end
+      end
+    end
+
+    def doma_start_ok?
+      @doma_start_status == 0
+    end
+
+    def doma_start_has_env?
+      @doma_start_envset
     end
 
     def b2d_version
@@ -71,18 +122,10 @@ module RakeCompilerDock
 
       if @b2d_start_status == 0
         io.puts @b2d_start_text
-        @b2d_start_text.scan(/(unset |Remove-Item Env:\\)(.+?)$/) do |_, key|
-          ENV.delete(key)
+        if set_env(@b2d_start_text)
           @b2d_start_envset = true
+          io.puts yellow("Using above environment variables for starting #{machine_name}.")
         end
-        @b2d_start_text.scan(/(export |\$Env:)(.+?)(=| = ")(.*?)(|\")$/) do |_, key, _, val, _|
-          ENV[key] = val
-          @b2d_start_envset = true
-        end
-      end
-
-      if @b2d_start_envset
-        io.puts yellow("Using above environment variables for starting rake-compiler-dock.")
       end
     end
 
@@ -94,9 +137,22 @@ module RakeCompilerDock
       @b2d_start_envset
     end
 
+    def set_env(text)
+      set = false
+      text.scan(/(unset |Remove-Item Env:\\)(.+?)$/) do |_, key|
+        ENV.delete(key)
+        set = true
+      end
+      text.scan(/(export |\$Env:)(.+?)(="|=| = ")(.*?)(|\")$/) do |_, key, _, val, _|
+        ENV[key] = val
+        set = true
+      end
+      set
+    end
+
     def help_text
       help = []
-      if !ok? && docker_client_avail? && !b2d_avail?
+      if !ok? && docker_client_avail? && !doma_avail? && !b2d_avail?
         help << red("Docker client tools work, but connection to the local docker server failed.")
         case RUBY_PLATFORM
         when /linux/
@@ -119,12 +175,12 @@ module RakeCompilerDock
           help << yellow("    Please check why '") + white("docker version") + yellow("' fails")
           help << yellow("    or have a look at the FAQs: http://git.io/vm8AL")
         end
-      elsif !ok? && !b2d_avail?
+      elsif !ok? && !doma_avail? && !b2d_avail?
         case RUBY_PLATFORM
         when /mingw|mswin/
           help << red("Docker is not available.")
-          help << yellow("Please download and install boot2docker:")
-          help << yellow("    https://github.com/boot2docker/windows-installer/releases")
+          help << yellow("Please download and install the docker-toolbox:")
+          help << yellow("    https://www.docker.com/docker-toolbox")
         when /linux/
           help << red("Docker is not available.")
           help << ""
@@ -140,38 +196,65 @@ module RakeCompilerDock
           help << "    sudo systemctl start docker"
         when /darwin/
           help << red("Docker is not available.")
-          help << yellow("Please install boot2docker per homebrew:")
+          help << yellow("Please install docker-machine per homebrew:")
           help << "    brew cask install virtualbox"
           help << "    brew install docker"
-          help << "    brew install boot2docker"
+          help << "    brew install docker-machine"
           help << ""
-          help << yellow("or download and install the official boot2docker bundle:")
-          help << yellow("    https://github.com/boot2docker/osx-installer/releases")
+          help << yellow("or download and install the official docker-toolbox:")
+          help << yellow("    https://www.docker.com/docker-toolbox")
         else
           help << red("Docker is not available.")
         end
-      elsif !ok? && !b2d_init_ok?
-        help << red("boot2docker is installed but couldn't be initialized.")
-        help << ""
-        help << yellow("    Please check why '") + white("boot2docker init") + yellow("' fails")
-        help << yellow("    or have a look at the FAQs: http://git.io/vm8Nr")
-      elsif !ok? && !b2d_start_ok?
-        help << red("boot2docker is installed but couldn't be started.")
-        help << ""
-        help << yellow("    Please check why '") + white("boot2docker start") + yellow("' fails.")
-        help << yellow("    You might need to re-init with '") + white("boot2docker delete") + yellow("'")
-        help << yellow("    or have a look at the FAQs: http://git.io/vm8Nr")
-      elsif !ok? && b2d_start_ok?
-        help << red("boot2docker is installed and started, but 'docker version' failed.")
-        help << ""
-        if b2d_start_has_env?
-          help << yellow("    Please copy and paste above environment variables to your terminal")
-          help << yellow("    and check why '") + white("docker version") + yellow("' fails.")
-        else
-          help << yellow("    Please check why '") + white("docker version") + yellow("' fails.")
+      elsif doma_avail?
+        if !ok? && !doma_create_ok?
+          help << red("docker-machine is installed but machine couldn't be created.")
+          help << ""
+          help << yellow("    Please check why '") + white("docker-machine create") + yellow("' fails")
+          help << yellow("    or have a look at the FAQs: http://git.io/vRzIg")
+        elsif !ok? && !doma_start_ok?
+          help << red("docker-machine is installed but couldn't be started.")
+          help << ""
+          help << yellow("    Please check why '") + white("docker-machine start") + yellow("' fails.")
+          help << yellow("    You might need to re-init with '") + white("docker-machine rm") + yellow("'")
+          help << yellow("    or have a look at the FAQs: http://git.io/vRzIg")
+        elsif !ok? && doma_start_ok?
+          help << red("docker-machine is installed and started, but 'docker version' failed.")
+          help << ""
+          if doma_start_has_env?
+            help << yellow("    Please copy and paste following environment variables to your terminal")
+            help += @doma_env.each_line.reject{|l| l=~/\s*#/ }.map{|l| "        #{l.chomp}" }
+            help << yellow("    and check why '") + white("docker version") + yellow("' fails.")
+          else
+            help << yellow("    Please check why '") + white("docker version") + yellow("' fails.")
+          end
+          help << yellow("    You might need to re-init with '") + white("docker-machine rm") + yellow("'")
+          help << yellow("    or have a look at the FAQs: http://git.io/vRzIg")
         end
-        help << yellow("    You might need to re-init with '") + white("boot2docker delete") + yellow("'")
-        help << yellow("    or have a look at the FAQs: http://git.io/vm8Nr")
+      elsif b2d_avail?
+        if !ok? && !b2d_init_ok?
+          help << red("boot2docker is installed but couldn't be initialized.")
+          help << ""
+          help << yellow("    Please check why '") + white("boot2docker init") + yellow("' fails")
+          help << yellow("    or have a look at the FAQs: http://git.io/vm8Nr")
+        elsif !ok? && !b2d_start_ok?
+          help << red("boot2docker is installed but couldn't be started.")
+          help << ""
+          help << yellow("    Please check why '") + white("boot2docker start") + yellow("' fails.")
+          help << yellow("    You might need to re-init with '") + white("boot2docker delete") + yellow("'")
+          help << yellow("    or have a look at the FAQs: http://git.io/vm8Nr")
+        elsif !ok? && b2d_start_ok?
+          help << red("boot2docker is installed and started, but 'docker version' failed.")
+          help << ""
+          if b2d_start_has_env?
+            help << yellow("    Please copy and paste above environment variables to your terminal")
+            help << yellow("    and check why '") + white("docker version") + yellow("' fails.")
+          else
+            help << yellow("    Please check why '") + white("docker version") + yellow("' fails.")
+          end
+          help << yellow("    You might need to re-init with '") + white("boot2docker delete") + yellow("'")
+          help << yellow("    or have a look at the FAQs: http://git.io/vm8Nr")
+        end
       end
 
       help.join("\n")
@@ -179,6 +262,32 @@ module RakeCompilerDock
 
     def print_help_text
       io.puts(help_text)
+    end
+
+    private
+
+    def run(cmd, options={})
+      if options[:cmd] == :visible
+        io.puts "$ #{green(cmd)}"
+      end
+
+      if options[:output] == :visible
+        text = String.new
+        begin
+          IO.popen("#{cmd} 2>&1") do |fd|
+            while !fd.eof?
+              t = fd.read_nonblock(1024)
+              io.write t
+              text << t
+            end
+          end
+        rescue SystemCallError
+          text = nil
+        end
+      else
+        text = `#{cmd} 2>&1` rescue SystemCallError
+      end
+      [text, $?.exitstatus]
     end
   end
 end
