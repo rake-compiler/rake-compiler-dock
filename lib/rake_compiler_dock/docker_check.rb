@@ -1,3 +1,4 @@
+require "uri"
 require "rake_compiler_dock/colors"
 
 module RakeCompilerDock
@@ -70,7 +71,12 @@ module RakeCompilerDock
     end
 
     def doma_create
-      @doma_create_text, @doma_create_status = run("docker-machine create --driver virtualbox #{machine_name}", cmd: :visible, output: :visible)
+      options = [
+            "--engine-env", "ftp_proxy=#{ENV['ftp_proxy']}",
+            "--engine-env", "http_proxy=#{ENV['http_proxy']}",
+            "--engine-env", "https_proxy=#{ENV['https_proxy']}",
+      ]
+      @doma_create_text, @doma_create_status = run("docker-machine create --driver virtualbox #{options.join(" ")} #{machine_name}", cmd: :visible, output: :visible)
     end
 
     def doma_create_ok?
@@ -84,6 +90,10 @@ module RakeCompilerDock
       if doma_start_ok?
         @doma_env_text, @doma_env_status = run("docker-machine env #{machine_name}")
         if @doma_env_status == 0 && set_env(@doma_env_text)
+          # We use docker-machine for a local provider only, so we shouldn't use any proxy to connect to it.
+          if host=ENV['DOCKER_HOST']
+            ENV['NO_PROXY'] = [ENV['NO_PROXY'], URI.parse(host).host].compact.join(",")
+          end
           @doma_env_set = true
         end
       end
