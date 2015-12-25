@@ -78,7 +78,7 @@ This can be done like this:
 
 Rake-compiler-dock uses [semantic versioning](http://semver.org/), so you should add it into your Gemfile, to make sure, that future changes will not break your build.
 
-    gem 'rake-compiler-dock', '~> 0.4.0'
+    gem 'rake-compiler-dock', '~> 0.5.0'
 
 See [the wiki](https://github.com/rake-compiler/rake-compiler-dock/wiki/Projects-using-rake-compiler-dock) for projects which make use of rake-compiler-dock.
 
