@@ -36,7 +36,7 @@ RUN bash -c " \
         rvm install \$v --patch \$(echo ~/patches/ruby-\$v/* | tr ' ' ','); \
     done && \
     rvm cleanup all && \
-    find /usr/local/rvm -type d | sudo xargs chmod g+sw "
+    find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw "
 
 # Install rake-compiler and typical gems in all Rubies
 # do not generate documentation for gems
@@ -68,7 +68,7 @@ RUN bash -c "rvm use 2.3.0 --default && \
     rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=i686-w64-mingw32 && \
     rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=x86_64-w64-mingw32 && \
     rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources && \
-    find /usr/local/rvm -type d | sudo xargs chmod g+sw "
+    find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw "
 
 RUN bash -c "rvm use 1.9.3 && \
     export CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
