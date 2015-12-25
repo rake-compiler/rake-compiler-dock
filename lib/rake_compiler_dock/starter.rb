@@ -53,8 +53,6 @@ module RakeCompilerDock
         user = options.fetch(:username){ current_user }
         group = options.fetch(:groupname){ current_group }
 
-        drun_args = docker_opts + [image_name] + runargs
-
         cmd = ["docker", "run",
             "-v", "#{pwd}:#{make_valid_path(pwd)}",
             "-e", "UID=#{uid}",
@@ -68,7 +66,9 @@ module RakeCompilerDock
             "-e", "RCD_HOST_RUBY_VERSION=#{RUBY_VERSION}",
             "-e", "RCD_IMAGE=#{image_name}",
             "-w", make_valid_path(pwd),
-            *drun_args]
+            *docker_opts,
+            image_name,
+            *runargs]
 
         cmdline = Shellwords.join(cmd)
         if verbose_flag(options) == true

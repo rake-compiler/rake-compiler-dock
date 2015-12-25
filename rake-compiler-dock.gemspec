@@ -13,6 +13,9 @@ Gem::Specification.new do |spec|
 Use rake-compiler-dock to enter an interactive shell session or add a task to your Rakefile to automate your cross build.}
   spec.homepage      = "https://github.com/rake-compiler/rake-compiler-dock"
   spec.license       = "MIT"
+#  We do not set a ruby version in the gemspec, to allow addition to the Gemfile of gems that still support ruby-1.8.
+#  However we do the version check at runtime.
+#  spec.required_ruby_version = '>= 1.9.2'
 
   spec.files         = `git ls-files -z`.split("\x0")
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
