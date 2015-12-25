@@ -3,6 +3,7 @@
 * Add cross ruby version 2.3.0.
 * Replace RVM ruby version 2.2.2 with 2.3.0 and set it as default.
 * Add support for docker-machine in addition to deprecated boot2docker.
+* Drop runtime support for ruby-1.8. Cross build for 1.8 is still supported.
 
 
 0.4.3 / 2015-07-09
