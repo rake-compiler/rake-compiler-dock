@@ -1,3 +1,10 @@
+0.5.0 / 2015-12-25
+------------------
+* Add cross ruby version 2.3.0.
+* Replace RVM ruby version 2.2.2 with 2.3.0 and set it as default.
+* Add support for docker-machine in addition to deprecated boot2docker.
+
+
 0.4.3 / 2015-07-09
 ------------------
 * Ensure the user and group names doesn't clash with names in the image.
