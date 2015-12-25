@@ -32,7 +32,7 @@ ENV BASH_ENV /etc/rubybashrc
 # install rubies and fix permissions on
 RUN bash -c " \
     export CFLAGS='-s -O3 -fno-fast-math -fPIC' && \
-    for v in 2.3.0-preview2 1.9.3 1.8.7-p374 ; do \
+    for v in 2.3.0 1.9.3 1.8.7-p374 ; do \
         rvm install \$v --patch \$(echo ~/patches/ruby-\$v/* | tr ' ' ','); \
     done && \
     rvm cleanup all && \
@@ -53,13 +53,13 @@ RUN sudo mkdir -p /usr/local/rake-compiler && \
 # Patch rake-compiler to avoid build of ruby extensions
 RUN cd /usr/local/rvm/gems/ruby-1.8.7-p374/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/patches/rake-compiler-0.9.5/without-exts.diff ; \
     cd /usr/local/rvm/gems/ruby-1.9.3-p551/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/patches/rake-compiler-0.9.5/without-exts.diff ; \
-    cd /usr/local/rvm/gems/ruby-2.3.0-preview2/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/patches/rake-compiler-0.9.5/without-exts.diff ; \
+    cd /usr/local/rvm/gems/ruby-2.3.0/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/patches/rake-compiler-0.9.5/without-exts.diff ; \
     true
 
-RUN bash -c "rvm use 2.3.0-preview2 --default && \
+RUN bash -c "rvm use 2.3.0 --default && \
     export MAKE=\"make -j`nproc`\" CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
-    rake-compiler cross-ruby VERSION=2.3.0-preview2 HOST=i686-w64-mingw32 && \
-    rake-compiler cross-ruby VERSION=2.3.0-preview2 HOST=x86_64-w64-mingw32 && \
+    rake-compiler cross-ruby VERSION=2.3.0 HOST=i686-w64-mingw32 && \
+    rake-compiler cross-ruby VERSION=2.3.0 HOST=x86_64-w64-mingw32 && \
     rake-compiler cross-ruby VERSION=2.2.2 HOST=i686-w64-mingw32 && \
     rake-compiler cross-ruby VERSION=2.2.2 HOST=x86_64-w64-mingw32 && \
     rake-compiler cross-ruby VERSION=2.1.6 HOST=i686-w64-mingw32 && \
@@ -82,7 +82,7 @@ RUN bash -c "rvm use 1.8.7-p374 && \
     rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources"
 
 RUN bash -c " \
-    rvm alias create 2.3 2.3.0-preview2 && \
+    rvm alias create 2.3 2.3.0 && \
     rvm alias create 1.9 1.9.3 && \
     rvm alias create 1.8 1.8.7-p374 "
 
