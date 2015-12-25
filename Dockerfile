@@ -114,6 +114,6 @@ COPY build/runas /usr/local/bin/
 # Install sudoers configuration
 COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 
-ENV RUBY_CC_VERSION 1.8.7:1.9.3:2.0.0:2.1.6:2.2.2:2.3.0
+ENV RUBY_CC_VERSION 2.3.0:2.2.2:2.1.6:2.0.0:1.9.3:1.8.7
 
 CMD bash
