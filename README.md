@@ -63,7 +63,7 @@ This is local to the running session, only:
     sudo apt-get update && sudo apt-get install your-package
 
 You can also choose between different executable ruby versions by `rvm use <version>` .
-Current default is 2.2.
+The current default is 2.3.
 
 
 ### Add to your Rakefile
