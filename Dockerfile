@@ -42,7 +42,7 @@ RUN bash -c " \
 # do not generate documentation for gems
 RUN echo "gem: --no-ri --no-rdoc" >> ~/.gemrc && \
     bash -c " \
-        rvm all do gem install bundler rake-compiler hoe mini_portile rubygems-tasks && \
+        rvm all do gem install bundler rake-compiler hoe mini_portile rubygems-tasks json && \
         rvm 1.9.3,2.3.0 do gem install mini_portile2 && \
         find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw "
 
