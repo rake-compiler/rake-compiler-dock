@@ -70,12 +70,17 @@ module RakeCompilerDock
       @doma_version_status == 0 && @doma_version_text =~ /version/
     end
 
+    def add_env_options(options, names)
+      names.each do |name|
+        if (v=ENV[name]) && !v.empty?
+          options << ["--engine-env", "#{name}=#{ENV[name]}"]
+        end
+      end
+      options
+    end
+
     def doma_create
-      options = [
-            "--engine-env", "ftp_proxy=#{ENV['ftp_proxy']}",
-            "--engine-env", "http_proxy=#{ENV['http_proxy']}",
-            "--engine-env", "https_proxy=#{ENV['https_proxy']}",
-      ]
+      options = add_env_options([], %w[ftp_proxy http_proxy https_proxy])
       @doma_create_text, @doma_create_status = run("docker-machine create --driver virtualbox #{options.join(" ")} #{machine_name}", cmd: :visible, output: :visible)
     end
 
