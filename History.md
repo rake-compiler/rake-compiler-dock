@@ -1,3 +1,9 @@
+0.5.1 / 2015-01-30
+------------------
+* Fix compatibility issue with bundler. #8
+* Add a check for the current working directory on boot2docker / docker-machine. #7
+
+
 0.5.0 / 2015-12-25
 ------------------
 * Add cross ruby version 2.3.0.
