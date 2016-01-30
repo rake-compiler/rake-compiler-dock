@@ -23,28 +23,18 @@ module RakeCompilerDock
         options = (Hash === args.last) ? args.pop : {}
         runargs = args.dup
 
-        check_docker if options.fetch(:check_docker){ true }
-        runargs.unshift("sigfw") if options.fetch(:sigfw){ true }
-        runargs.unshift("runas") if options.fetch(:runas){ true }
-        docker_opts = options.fetch(:options) do
-          opts = ["--rm", "-i"]
-          opts << "-t" if $stdin.tty?
-          opts
-        end
-
+	pwd = Dir.pwd
         case RUBY_PLATFORM
         when /mingw|mswin/
           # Change Path from "C:\Path" to "/c/Path" as used by boot2docker
-          pwd = Dir.pwd.gsub(/^([a-z]):/i){ "/#{$1.downcase}" }
+          pwd = pwd.gsub(/^([a-z]):/i){ "/#{$1.downcase}" }
           # Virtualbox shared folders don't care about file permissions, so we use generic ids.
           uid = 1000
           gid = 1000
         when /darwin/
-          pwd = Dir.pwd
           uid = 1000
           gid = 1000
         else
-          pwd = Dir.pwd
           # Docker mounted volumes also share file uid/gid and permissions with the host.
           # Therefore we use the same attributes inside and outside the container.
           uid = Process.uid
@@ -52,6 +42,15 @@ module RakeCompilerDock
         end
         user = options.fetch(:username){ current_user }
         group = options.fetch(:groupname){ current_group }
+
+        check_docker(pwd) if options.fetch(:check_docker){ true }
+        runargs.unshift("sigfw") if options.fetch(:sigfw){ true }
+        runargs.unshift("runas") if options.fetch(:runas){ true }
+        docker_opts = options.fetch(:options) do
+          opts = ["--rm", "-i"]
+          opts << "-t" if $stdin.tty?
+          opts
+        end
 
         cmd = ["docker", "run",
             "-v", "#{pwd}:#{make_valid_path(pwd)}",
@@ -128,12 +127,12 @@ module RakeCompilerDock
         name = name.gsub(/[ ]/i, "_")
       end
 
-      @@docker_checked = nil
+      @@docker_checked = {}
 
-      def check_docker
-        return if @@docker_checked
+      def check_docker(pwd)
+        return if @@docker_checked[pwd]
 
-        check = DockerCheck.new($stderr)
+        check = DockerCheck.new($stderr, pwd)
         unless check.ok?
           at_exit do
             check.print_help_text
@@ -141,7 +140,7 @@ module RakeCompilerDock
           raise DockerIsNotAvailable, "Docker is not available"
         end
 
-        @@docker_checked = check
+        @@docker_checked[pwd] = check
       end
 
     end

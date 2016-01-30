@@ -6,10 +6,12 @@ module RakeCompilerDock
     include Colors
 
     attr_reader :io
+    attr_reader :pwd
     attr_accessor :machine_name
 
-    def initialize(io, machine_name="rake-compiler-dock")
+    def initialize(io, pwd, machine_name="rake-compiler-dock")
       @io = io
+      @pwd = pwd
       @machine_name = machine_name
 
       if !io.tty? || (RUBY_PLATFORM=~/mingw|mswin/ && RUBY_VERSION[/^\d+/] < '2')
@@ -55,7 +57,7 @@ module RakeCompilerDock
     end
 
     def ok?
-      @docker_version_status == 0 && @docker_version_text =~ /version/
+      @docker_version_status == 0 && @docker_version_text =~ /version/ && doma_pwd_ok?
     end
 
     def docker_client_avail?
@@ -156,6 +158,17 @@ module RakeCompilerDock
       @b2d_start_envset
     end
 
+    def doma_pwd_ok?
+      case RUBY_PLATFORM
+      when /mingw|mswin/
+        pwd =~ /^\/c\/users/i
+      when /linux/
+        true
+      when /darwin/
+        pwd =~ /^\/users/i
+      end
+    end
+
     def set_env(text)
       set = false
       text.scan(/(unset |Remove-Item Env:\\)(.+?)$/) do |_, key|
@@ -242,6 +255,15 @@ module RakeCompilerDock
             help << ""
             help << yellow("You might try to regenerate TLS certificates with:")
             help << "    docker-machine regenerate-certs #{machine_name}"
+        elsif !ok? && !doma_pwd_ok?
+          help << red("docker-machine can not mount the current working directory.")
+          help << ""
+          case RUBY_PLATFORM
+          when /mingw|mswin/
+            help << yellow("    Please move to a diretory below C:\\Users")
+          when /darwin/
+            help << yellow("    Please move to a diretory below /Users")
+          end
         elsif !ok?
           help << red("docker-machine is installed and started, but 'docker version' failed.")
           help << ""
@@ -267,6 +289,15 @@ module RakeCompilerDock
           help << yellow("    Please check why '") + white("boot2docker start") + yellow("' fails.")
           help << yellow("    You might need to re-init with '") + white("boot2docker delete") + yellow("'")
           help << yellow("    or have a look at our FAQs: http://git.io/vm8Nr")
+        elsif !ok? && !doma_pwd_ok?
+          help << red("boot2docker can not mount the current working directory.")
+          help << ""
+          case RUBY_PLATFORM
+          when /mingw|mswin/
+            help << yellow("    Please move to a diretory below C:\\Users")
+          when /darwin/
+            help << yellow("    Please move to a diretory below /Users")
+          end
         elsif !ok? && b2d_start_ok?
           help << red("boot2docker is installed and started, but 'docker version' failed.")
           help << ""
