@@ -52,9 +52,9 @@ RUN sudo mkdir -p /usr/local/rake-compiler && \
     ln -s /usr/local/rake-compiler ~/.rake-compiler
 
 # Patch rake-compiler to avoid build of ruby extensions
-RUN cd /usr/local/rvm/gems/ruby-1.8.7-p374/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/patches/rake-compiler-0.9.5/without-exts.diff ; \
-    cd /usr/local/rvm/gems/ruby-1.9.3-p551/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/patches/rake-compiler-0.9.5/without-exts.diff ; \
-    cd /usr/local/rvm/gems/ruby-2.3.0/gems/rake-compiler-0.9.5 && patch -p1 < /home/rvm/patches/rake-compiler-0.9.5/without-exts.diff ; \
+RUN cd /usr/local/rvm/gems/ruby-1.8.7-p374/gems/rake-compiler-0.9.5 && git apply /home/rvm/patches/rake-compiler-0.9.5/*.diff ; \
+    cd /usr/local/rvm/gems/ruby-1.9.3-p551/gems/rake-compiler-0.9.5 && git apply /home/rvm/patches/rake-compiler-0.9.5/*.diff ; \
+    cd /usr/local/rvm/gems/ruby-2.3.0/gems/rake-compiler-0.9.5 && git apply /home/rvm/patches/rake-compiler-0.9.5/*.diff ; \
     true
 
 RUN bash -c "rvm use 2.3.0 --default && \
