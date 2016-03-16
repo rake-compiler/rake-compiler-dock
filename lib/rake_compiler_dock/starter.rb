@@ -94,7 +94,7 @@ module RakeCompilerDock
       end
 
       def current_group
-        group_obj = Etc.getgrgid
+        group_obj = Etc.getgrgid rescue nil
         make_valid_group_name(group_obj ? group_obj.name : "dummygroup")
       end
 
