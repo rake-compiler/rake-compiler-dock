@@ -1,3 +1,8 @@
+0.5.2 / 2016-03-16
+------------------
+* Fix exception when group id can not be retrieved. #14
+
+
 0.5.1 / 2015-01-30
 ------------------
 * Fix compatibility issue with bundler. #8
