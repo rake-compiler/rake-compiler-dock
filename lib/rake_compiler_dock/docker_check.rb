@@ -83,7 +83,7 @@ module RakeCompilerDock
 
     def doma_create
       options = add_env_options([], %w[ftp_proxy http_proxy https_proxy])
-      @doma_create_text, @doma_create_status = run("docker-machine create --driver virtualbox #{options.join(" ")} #{machine_name}", cmd: :visible, output: :visible)
+      @doma_create_text, @doma_create_status = run("docker-machine create --driver #{ENV['DRIVER'] || 'virtualbox'} #{options.join(" ")} #{machine_name}", cmd: :visible, output: :visible)
     end
 
     def doma_create_ok?
