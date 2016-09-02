@@ -1,3 +1,8 @@
+0.5.3 / 2016-09-02
+------------------
+* Fix 'docker-machine env' when running in Windows cmd shell
+
+
 0.5.2 / 2016-03-16
 ------------------
 * Fix exception when group id can not be retrieved. #14
