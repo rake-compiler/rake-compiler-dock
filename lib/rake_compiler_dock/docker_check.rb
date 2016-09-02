@@ -95,12 +95,8 @@ module RakeCompilerDock
       @doma_env_set = false
 
       if doma_start_ok?
-        @doma_env_text, @doma_env_status = run("docker-machine env #{machine_name} --shell bash")
+        @doma_env_text, @doma_env_status = run("docker-machine env #{machine_name} --shell bash --no-proxy")
         if @doma_env_status == 0 && set_env(@doma_env_text)
-          # We use docker-machine for a local provider only, so we shouldn't use any proxy to connect to it.
-          if host=ENV['DOCKER_HOST']
-            ENV['NO_PROXY'] = [ENV['NO_PROXY'], URI.parse(host).host].compact.join(",")
-          end
           @doma_env_set = true
         end
       end
