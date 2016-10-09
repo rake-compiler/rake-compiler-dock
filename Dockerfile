@@ -50,10 +50,6 @@ RUN sudo mkdir -p /usr/local/rake-compiler && \
     sudo chown rvm.rvm /usr/local/rake-compiler && \
     ln -s /usr/local/rake-compiler ~/.rake-compiler
 
-# Patch rake-compiler to avoid build of ruby extensions
-RUN cd /usr/local/rvm/gems/ruby-2.3.1/gems/rake-compiler-0.9.5 && git apply /home/rvm/patches/rake-compiler-0.9.5/*.diff ; \
-    true
-
 RUN bash -c "rvm use 2.3.1 --default && \
     export MAKE=\"make -j`nproc`\" CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
     rake-compiler cross-ruby VERSION=2.3.0 HOST=i686-w64-mingw32 && \
