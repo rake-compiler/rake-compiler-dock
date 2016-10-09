@@ -1,7 +1,7 @@
-FROM ubuntu:14.04
+FROM ubuntu:16.10
 
 RUN apt-get -y update && \
-    apt-get install -y curl git-core mingw32 xz-utils build-essential wget unzip
+    apt-get install -y curl git-core xz-utils build-essential wget unzip sudo gpg dirmngr
 
 RUN mkdir -p /opt/mingw && \
     curl -SL http://downloads.sourceforge.net/mingw-w64/i686-w64-mingw32-gcc-4.7.2-release-linux64_rubenvb.tar.xz | \
@@ -32,7 +32,7 @@ ENV BASH_ENV /etc/rubybashrc
 # install rubies and fix permissions on
 RUN bash -c " \
     export CFLAGS='-s -O3 -fno-fast-math -fPIC' && \
-    for v in 2.3.0 1.9.3 1.8.7-p374 ; do \
+    for v in 2.3.1 ; do \
         rvm install \$v --patch \$(echo ~/patches/ruby-\$v/* | tr ' ' ','); \
     done && \
     rvm cleanup all && \
@@ -42,8 +42,7 @@ RUN bash -c " \
 # do not generate documentation for gems
 RUN echo "gem: --no-ri --no-rdoc" >> ~/.gemrc && \
     bash -c " \
-        rvm all do gem install --no-document bundler rake-compiler hoe mini_portile rubygems-tasks && \
-        rvm 1.9.3,2.3.0 do gem install --no-document mini_portile2 && \
+        rvm all do gem install --no-document bundler rake-compiler hoe mini_portile rubygems-tasks mini_portile2 && \
         find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw "
 
 # Install rake-compiler's cross rubies in global dir instead of /root
@@ -52,12 +51,10 @@ RUN sudo mkdir -p /usr/local/rake-compiler && \
     ln -s /usr/local/rake-compiler ~/.rake-compiler
 
 # Patch rake-compiler to avoid build of ruby extensions
-RUN cd /usr/local/rvm/gems/ruby-1.8.7-p374/gems/rake-compiler-0.9.5 && git apply /home/rvm/patches/rake-compiler-0.9.5/*.diff ; \
-    cd /usr/local/rvm/gems/ruby-1.9.3-p551/gems/rake-compiler-0.9.5 && git apply /home/rvm/patches/rake-compiler-0.9.5/*.diff ; \
-    cd /usr/local/rvm/gems/ruby-2.3.0/gems/rake-compiler-0.9.5 && git apply /home/rvm/patches/rake-compiler-0.9.5/*.diff ; \
+RUN cd /usr/local/rvm/gems/ruby-2.3.1/gems/rake-compiler-0.9.5 && git apply /home/rvm/patches/rake-compiler-0.9.5/*.diff ; \
     true
 
-RUN bash -c "rvm use 2.3.0 --default && \
+RUN bash -c "rvm use 2.3.1 --default && \
     export MAKE=\"make -j`nproc`\" CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
     rake-compiler cross-ruby VERSION=2.3.0 HOST=i686-w64-mingw32 && \
     rake-compiler cross-ruby VERSION=2.3.0 HOST=x86_64-w64-mingw32 && \
@@ -70,22 +67,8 @@ RUN bash -c "rvm use 2.3.0 --default && \
     rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources && \
     find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw "
 
-RUN bash -c "rvm use 1.9.3 && \
-    export CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
-    rake-compiler cross-ruby VERSION=1.9.3-p551 HOST=i586-mingw32msvc && \
-    rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources"
-
-# Build 1.8.7 with mingw32 compiler (GCC 4.2)
-# Use just one CPU for building 1.8.7 and 1.9.3
-RUN bash -c "rvm use 1.8.7-p374 && \
-    export CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
-    rake-compiler cross-ruby VERSION=1.8.7-p374 HOST=i586-mingw32msvc && \
-    rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources"
-
 RUN bash -c " \
-    rvm alias create 2.3 2.3.0 && \
-    rvm alias create 1.9 1.9.3 && \
-    rvm alias create 1.8 1.8.7-p374 "
+    rvm alias create 2.3 2.3.1 "
 
 USER root
 
@@ -99,10 +82,8 @@ RUN sed -i -- "s:/root/.rake-compiler:/usr/local/rake-compiler:g" /usr/local/rak
 COPY build/strip_wrapper /root/
 RUN mv /opt/mingw/mingw32/bin/i686-w64-mingw32-strip /opt/mingw/mingw32/bin/i686-w64-mingw32-strip.bin && \
     mv /opt/mingw/mingw64/bin/x86_64-w64-mingw32-strip /opt/mingw/mingw64/bin/x86_64-w64-mingw32-strip.bin && \
-    mv /usr/bin/i586-mingw32msvc-strip /usr/bin/i586-mingw32msvc-strip.bin && \
     ln /root/strip_wrapper /opt/mingw/mingw32/bin/i686-w64-mingw32-strip && \
-    ln /root/strip_wrapper /opt/mingw/mingw64/bin/x86_64-w64-mingw32-strip && \
-    ln /root/strip_wrapper /usr/bin/i586-mingw32msvc-strip
+    ln /root/strip_wrapper /opt/mingw/mingw64/bin/x86_64-w64-mingw32-strip
 
 # Install SIGINT forwarder
 COPY build/sigfw.c /root/
@@ -114,6 +95,6 @@ COPY build/runas /usr/local/bin/
 # Install sudoers configuration
 COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 
-ENV RUBY_CC_VERSION 2.3.0:2.2.2:2.1.6:2.0.0:1.9.3:1.8.7
+ENV RUBY_CC_VERSION 2.3.0:2.2.2:2.1.6:2.0.0
 
 CMD bash
