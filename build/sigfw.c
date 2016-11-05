@@ -7,6 +7,8 @@
  * Therefore Ctrl-C aka SIGINT is ignored per default.
  */
 
+#include <unistd.h>
+#include <stdio.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
