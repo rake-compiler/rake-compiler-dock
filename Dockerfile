@@ -3,16 +3,6 @@ FROM ubuntu:16.10
 RUN apt-get -y update && \
     apt-get install -y curl git-core xz-utils build-essential wget unzip sudo gpg dirmngr
 
-RUN mkdir -p /opt/mingw && \
-    curl -SL http://downloads.sourceforge.net/mingw-w64/i686-w64-mingw32-gcc-4.7.2-release-linux64_rubenvb.tar.xz | \
-    tar -xJC /opt/mingw && \
-    echo "export PATH=\$PATH:/opt/mingw/mingw32/bin" >> /etc/rubybashrc
-
-RUN mkdir -p /opt/mingw && \
-    curl -SL http://downloads.sourceforge.net/mingw-w64/x86_64-w64-mingw32-gcc-4.7.2-release-linux64_rubenvb.tar.xz | \
-    tar -xJC /opt/mingw && \
-    echo "export PATH=\$PATH:/opt/mingw/mingw64/bin" >> /etc/rubybashrc
-
 # Add "rvm" as system group, to avoid conflicts with host GIDs typically starting with 1000
 RUN groupadd -r rvm && useradd -r -g rvm -G sudo -p "" --create-home rvm && \
     echo "source /etc/profile.d/rvm.sh" >> /etc/rubybashrc
@@ -50,18 +40,54 @@ RUN sudo mkdir -p /usr/local/rake-compiler && \
     sudo chown rvm.rvm /usr/local/rake-compiler && \
     ln -s /usr/local/rake-compiler ~/.rake-compiler
 
-RUN bash -c "rvm use 2.3.1 --default && \
-    export MAKE=\"make -j`nproc`\" CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
-    rake-compiler cross-ruby VERSION=2.3.0 HOST=i686-w64-mingw32 && \
-    rake-compiler cross-ruby VERSION=2.3.0 HOST=x86_64-w64-mingw32 && \
-    rake-compiler cross-ruby VERSION=2.2.2 HOST=i686-w64-mingw32 && \
-    rake-compiler cross-ruby VERSION=2.2.2 HOST=x86_64-w64-mingw32 && \
-    rake-compiler cross-ruby VERSION=2.1.6 HOST=i686-w64-mingw32 && \
-    rake-compiler cross-ruby VERSION=2.1.6 HOST=x86_64-w64-mingw32 && \
-    rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=i686-w64-mingw32 && \
-    rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=x86_64-w64-mingw32 && \
+# Add cross compilers for Windows and Linux
+USER root
+RUN dpkg --add-architecture i386 && \
+    apt-get -y update && \
+    apt-get install -y gcc-mingw-w64-x86-64 gcc-mingw-w64-i686 g++-mingw-w64-x86-64 g++-mingw-w64-i686 \
+        gcc-multilib moreutils libc6-dev:i386
+USER rvm
+
+# Create dev tools i686-linux-gnu-*
+COPY build/mk_i686.rb /root/
+RUN bash -c "rvm use 2.3.1 --default && rvmsudo ruby /root/mk_i686.rb"
+
+# Build cross ruby versions
+RUN bash -c " \
+    export CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
+    parallel -- \
+      'rake-compiler cross-ruby VERSION=2.4.0-preview2 HOST=i686-linux-gnu' \
+      'rake-compiler cross-ruby VERSION=2.3.0 HOST=i686-linux-gnu' \
+      'rake-compiler cross-ruby VERSION=2.2.2 HOST=i686-linux-gnu' \
+      'rake-compiler cross-ruby VERSION=2.1.6 HOST=i686-linux-gnu' \
+      'rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=i686-linux-gnu' \
+      'rake-compiler cross-ruby VERSION=2.4.0-preview2 HOST=x86_64-linux-gnu' \
+      'rake-compiler cross-ruby VERSION=2.3.0 HOST=x86_64-linux-gnu' \
+      'rake-compiler cross-ruby VERSION=2.2.2 HOST=x86_64-linux-gnu' \
+      'rake-compiler cross-ruby VERSION=2.1.6 HOST=x86_64-linux-gnu' \
+      'rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=x86_64-linux-gnu' \
+      'rake-compiler cross-ruby VERSION=2.4.0-preview2 HOST=i686-w64-mingw32' \
+      'rake-compiler cross-ruby VERSION=2.3.0 HOST=i686-w64-mingw32' \
+      'rake-compiler cross-ruby VERSION=2.2.2 HOST=i686-w64-mingw32' \
+      'rake-compiler cross-ruby VERSION=2.1.6 HOST=i686-w64-mingw32' \
+      'rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=i686-w64-mingw32' \
+      'rake-compiler cross-ruby VERSION=2.4.0-preview2 HOST=x86_64-w64-mingw32' \
+      'rake-compiler cross-ruby VERSION=2.3.0 HOST=x86_64-w64-mingw32' \
+      'rake-compiler cross-ruby VERSION=2.2.2 HOST=x86_64-w64-mingw32' \
+      'rake-compiler cross-ruby VERSION=2.1.6 HOST=x86_64-w64-mingw32' \
+      'rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=x86_64-w64-mingw32' ; \
     rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources && \
     find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw "
+
+# Avoid linking against libruby shared object.
+# See also https://github.com/rake-compiler/rake-compiler-dock/issues/13
+RUN find /usr/local/rake-compiler/ruby/*linux*/ -name libruby.so | xargs rm
+RUN find /usr/local/rake-compiler/ruby/*linux*/ -name libruby-static.a | while read f ; do cp $f `echo $f | sed s/-static//` ; done
+RUN find /usr/local/rake-compiler/ruby/*linux*/ -name libruby.a | while read f ; do ar t $f | xargs ar d $f ; done
+RUN find /usr/local/rake-compiler/ruby/*linux*/ -name mkmf.rb | while read f ; do sed -i ':a;N;$!ba;s/TRY_LINK = [^\n]*\n[^\n]*\n[^\n]*LOCAL_LIBS)/& -lruby-static/' $f ; done
+
+# RubyInstaller doesn't install libgcc -> link it static.
+RUN find /usr/local/rake-compiler/ruby/*mingw*/ -name rbconfig.rb | while read f ; do sed -i 's/."LDFLAGS". = "/&-static-libgcc /' $f ; done
 
 RUN bash -c " \
     rvm alias create 2.3 2.3.1 "
@@ -70,16 +96,14 @@ USER root
 
 # Fix paths in rake-compiler/config.yml and add rvm and mingw-tools to the global bashrc
 RUN sed -i -- "s:/root/.rake-compiler:/usr/local/rake-compiler:g" /usr/local/rake-compiler/config.yml && \
-    echo "source /etc/profile.d/rvm.sh" >> /etc/bash.bashrc && \
-    echo "export PATH=\$PATH:/opt/mingw/mingw32/bin" >> /etc/bash.bashrc && \
-    echo "export PATH=\$PATH:/opt/mingw/mingw64/bin" >> /etc/bash.bashrc
+    echo "source /etc/profile.d/rvm.sh" >> /etc/bash.bashrc
 
-# Install wrappers for strip commands as a workaround for "Protocol error" in boot2docker.
+# # Install wrappers for strip commands as a workaround for "Protocol error" in boot2docker.
 COPY build/strip_wrapper /root/
-RUN mv /opt/mingw/mingw32/bin/i686-w64-mingw32-strip /opt/mingw/mingw32/bin/i686-w64-mingw32-strip.bin && \
-    mv /opt/mingw/mingw64/bin/x86_64-w64-mingw32-strip /opt/mingw/mingw64/bin/x86_64-w64-mingw32-strip.bin && \
-    ln /root/strip_wrapper /opt/mingw/mingw32/bin/i686-w64-mingw32-strip && \
-    ln /root/strip_wrapper /opt/mingw/mingw64/bin/x86_64-w64-mingw32-strip
+RUN mv /usr/bin/i686-w64-mingw32-strip /usr/bin/i686-w64-mingw32-strip.bin && \
+    mv /usr/bin/x86_64-w64-mingw32-strip /usr/bin/x86_64-w64-mingw32-strip.bin && \
+    ln /root/strip_wrapper /usr/bin/i686-w64-mingw32-strip && \
+    ln /root/strip_wrapper /usr/bin/x86_64-w64-mingw32-strip
 
 # Install SIGINT forwarder
 COPY build/sigfw.c /root/
@@ -91,6 +115,6 @@ COPY build/runas /usr/local/bin/
 # Install sudoers configuration
 COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 
-ENV RUBY_CC_VERSION 2.3.0:2.2.2:2.1.6:2.0.0
+ENV RUBY_CC_VERSION 2.4.0:2.3.0:2.2.2:2.1.6:2.0.0
 
 CMD bash
