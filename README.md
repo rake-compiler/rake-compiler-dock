@@ -73,7 +73,8 @@ This can be done like this:
 
     task 'gem:windows' do
       require 'rake_compiler_dock'
-      RakeCompilerDock.sh "bundle && rake cross native gem"
+      sh "bundle package"   # Avoid repeated downloads of gems by using gem files from the host.
+      RakeCompilerDock.sh "bundle --local && rake cross native gem"
     end
 
 Rake-compiler-dock uses [semantic versioning](http://semver.org/), so you should add it into your Gemfile, to make sure, that future changes will not break your build.
