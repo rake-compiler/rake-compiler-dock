@@ -1,8 +1,8 @@
 # rake-compiler-dock
 
-**Easy to use and reliable cross compiler environment for building Windows binary gems.**
+**Easy to use and reliable cross compiler environment for building Windows and Linux binary gems.**
 
-It provides cross compilers and Ruby environments for all versions of the [RubyInstaller](http://rubyinstaller.org/).
+It provides cross compilers and Ruby environments for 2.0 and newer versions of the [RubyInstaller](http://rubyinstaller.org/) and Linux runtime environments.
 They are prepared for use with [rake-compiler](https://github.com/rake-compiler/rake-compiler).
 It is used by [many gems with C-extentions](https://github.com/rake-compiler/rake-compiler-dock/wiki/Projects-using-rake-compiler-dock).
 
@@ -36,12 +36,13 @@ Rake-compiler-dock offers the shell command `rake-compiler-dock` and a [ruby API
 This is best suited to try out and debug a build.
 It mounts the current working directory into the docker environment.
 All changes below the current working directory are shared with the host.
-But note, that all other changes to the file system of the container are dropped at the end of the session - the docker image is static for a given version. `rake-compiler-dock` can also take the build command(s) from STDIN or as command arguments.
+But note, that all other changes to the file system of the container are dropped at the end of the session - the docker image is static for a given version.
+`rake-compiler-dock` can also take the build command(s) from STDIN or as command arguments.
 
 All commands are executed with the same user and group of the host.
 This is done by copying user account data into the container and sudo to it.
 
-To build x86- and x64 Windows (RubyInstaller) binary gems interactively, it can be called like this:
+To build x86 and x64 Windows and Linux binary gems interactively, it can be called like this:
 
     user@host:$ cd your-gem-dir/
     user@host:$ rake-compiler-dock   # this enters a container with an interactive shell
@@ -50,6 +51,7 @@ To build x86- and x64 Windows (RubyInstaller) binary gems interactively, it can 
     user@5b53794ada92:$ exit
     user@host:$ ls pkg/*.gem
     your-gem-1.0.0.gem  your-gem-1.0.0-x64-mingw32.gem  your-gem-1.0.0-x86-mingw32.gem
+    your-gem-1.0.0-x86_64-linux.gem  your-gem-1.0.0-x86-linux.gem
 
 Or non-interactive:
 
@@ -71,7 +73,7 @@ The current default is 2.3.
 To make the build process reproduceable for other parties, it is recommended to add rake-compiler-dock to your Rakefile.
 This can be done like this:
 
-    task 'gem:windows' do
+    task 'gem:native' do
       require 'rake_compiler_dock'
       sh "bundle package"   # Avoid repeated downloads of gems by using gem files from the host.
       RakeCompilerDock.sh "bundle --local && rake cross native gem"
@@ -79,7 +81,7 @@ This can be done like this:
 
 Rake-compiler-dock uses [semantic versioning](http://semver.org/), so you should add it into your Gemfile, to make sure, that future changes will not break your build.
 
-    gem 'rake-compiler-dock', '~> 0.5.0'
+    gem 'rake-compiler-dock', '~> 0.6.0'
 
 See [the wiki](https://github.com/rake-compiler/rake-compiler-dock/wiki/Projects-using-rake-compiler-dock) for projects which make use of rake-compiler-dock.
 
