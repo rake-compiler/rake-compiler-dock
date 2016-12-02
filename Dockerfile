@@ -22,7 +22,7 @@ ENV BASH_ENV /etc/rubybashrc
 # install rubies and fix permissions on
 RUN bash -c " \
     export CFLAGS='-s -O3 -fno-fast-math -fPIC' && \
-    for v in 2.3.1 ; do \
+    for v in 2.3.3 ; do \
         rvm install \$v --patch \$(echo ~/patches/ruby-\$v/* | tr ' ' ','); \
     done && \
     rvm cleanup all && \
@@ -42,36 +42,35 @@ RUN sudo mkdir -p /usr/local/rake-compiler && \
 
 # Add cross compilers for Windows and Linux
 USER root
-RUN dpkg --add-architecture i386 && \
-    apt-get -y update && \
+RUN apt-get -y update && \
     apt-get install -y gcc-mingw-w64-x86-64 gcc-mingw-w64-i686 g++-mingw-w64-x86-64 g++-mingw-w64-i686 \
-        gcc-multilib moreutils libc6-dev:i386
+        gcc-multilib moreutils
 USER rvm
 
 # Create dev tools i686-linux-gnu-*
 COPY build/mk_i686.rb /root/
-RUN bash -c "rvm use 2.3.1 --default && rvmsudo ruby /root/mk_i686.rb"
+RUN bash -c "rvm use 2.3.3 --default && rvmsudo ruby /root/mk_i686.rb"
 
 # Build cross ruby versions
 RUN bash -c " \
     export CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
     parallel -- \
-      'rake-compiler cross-ruby VERSION=2.4.0-preview2 HOST=i686-linux-gnu' \
+      'rake-compiler cross-ruby VERSION=2.4.0-preview3 HOST=i686-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.3.0 HOST=i686-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.2.2 HOST=i686-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.1.6 HOST=i686-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=i686-linux-gnu' \
-      'rake-compiler cross-ruby VERSION=2.4.0-preview2 HOST=x86_64-linux-gnu' \
+      'rake-compiler cross-ruby VERSION=2.4.0-preview3 HOST=x86_64-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.3.0 HOST=x86_64-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.2.2 HOST=x86_64-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.1.6 HOST=x86_64-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=x86_64-linux-gnu' \
-      'rake-compiler cross-ruby VERSION=2.4.0-preview2 HOST=i686-w64-mingw32' \
+      'rake-compiler cross-ruby VERSION=2.4.0-preview3 HOST=i686-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.3.0 HOST=i686-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.2.2 HOST=i686-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.1.6 HOST=i686-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=i686-w64-mingw32' \
-      'rake-compiler cross-ruby VERSION=2.4.0-preview2 HOST=x86_64-w64-mingw32' \
+      'rake-compiler cross-ruby VERSION=2.4.0-preview3 HOST=x86_64-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.3.0 HOST=x86_64-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.2.2 HOST=x86_64-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.1.6 HOST=x86_64-w64-mingw32' \
@@ -90,9 +89,14 @@ RUN find /usr/local/rake-compiler/ruby/*linux*/ -name mkmf.rb | while read f ; d
 RUN find /usr/local/rake-compiler/ruby/*mingw*/ -name rbconfig.rb | while read f ; do sed -i 's/."LDFLAGS". = "/&-static-libgcc /' $f ; done
 
 RUN bash -c " \
-    rvm alias create 2.3 2.3.1 "
+    rvm alias create 2.3 2.3.3 "
 
 USER root
+
+# Add more libraries and tools to support cross build
+RUN dpkg --add-architecture i386 && \
+    apt-get -y update && \
+    apt-get install -y libc6-dev:i386 libudev-dev libudev-dev:i386 cmake
 
 # Fix paths in rake-compiler/config.yml and add rvm and mingw-tools to the global bashrc
 RUN sed -i -- "s:/root/.rake-compiler:/usr/local/rake-compiler:g" /usr/local/rake-compiler/config.yml && \
