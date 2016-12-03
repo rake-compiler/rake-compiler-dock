@@ -30,7 +30,7 @@ Install rake-compiler-dock as a gem. The docker image is downloaded later on dem
 
 ## Usage
 
-Rake-compiler-dock provides the necessary tools to build Windows and Linux extensions written in C and C++.
+Rake-compiler-dock provides the necessary tools to build Ruby extensions for Windows and Linux written in C and C++.
 It is intended to be used in conjunction with [rake-compiler's](https://github.com/rake-compiler/rake-compiler) cross build capability.
 Your Rakefile should enable cross compilation like so:
 
@@ -38,6 +38,8 @@ Your Rakefile should enable cross compilation like so:
       ext.cross_compile = true
       ext.cross_platform = %w[x86-mingw32 x64-mingw32 x86-linux x86_64-linux]
     end
+
+It may also be used to build ffi based binary gems like [libusb](https://github.com/larskanis/libusb), but currently doesn't provide any additional build helpers beyond docker invocation and cross compilers.
 
 ### Interactive Usage
 
