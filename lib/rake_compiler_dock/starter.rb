@@ -23,7 +23,7 @@ module RakeCompilerDock
         options = (Hash === args.last) ? args.pop : {}
         runargs = args.dup
 
-	pwd = Dir.pwd
+        pwd = Dir.pwd
         case RUBY_PLATFORM
         when /mingw|mswin/
           # Change Path from "C:\Path" to "/c/Path" as used by boot2docker
