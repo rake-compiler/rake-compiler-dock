@@ -47,4 +47,8 @@ class TestEnvironmentVariables < Test::Unit::TestCase
     assert_equal RUBY_VERSION, rcd_env['RCD_HOST_RUBY_VERSION']
   end
 
+  def test_PWD
+    assert_equal Dir.pwd, rcd_env['PWD']
+  end
+
 end

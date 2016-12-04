@@ -23,11 +23,12 @@ module RakeCompilerDock
         options = (Hash === args.last) ? args.pop : {}
         runargs = args.dup
 
-        pwd = Dir.pwd
+        mountdir = options.fetch(:mountdir){ ENV['RCD_MOUNTDIR'] || Dir.pwd }
+        workdir = options.fetch(:workdir){ ENV['RCD_WORKDIR'] || Dir.pwd }
         case RUBY_PLATFORM
         when /mingw|mswin/
-          # Change Path from "C:\Path" to "/c/Path" as used by boot2docker
-          pwd = pwd.gsub(/^([a-z]):/i){ "/#{$1.downcase}" }
+          mountdir = sanitize_windows_path(mountdir)
+          workdir = sanitize_windows_path(workdir)
           # Virtualbox shared folders don't care about file permissions, so we use generic ids.
           uid = 1000
           gid = 1000
@@ -43,7 +44,7 @@ module RakeCompilerDock
         user = options.fetch(:username){ current_user }
         group = options.fetch(:groupname){ current_group }
 
-        check_docker(pwd) if options.fetch(:check_docker){ true }
+        check_docker(mountdir) if options.fetch(:check_docker){ true }
         runargs.unshift("sigfw") if options.fetch(:sigfw){ true }
         runargs.unshift("runas") if options.fetch(:runas){ true }
         docker_opts = options.fetch(:options) do
@@ -53,7 +54,7 @@ module RakeCompilerDock
         end
 
         cmd = ["docker", "run",
-            "-v", "#{pwd}:#{make_valid_path(pwd)}",
+            "-v", "#{mountdir}:#{make_valid_path(mountdir)}",
             "-e", "UID=#{uid}",
             "-e", "GID=#{gid}",
             "-e", "USER=#{user}",
@@ -64,7 +65,7 @@ module RakeCompilerDock
             "-e", "RCD_HOST_RUBY_PLATFORM=#{RUBY_PLATFORM}",
             "-e", "RCD_HOST_RUBY_VERSION=#{RUBY_VERSION}",
             "-e", "RCD_IMAGE=#{image_name}",
-            "-w", make_valid_path(pwd),
+            "-w", make_valid_path(workdir),
             *docker_opts,
             image_name,
             *runargs]
@@ -143,6 +144,10 @@ module RakeCompilerDock
         @@docker_checked[pwd] = check
       end
 
+      # Change Path from "C:\Path" to "/c/Path" as used by boot2docker
+      def sanitize_windows_path(path)
+        path.gsub(/^([a-z]):/i){ "/#{$1.downcase}" }
+      end
     end
   end
 end
