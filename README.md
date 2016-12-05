@@ -39,7 +39,7 @@ Your Rakefile should enable cross compilation like so:
       ext.cross_platform = %w[x86-mingw32 x64-mingw32 x86-linux x86_64-linux]
     end
 
-It may also be used to build ffi based binary gems like [libusb](https://github.com/larskanis/libusb), but currently doesn't provide any additional build helpers beyond docker invocation and cross compilers.
+It may also be used to build ffi based binary gems like [libusb](https://github.com/larskanis/libusb), but currently doesn't provide any additional build helpers for this use case, beyond docker invocation and cross compilers.
 
 ### Interactive Usage
 
