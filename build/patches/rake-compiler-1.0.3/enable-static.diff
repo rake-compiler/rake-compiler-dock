@@ -1,0 +1,13 @@
+diff --git a/tasks/bin/cross-ruby.rake b/tasks/bin/cross-ruby.rake
+index 6230799..3a69f13 100644
+--- a/tasks/bin/cross-ruby.rake
++++ b/tasks/bin/cross-ruby.rake
+@@ -134,6 +134,8 @@ file "#{USER_HOME}/builds/#{MINGW_HOST}/#{RUBY_CC_VERSION}/Makefile" => ["#{USER
+     "--target=#{MINGW_TARGET}",
+     "--build=#{RUBY_BUILD}",
+     '--enable-shared',
++    '--enable-static',
++    '--enable-install-static-library',
+     '--disable-install-doc',
+     '--with-ext='
+   ]
