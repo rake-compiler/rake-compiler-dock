@@ -1,3 +1,16 @@
+0.6.0 / YYYY-MM-DD
+------------------
+* Remove Windows cross build environments for Ruby < 2.0.
+* Add Windows cross build environment for Ruby-2.4.
+* Add Linux cross build environment for Ruby-2.0 to 2.4.
+* Update Windows gcc to 6.2.
+* Update docker base image to Ubuntu-16.10.
+* Update native rvm based ruby to 2.4.0.
+* Respect MACHINE_DRIVER environment variable for docker-machine. #15
+* Add RCD_WORKDIR and RCD_MOUNTDIR environment variables. #11
+* Ignore non-unique UID or GID. #10
+
+
 0.5.3 / 2016-09-02
 ------------------
 * Fix 'docker-machine env' when running in Windows cmd shell
