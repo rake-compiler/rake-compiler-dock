@@ -2,6 +2,8 @@ require "bundler/gem_tasks"
 require "rake_compiler_dock"
 require "rake_compiler_dock/gem_helper"
 
+RakeCompilerDock::GemHelper.install_tasks
+
 task :build do
   sh "docker build -t larskanis/rake-compiler-dock:#{RakeCompilerDock::IMAGE_VERSION} ."
 end
