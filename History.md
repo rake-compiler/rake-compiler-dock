@@ -1,4 +1,4 @@
-0.6.0 / YYYY-MM-DD
+0.6.0 / 2016-12-26
 ------------------
 * Remove Windows cross build environments for Ruby < 2.0.
 * Add Windows cross build environment for Ruby-2.4.
