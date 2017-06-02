@@ -55,8 +55,14 @@ RUN bash -c "rvm use 2.4.1 --default && rvmsudo ruby /root/mk_i686.rb"
 RUN cd /usr/local/rvm/gems/ruby-2.4.1/gems/rake-compiler-1.0.4 && git apply /home/rvm/patches/rake-compiler-1.0.4/*.diff ;\
     true
 
-# Build cross ruby versions
-RUN bash -c " \
+# Prefetch tar files, so that downloads don't overlap while parallel builds
+# Then build cross ruby versions
+RUN mkdir -p /home/rvm/.rake-compiler/sources && \
+    cd /home/rvm/.rake-compiler/sources && \
+    for v in 2.4.0 2.3.0 2.2.2 2.1.6 2.0.0-p645 ; do \
+      wget http://cache.ruby-lang.org/pub/ruby/ruby-$v.tar.bz2; \
+    done; \
+    bash -c " \
     export CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
     parallel -- \
       'rake-compiler cross-ruby VERSION=2.4.0 HOST=i686-linux-gnu' \
