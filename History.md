@@ -1,4 +1,4 @@
-0.6.1 / 2017-06-02
+0.6.1 / 2017-06-03
 ------------------
 * Update base image from Ubuntu-16.10 to 17.04
 * Update perinstalled gems (this solves an version conflict between hoe and rake)
