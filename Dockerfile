@@ -58,22 +58,26 @@ RUN cd /usr/local/rvm/gems/ruby-2.4.2/gems/rake-compiler-1.0.4 && git apply /hom
 # Then build cross ruby versions
 RUN bash -c " \
     export CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
-    parallel -j5 -- \
+    parallel -j6 -- \
+      'rake-compiler cross-ruby VERSION=2.5.0-preview1 HOST=i686-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.4.0 HOST=i686-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.3.0 HOST=i686-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.2.2 HOST=i686-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.1.6 HOST=i686-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=i686-linux-gnu' \
+      'rake-compiler cross-ruby VERSION=2.5.0-preview1 HOST=x86_64-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.4.0 HOST=x86_64-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.3.0 HOST=x86_64-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.2.2 HOST=x86_64-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.1.6 HOST=x86_64-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=x86_64-linux-gnu' \
+      'rake-compiler cross-ruby VERSION=2.5.0-preview1 HOST=i686-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.4.0 HOST=i686-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.3.0 HOST=i686-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.2.2 HOST=i686-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.1.6 HOST=i686-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=i686-w64-mingw32' \
+      'rake-compiler cross-ruby VERSION=2.5.0-preview1 HOST=x86_64-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.4.0 HOST=x86_64-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.3.0 HOST=x86_64-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.2.2 HOST=x86_64-w64-mingw32' \
@@ -123,6 +127,6 @@ COPY build/runas /usr/local/bin/
 # Install sudoers configuration
 COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 
-ENV RUBY_CC_VERSION 2.4.0:2.3.0:2.2.2:2.1.6:2.0.0
+ENV RUBY_CC_VERSION 2.5.0:2.4.0:2.3.0:2.2.2:2.1.6:2.0.0
 
 CMD bash
