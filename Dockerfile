@@ -55,6 +55,20 @@ RUN bash -c "rvm use 2.4.3 --default && rvmsudo ruby /root/mk_i686.rb"
 RUN cd /usr/local/rvm/gems/ruby-2.4.3/gems/rake-compiler-1.0.4 && git apply /home/rvm/patches/rake-compiler-1.0.4/*.diff ;\
     true
 
+
+# Patch ruby-2.5.0-rc1 for cross build
+USER root
+RUN curl -SL http://cache.ruby-lang.org/pub/ruby/2.5/ruby-2.5.0-rc1.tar.xz | tar -xJC /root/ && \
+    cd /root/ruby-2.5.0-rc1 && \
+    git apply /home/rvm/patches/ruby-2.5.0-rc1/*.patch && \
+    cd .. && \
+    mkdir -p /usr/local/rake-compiler/sources/ && \
+    tar cjf /usr/local/rake-compiler/sources/ruby-2.5.0-rc1.tar.bz2 ruby-2.5.0-rc1 && \
+    chown rvm /usr/local/rake-compiler -R && \
+    rm -rf /root/ruby-2.5.0-rc1
+USER rvm
+
+
 # Then build cross ruby versions
 RUN bash -c " \
     export CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
