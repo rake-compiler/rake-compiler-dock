@@ -1,4 +1,3 @@
-require "bundler/gem_tasks"
 require "rake_compiler_dock"
 require "rake_compiler_dock/gem_helper"
 
