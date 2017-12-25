@@ -1,3 +1,9 @@
+0.6.2 / 2017-12-25
+------------------
+* Add ruby-2.5.0 cross ruby
+* Update installed ruby version to 2.4.3
+
+
 0.6.1 / 2017-06-03
 ------------------
 * Update base image from Ubuntu-16.10 to 17.04
