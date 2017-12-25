@@ -56,42 +56,29 @@ RUN cd /usr/local/rvm/gems/ruby-2.4.3/gems/rake-compiler-1.0.4 && git apply /hom
     true
 
 
-# Patch ruby-2.5.0-rc1 for cross build
-USER root
-RUN curl -SL http://cache.ruby-lang.org/pub/ruby/2.5/ruby-2.5.0-rc1.tar.xz | tar -xJC /root/ && \
-    cd /root/ruby-2.5.0-rc1 && \
-    git apply /home/rvm/patches/ruby-2.5.0-rc1/*.patch && \
-    cd .. && \
-    mkdir -p /usr/local/rake-compiler/sources/ && \
-    tar cjf /usr/local/rake-compiler/sources/ruby-2.5.0-rc1.tar.bz2 ruby-2.5.0-rc1 && \
-    chown rvm /usr/local/rake-compiler -R && \
-    rm -rf /root/ruby-2.5.0-rc1
-USER rvm
-
-
 # Then build cross ruby versions
 RUN bash -c " \
     export CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
     parallel -j6 -- \
-      'rake-compiler cross-ruby VERSION=2.5.0-rc1 HOST=i686-linux-gnu' \
+      'rake-compiler cross-ruby VERSION=2.5.0 HOST=i686-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.4.0 HOST=i686-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.3.0 HOST=i686-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.2.2 HOST=i686-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.1.6 HOST=i686-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=i686-linux-gnu' \
-      'rake-compiler cross-ruby VERSION=2.5.0-rc1 HOST=x86_64-linux-gnu' \
+      'rake-compiler cross-ruby VERSION=2.5.0 HOST=x86_64-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.4.0 HOST=x86_64-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.3.0 HOST=x86_64-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.2.2 HOST=x86_64-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.1.6 HOST=x86_64-linux-gnu' \
       'rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=x86_64-linux-gnu' \
-      'rake-compiler cross-ruby VERSION=2.5.0-rc1 HOST=i686-w64-mingw32' \
+      'rake-compiler cross-ruby VERSION=2.5.0 HOST=i686-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.4.0 HOST=i686-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.3.0 HOST=i686-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.2.2 HOST=i686-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.1.6 HOST=i686-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=i686-w64-mingw32' \
-      'rake-compiler cross-ruby VERSION=2.5.0-rc1 HOST=x86_64-w64-mingw32' \
+      'rake-compiler cross-ruby VERSION=2.5.0 HOST=x86_64-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.4.0 HOST=x86_64-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.3.0 HOST=x86_64-w64-mingw32' \
       'rake-compiler cross-ruby VERSION=2.2.2 HOST=x86_64-w64-mingw32' \
