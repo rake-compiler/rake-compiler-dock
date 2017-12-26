@@ -8,7 +8,7 @@ It is used by [many gems with C-extentions](https://github.com/rake-compiler/rak
 
 This is kind of successor of [rake-compiler-dev-box](https://github.com/tjschuck/rake-compiler-dev-box).
 It is wrapped as a gem for easier setup, usage and integration and is based on lightweight Docker containers.
-It is also more reliable, since the underlying docker images are versioned and kept unchanged while building.
+It is also more reliable, since the underlying docker images are versioned and immutable.
 
 ## Installation
 
