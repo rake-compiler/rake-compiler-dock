@@ -8,5 +8,17 @@ index ebe3d8c..a336b73 100755
    cat >>confdefs.h <<_ACEOF
 -#define HAVE_SENDFILE 1
  _ACEOF
- 
+
  fi
+diff --git a/io.c b/io.c
+index 82c5940538..a8d3661ec8 100644
+--- a/io.c
++++ b/io.c
+@@ -10721,7 +10721,6 @@ nogvl_copy_stream_wait_write(struct copy_stream_struct *stp)
+ }
+
+ #if defined __linux__ && defined __NR_copy_file_range
+-#  define USE_COPY_FILE_RANGE
+ #endif
+
+ #ifdef USE_COPY_FILE_RANGE

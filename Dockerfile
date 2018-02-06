@@ -22,7 +22,7 @@ ENV BASH_ENV /etc/rubybashrc
 # install rubies and fix permissions on
 RUN bash -c " \
     export CFLAGS='-s -O3 -fno-fast-math -fPIC' && \
-    for v in 2.4.3 ; do \
+    for v in 2.5.0 ; do \
         rvm install \$v --patch \$(echo ~/patches/ruby-\$v/* | tr ' ' ','); \
     done && \
     rvm cleanup all && \
@@ -49,10 +49,10 @@ USER rvm
 
 # Create dev tools i686-linux-gnu-*
 COPY build/mk_i686.rb /root/
-RUN bash -c "rvm use 2.4.3 --default && rvmsudo ruby /root/mk_i686.rb"
+RUN bash -c "rvm use 2.5.0 --default && rvmsudo ruby /root/mk_i686.rb"
 
 # Patch rake-compiler to build and install static libraries for Linux rubies
-RUN cd /usr/local/rvm/gems/ruby-2.4.3/gems/rake-compiler-1.0.4 && git apply /home/rvm/patches/rake-compiler-1.0.4/*.diff ;\
+RUN cd /usr/local/rvm/gems/ruby-2.5.0/gems/rake-compiler-1.0.4 && git apply /home/rvm/patches/rake-compiler-1.0.4/*.diff ;\
     true
 
 
@@ -98,7 +98,7 @@ RUN find /usr/local/rake-compiler/ruby/*linux*/ -name mkmf.rb | while read f ; d
 RUN find /usr/local/rake-compiler/ruby/*mingw*/ -name rbconfig.rb | while read f ; do sed -i 's/."LDFLAGS". = "/&-static-libgcc /' $f ; done
 
 RUN bash -c " \
-    rvm alias create 2.4 2.4.3 "
+    rvm alias create 2.5 2.5.0 "
 
 USER root
 
