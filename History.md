@@ -1,14 +1,20 @@
+0.6.3 / 2018-02-06
+------------------
+* Update base image to Ubuntu-17.10. Fixes #19, #17
+* Update native ruby version to 2.5.0
+
+
 0.6.2 / 2017-12-25
 ------------------
 * Add ruby-2.5.0 cross ruby
-* Update installed ruby version to 2.4.3
+* Update native ruby version to 2.4.3
 
 
 0.6.1 / 2017-06-03
 ------------------
 * Update base image from Ubuntu-16.10 to 17.04
 * Update perinstalled gems (this solves an version conflict between hoe and rake)
-* Update installed ruby version
+* Update native ruby version
 
 
 0.6.0 / 2016-12-26
