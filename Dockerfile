@@ -1,4 +1,4 @@
-FROM ubuntu:17.10
+FROM ubuntu:18.04
 
 RUN apt-get -y update && \
     apt-get install -y curl git-core xz-utils build-essential wget unzip sudo gpg dirmngr
@@ -9,7 +9,7 @@ RUN groupadd -r rvm && useradd -r -g rvm -G sudo -p "" --create-home rvm && \
 USER rvm
 
 # install rvm, RVM 1.26.0+ has signed releases, source rvm for usage outside of package scripts
-RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3 && \
+RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB && \
     (curl -L http://get.rvm.io | sudo bash -s stable) && \
     bash -c " \
         source /etc/rubybashrc && \
@@ -22,7 +22,7 @@ ENV BASH_ENV /etc/rubybashrc
 # install rubies and fix permissions on
 RUN bash -c " \
     export CFLAGS='-s -O3 -fno-fast-math -fPIC' && \
-    for v in 2.5.0 ; do \
+    for v in 2.5.3 ; do \
         rvm install \$v --patch \$(echo ~/patches/ruby-\$v/* | tr ' ' ','); \
     done && \
     rvm cleanup all && \
@@ -45,45 +45,35 @@ USER root
 RUN apt-get -y update && \
     apt-get install -y gcc-mingw-w64-x86-64 gcc-mingw-w64-i686 g++-mingw-w64-x86-64 g++-mingw-w64-i686 \
         gcc-multilib moreutils
-USER rvm
 
 # Create dev tools i686-linux-gnu-*
 COPY build/mk_i686.rb /root/
-RUN bash -c "rvm use 2.5.0 --default && rvmsudo ruby /root/mk_i686.rb"
+RUN echo "rvm use 2.5.3 > /dev/null" >> /etc/rubybashrc && \
+    bash -c "ruby /root/mk_i686.rb"
+
+USER rvm
 
 # Patch rake-compiler to build and install static libraries for Linux rubies
-RUN cd /usr/local/rvm/gems/ruby-2.5.0/gems/rake-compiler-1.0.4 && git apply /home/rvm/patches/rake-compiler-1.0.4/*.diff ;\
+RUN cd /usr/local/rvm/gems/ruby-2.5.3/gems/rake-compiler-1.0.5 && git apply /home/rvm/patches/rake-compiler-1.0.5/*.diff ;\
     true
 
+ENV XRUBIES 2.6.0-rc2 2.5.0 2.4.0 2.3.0 2.2.2 2.1.6 2.0.0-p645
 
-# Then build cross ruby versions
-RUN bash -c " \
+# First do downloads sequentially since they can not run in parallel
+# Then build all xruby versions in parallel
+# Then cleanup all build artifacts
+RUN for rv in $XRUBIES; do \
+        bash -c "rake-compiler /home/rvm/.rake-compiler/sources/ruby-$rv/Makefile.in VERSION=$rv HOST=x86_64-linux-gnu"; \
+    done; \
+    for rv in $XRUBIES; do \
+        for host in i686-linux-gnu x86_64-linux-gnu i686-w64-mingw32 x86_64-w64-mingw32; do \
+            echo -n "'rake-compiler cross-ruby VERSION=$rv HOST=$host' " >> ~/xbuild_rubies; \
+        done; \
+    done && \
+    cat ~/xbuild_rubies; \
+    bash -c " \
     export CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
-    parallel -j6 -- \
-      'rake-compiler cross-ruby VERSION=2.5.0 HOST=i686-linux-gnu' \
-      'rake-compiler cross-ruby VERSION=2.4.0 HOST=i686-linux-gnu' \
-      'rake-compiler cross-ruby VERSION=2.3.0 HOST=i686-linux-gnu' \
-      'rake-compiler cross-ruby VERSION=2.2.2 HOST=i686-linux-gnu' \
-      'rake-compiler cross-ruby VERSION=2.1.6 HOST=i686-linux-gnu' \
-      'rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=i686-linux-gnu' \
-      'rake-compiler cross-ruby VERSION=2.5.0 HOST=x86_64-linux-gnu' \
-      'rake-compiler cross-ruby VERSION=2.4.0 HOST=x86_64-linux-gnu' \
-      'rake-compiler cross-ruby VERSION=2.3.0 HOST=x86_64-linux-gnu' \
-      'rake-compiler cross-ruby VERSION=2.2.2 HOST=x86_64-linux-gnu' \
-      'rake-compiler cross-ruby VERSION=2.1.6 HOST=x86_64-linux-gnu' \
-      'rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=x86_64-linux-gnu' \
-      'rake-compiler cross-ruby VERSION=2.5.0 HOST=i686-w64-mingw32' \
-      'rake-compiler cross-ruby VERSION=2.4.0 HOST=i686-w64-mingw32' \
-      'rake-compiler cross-ruby VERSION=2.3.0 HOST=i686-w64-mingw32' \
-      'rake-compiler cross-ruby VERSION=2.2.2 HOST=i686-w64-mingw32' \
-      'rake-compiler cross-ruby VERSION=2.1.6 HOST=i686-w64-mingw32' \
-      'rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=i686-w64-mingw32' \
-      'rake-compiler cross-ruby VERSION=2.5.0 HOST=x86_64-w64-mingw32' \
-      'rake-compiler cross-ruby VERSION=2.4.0 HOST=x86_64-w64-mingw32' \
-      'rake-compiler cross-ruby VERSION=2.3.0 HOST=x86_64-w64-mingw32' \
-      'rake-compiler cross-ruby VERSION=2.2.2 HOST=x86_64-w64-mingw32' \
-      'rake-compiler cross-ruby VERSION=2.1.6 HOST=x86_64-w64-mingw32' \
-      'rake-compiler cross-ruby VERSION=2.0.0-p645 HOST=x86_64-w64-mingw32' ; \
+    parallel -- $( cat ~/xbuild_rubies ) && \
     rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources && \
     find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw "
 
@@ -96,9 +86,6 @@ RUN find /usr/local/rake-compiler/ruby/*linux*/ -name mkmf.rb | while read f ; d
 
 # RubyInstaller doesn't install libgcc -> link it static.
 RUN find /usr/local/rake-compiler/ruby/*mingw*/ -name rbconfig.rb | while read f ; do sed -i 's/."LDFLAGS". = "/&-static-libgcc /' $f ; done
-
-RUN bash -c " \
-    rvm alias create 2.5 2.5.0 "
 
 USER root
 
@@ -128,6 +115,6 @@ COPY build/runas /usr/local/bin/
 # Install sudoers configuration
 COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 
-ENV RUBY_CC_VERSION 2.5.0:2.4.0:2.3.0:2.2.2:2.1.6:2.0.0
+ENV RUBY_CC_VERSION 2.6.0:2.5.0:2.4.0:2.3.0:2.2.2:2.1.6:2.0.0
 
 CMD bash
