@@ -48,16 +48,18 @@ RUN apt-get -y update && \
 
 # Create dev tools i686-linux-gnu-*
 COPY build/mk_i686.rb /root/
-RUN echo "rvm use 2.5.3 > /dev/null" >> /etc/rubybashrc && \
-    bash -c "ruby /root/mk_i686.rb"
+RUN bash -c " \
+        rvm alias create default 2.5.3 && \
+        rvm use default && \
+        ruby /root/mk_i686.rb "
 
 USER rvm
 
 # Patch rake-compiler to build and install static libraries for Linux rubies
-RUN cd /usr/local/rvm/gems/ruby-2.5.3/gems/rake-compiler-1.0.5 && git apply /home/rvm/patches/rake-compiler-1.0.5/*.diff ;\
+RUN cd /usr/local/rvm/gems/ruby-2.5.3/gems/rake-compiler-1.0.6 && git apply /home/rvm/patches/rake-compiler-1.0.6/*.diff ;\
     true
 
-ENV XRUBIES 2.6.0 2.5.0 2.4.0 2.3.0 2.2.2 2.1.6 2.0.0-p645
+ENV XRUBIES 2.6.0 2.5.0 2.4.0 2.3.0 2.2.2
 
 # First do downloads sequentially since they can not run in parallel
 # Then build all xruby versions in parallel
@@ -115,6 +117,6 @@ COPY build/runas /usr/local/bin/
 # Install sudoers configuration
 COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 
-ENV RUBY_CC_VERSION 2.6.0:2.5.0:2.4.0:2.3.0:2.2.2:2.1.6:2.0.0
+ENV RUBY_CC_VERSION 2.6.0:2.5.0:2.4.0:2.3.0:2.2.2
 
 CMD bash

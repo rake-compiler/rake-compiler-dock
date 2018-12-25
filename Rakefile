@@ -4,7 +4,8 @@ require "rake_compiler_dock/gem_helper"
 RakeCompilerDock::GemHelper.install_tasks
 
 task :build do
-  sh "docker build -t larskanis/rake-compiler-dock:#{RakeCompilerDock::IMAGE_VERSION} ."
+  sh "docker build -t larskanis/rake-compiler-dock-mri:#{RakeCompilerDock::IMAGE_VERSION} -f Dockerfile.mri ."
+  sh "docker build -t larskanis/rake-compiler-dock-jruby:#{RakeCompilerDock::IMAGE_VERSION} -f Dockerfile.jruby ."
 end
 
 desc "Run tests"

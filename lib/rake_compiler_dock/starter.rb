@@ -15,10 +15,6 @@ module RakeCompilerDock
         exec('bash', '-c', cmd, options, &block)
       end
 
-      def image_name
-        ENV['RCD_IMAGE'] || ENV['RAKE_COMPILER_DOCK_IMAGE'] || "larskanis/rake-compiler-dock:#{IMAGE_VERSION}"
-      end
-
       def exec(*args)
         options = (Hash === args.last) ? args.pop : {}
         runargs = args.dup
@@ -43,6 +39,12 @@ module RakeCompilerDock
         end
         user = options.fetch(:username){ current_user }
         group = options.fetch(:groupname){ current_group }
+        rubyvm = options.fetch(:rubyvm){ ENV['RCD_RUBYVM'] } || "mri"
+        image_name = options.fetch(:image) do
+          ENV['RCD_IMAGE'] ||
+              ENV['RAKE_COMPILER_DOCK_IMAGE'] ||
+              "larskanis/rake-compiler-dock-#{rubyvm}:#{IMAGE_VERSION}"
+        end
 
         check_docker(mountdir) if options.fetch(:check_docker){ true }
         runargs.unshift("sigfw") if options.fetch(:sigfw){ true }
