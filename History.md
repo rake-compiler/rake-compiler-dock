@@ -1,3 +1,12 @@
+0.7.0 / 2018-12-26
+------------------
+* Add docker image for JRuby extensions, new option `:rubyvm` and `RCD_RUBYVM` environment variable
+* Add ruby-2.6.0 cross ruby
+* Remove ruby-2.0 and ruby-2.1 cross ruby
+* Update base image to Ubuntu-18.04.
+* Update native ruby version to 2.5.3
+
+
 0.6.3 / 2018-02-06
 ------------------
 * Update base image to Ubuntu-17.10. Fixes #19, #17
