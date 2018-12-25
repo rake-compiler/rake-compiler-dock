@@ -57,7 +57,7 @@ USER rvm
 RUN cd /usr/local/rvm/gems/ruby-2.5.3/gems/rake-compiler-1.0.5 && git apply /home/rvm/patches/rake-compiler-1.0.5/*.diff ;\
     true
 
-ENV XRUBIES 2.6.0-rc2 2.5.0 2.4.0 2.3.0 2.2.2 2.1.6 2.0.0-p645
+ENV XRUBIES 2.6.0 2.5.0 2.4.0 2.3.0 2.2.2 2.1.6 2.0.0-p645
 
 # First do downloads sequentially since they can not run in parallel
 # Then build all xruby versions in parallel
