@@ -1,4 +1,5 @@
 require "uri"
+require "rbconfig"
 require "rake_compiler_dock/colors"
 
 module RakeCompilerDock
@@ -155,8 +156,12 @@ module RakeCompilerDock
       @b2d_start_envset
     end
 
+    def host_os
+      RbConfig::CONFIG['host_os']
+    end
+
     def doma_pwd_ok?
-      case RUBY_PLATFORM
+      case host_os
       when /mingw|mswin/
         pwd =~ /^\/c\/users/i
       when /linux/
@@ -183,7 +188,7 @@ module RakeCompilerDock
       help = []
       if !ok? && docker_client_avail? && !doma_avail? && !b2d_avail?
         help << red("Docker client tools work, but connection to the local docker server failed.")
-        case RUBY_PLATFORM
+        case host_os
         when /linux/
           help << yellow("Please make sure the docker daemon is running.")
           help << ""
@@ -205,7 +210,7 @@ module RakeCompilerDock
           help << yellow("    or have a look at our FAQs: http://git.io/vm8AL")
         end
       elsif !ok? && !doma_avail? && !b2d_avail?
-        case RUBY_PLATFORM
+        case host_os
         when /mingw|mswin/
           help << red("Docker is not available.")
           help << yellow("Please download and install the docker-toolbox:")
@@ -255,7 +260,7 @@ module RakeCompilerDock
         elsif !ok? && !doma_pwd_ok?
           help << red("docker-machine can not mount the current working directory.")
           help << ""
-          case RUBY_PLATFORM
+          case host_os
           when /mingw|mswin/
             help << yellow("    Please move to a diretory below C:\\Users")
           when /darwin/
@@ -289,7 +294,7 @@ module RakeCompilerDock
         elsif !ok? && !doma_pwd_ok?
           help << red("boot2docker can not mount the current working directory.")
           help << ""
-          case RUBY_PLATFORM
+          case host_os
           when /mingw|mswin/
             help << yellow("    Please move to a diretory below C:\\Users")
           when /darwin/
