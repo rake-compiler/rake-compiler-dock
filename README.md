@@ -2,7 +2,7 @@
 
 **Easy to use and reliable cross compiler environment for building Windows, Linux and JRuby binary gems.**
 
-It provides cross compilers and Ruby environments for 2.0 and newer versions of the [RubyInstaller](http://rubyinstaller.org/) and Linux runtime environments.
+It provides cross compilers and Ruby environments for 2.2 and newer versions of the [RubyInstaller](http://rubyinstaller.org/) and Linux runtime environments.
 They are prepared for use with [rake-compiler](https://github.com/rake-compiler/rake-compiler).
 It is used by [many gems with C or JRuby extentions](https://github.com/rake-compiler/rake-compiler-dock/wiki/Projects-using-rake-compiler-dock).
 
