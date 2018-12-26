@@ -30,11 +30,11 @@ class TestEnvironmentVariables < Test::Unit::TestCase
   end
 
   def test_IMAGE
-    assert_equal RakeCompilerDock.image_name, rcd_env['RCD_IMAGE']
+    assert_equal "larskanis/rake-compiler-dock-mri:#{RakeCompilerDock::IMAGE_VERSION}", rcd_env['RCD_IMAGE']
   end
 
   def test_RUBY_CC_VERSION
-    df = File.read(File.expand_path("../../Dockerfile", __FILE__))
+    df = File.read(File.expand_path("../../Dockerfile.mri", __FILE__))
     df =~ /^ENV RUBY_CC_VERSION\s+(.*)\s+$/
     assert_equal $1, rcd_env['RUBY_CC_VERSION']
   end
