@@ -1,10 +1,10 @@
 # rake-compiler-dock
 
-**Easy to use and reliable cross compiler environment for building Windows and Linux binary gems.**
+**Easy to use and reliable cross compiler environment for building Windows, Linux and JRuby binary gems.**
 
 It provides cross compilers and Ruby environments for 2.0 and newer versions of the [RubyInstaller](http://rubyinstaller.org/) and Linux runtime environments.
 They are prepared for use with [rake-compiler](https://github.com/rake-compiler/rake-compiler).
-It is used by [many gems with C-extentions](https://github.com/rake-compiler/rake-compiler-dock/wiki/Projects-using-rake-compiler-dock).
+It is used by [many gems with C or JRuby extentions](https://github.com/rake-compiler/rake-compiler-dock/wiki/Projects-using-rake-compiler-dock).
 
 This is kind of successor of [rake-compiler-dev-box](https://github.com/tjschuck/rake-compiler-dev-box).
 It is wrapped as a gem for easier setup, usage and integration and is based on lightweight Docker containers.
@@ -30,7 +30,7 @@ Install rake-compiler-dock as a gem. The docker image is downloaded later on dem
 
 ## Usage
 
-Rake-compiler-dock provides the necessary tools to build Ruby extensions for Windows and Linux written in C and C++.
+Rake-compiler-dock provides the necessary tools to build Ruby extensions for Windows and Linux written in C and C++ and JRuby written in Java.
 It is intended to be used in conjunction with [rake-compiler's](https://github.com/rake-compiler/rake-compiler) cross build capability.
 Your Rakefile should enable cross compilation like so:
 
@@ -78,23 +78,40 @@ This is local to the running session, only:
     sudo apt-get update && sudo apt-get install your-package
 
 You can also choose between different executable ruby versions by `rvm use <version>` .
-The current default is 2.3.
+The current default is 2.5.
 
+### JRuby support
+
+Rake-compiler-dock offers a dedicated docker image for JRuby.
+JRuby doesn't need a complicated cross build environment like C-ruby, but using Rake-compiler-dock for JRuby makes building binary gems more consistent.
+
+To build java binary gems interactively, it can be called like this:
+
+    user@host:$ cd your-gem-dir/
+    user@host:$ RCD_RUBYVM=jruby rake-compiler-dock   # this enters a container with an interactive shell
+    user@5b53794ada92:$ ruby -v
+    jruby 9.2.5.0 (2.5.0) 2018-12-06 6d5a228 OpenJDK 64-Bit Server VM 10.0.2+13-Ubuntu-1ubuntu0.18.04.4 on 10.0.2+13-Ubuntu-1ubuntu0.18.04.4 +jit [linux-x86_64]
+    user@5b53794ada92:$ bundle
+    user@5b53794ada92:$ rake java gem
+    user@5b53794ada92:$ exit
+    user@host:$ ls pkg/*.gem
+    your-gem-1.0.0.gem  your-gem-1.0.0-java.gem
 
 ### Add to your Rakefile
 
-To make the build process reproduceable for other parties, it is recommended to add rake-compiler-dock to your Rakefile.
+To make the build process reproducible for other parties, it is recommended to add rake-compiler-dock to your Rakefile.
 This can be done like this:
 
     task 'gem:native' do
       require 'rake_compiler_dock'
       sh "bundle package"   # Avoid repeated downloads of gems by using gem files from the host.
       RakeCompilerDock.sh "bundle --local && rake cross native gem"
+      RakeCompilerDock.sh "bundle --local && rake java gem", rubyvm: :jruby
     end
 
 Rake-compiler-dock uses [semantic versioning](http://semver.org/), so you should add it into your Gemfile, to make sure, that future changes will not break your build.
 
-    gem 'rake-compiler-dock', '~> 0.6.0'
+    gem 'rake-compiler-dock', '~> 0.7.0'
 
 See [the wiki](https://github.com/rake-compiler/rake-compiler-dock/wiki/Projects-using-rake-compiler-dock) for projects which make use of rake-compiler-dock.
 
@@ -105,6 +122,8 @@ Rake-compiler-dock makes use of several environment variables.
 
 The following variables are recognized by rake-compiler-dock:
 
+* `RCD_RUBYVM` - The flavour of docker image to be used.
+    Must be one of `mri`, `jruby`.
 * `RCD_IMAGE` - The docker image that is downloaded and started.
     Defaults to "larskanis/rake-compiler-dock:IMAGE_VERSION" with an image version that is determined by the gem version.
 
