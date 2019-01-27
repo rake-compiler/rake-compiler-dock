@@ -32,7 +32,7 @@ RUN bash -c " \
 # do not generate documentation for gems
 RUN echo "gem: --no-ri --no-rdoc" >> ~/.gemrc && \
     bash -c " \
-        rvm all do gem install --no-document bundler rake-compiler hoe rubygems-tasks && \
+        rvm all do gem install --no-document bundler 'bundler:~>1.16' rake-compiler hoe rubygems-tasks && \
         find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw "
 
 # Install rake-compiler's cross rubies in global dir instead of /root
