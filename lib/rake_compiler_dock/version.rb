@@ -1,4 +1,4 @@
 module RakeCompilerDock
-  VERSION = "0.7.0"
-  IMAGE_VERSION = "0.7.0"
+  VERSION = "0.7.1"
+  IMAGE_VERSION = "0.7.1"
 end
