@@ -1,7 +1,7 @@
-FROM ubuntu:18.04
+FROM ubuntu:16.04
 
 RUN apt-get -y update && \
-    apt-get install -y curl git-core xz-utils build-essential wget unzip sudo gpg dirmngr
+    apt-get install -y curl git-core xz-utils build-essential wget unzip sudo gnupg2 dirmngr
 
 # Add "rvm" as system group, to avoid conflicts with host GIDs typically starting with 1000
 RUN groupadd -r rvm && useradd -r -g rvm -G sudo -p "" --create-home rvm && \
