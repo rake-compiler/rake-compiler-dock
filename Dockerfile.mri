@@ -56,8 +56,8 @@ RUN bash -c " \
 USER rvm
 
 # Patch rake-compiler to build and install static libraries for Linux rubies
-RUN cd /usr/local/rvm/gems/ruby-2.5.3/gems/rake-compiler-1.0.6 && git apply /home/rvm/patches/rake-compiler-1.0.6/*.diff ;\
-    true
+RUN cd /usr/local/rvm/gems/ruby-2.5.3/gems/rake-compiler-1.0.7 && \
+    ( git apply /home/rvm/patches/rake-compiler-1.0.7/*.diff || true )
 
 ENV XRUBIES 2.6.0 2.5.0 2.4.0 2.3.0 2.2.2
 
