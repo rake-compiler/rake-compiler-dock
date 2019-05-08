@@ -16,7 +16,7 @@ Install docker natively on Linux:
 
     $ sudo apt-get install docker.io
 
-... or install [docker-toolbox for Windows and OSX](https://www.docker.com/docker-toolbox) or boot2docker on [Windows](https://github.com/boot2docker/windows-installer/releases) or [OS X](https://github.com/boot2docker/osx-installer/releases) .
+... or install [docker-toolbox for Windows and OSX](https://github.com/docker/toolbox/releases) or boot2docker on [Windows](https://github.com/boot2docker/windows-installer/releases) or [OS X](https://github.com/boot2docker/osx-installer/releases) .
 
 Install rake-compiler-dock as a gem. The docker image is downloaded later on demand:
 
