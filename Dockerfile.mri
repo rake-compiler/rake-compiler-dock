@@ -44,7 +44,7 @@ RUN sudo mkdir -p /usr/local/rake-compiler && \
 USER root
 RUN apt-get -y update && \
     apt-get install -y gcc-mingw-w64-x86-64 gcc-mingw-w64-i686 g++-mingw-w64-x86-64 g++-mingw-w64-i686 \
-        gcc-multilib moreutils
+        gcc-multilib g++-multilib moreutils
 
 # Create dev tools i686-linux-gnu-*
 COPY build/mk_i686.rb /root/
