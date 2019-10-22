@@ -8,6 +8,7 @@ module RakeCompilerDock
 
     attr_reader :io
     attr_reader :pwd
+    attr_reader :docker_command
     attr_accessor :machine_name
 
     def initialize(io, pwd, machine_name="rake-compiler-dock")
@@ -53,12 +54,17 @@ module RakeCompilerDock
       end
     end
 
+    COMMANDS = %w[docker podman]
     def docker_version
-      @docker_version_text, @docker_version_status = run("docker version")
+      COMMANDS.find do |command|
+        @docker_version_text, @docker_version_status = run("#{command} version")
+        @docker_command = command
+        @docker_version_status == 0
+      end
     end
 
     def ok?
-      @docker_version_status == 0 && @docker_version_text =~ /version/ && doma_pwd_ok?
+      @docker_version_status == 0 && @docker_version_text =~ /version/i && doma_pwd_ok?
     end
 
     def docker_client_avail?
@@ -216,16 +222,16 @@ module RakeCompilerDock
           help << yellow("Please download and install the docker-toolbox:")
           help << yellow("    https://www.docker.com/docker-toolbox")
         when /linux/
-          help << red("Docker is not available.")
+          help << red("Neither Docker nor Podman is available.")
           help << ""
-          help << yellow("Install on Ubuntu/Debian:")
+          help << yellow("Install Docker on Ubuntu/Debian:")
           help << "    sudo apt-get install docker.io"
           help << ""
-          help << yellow("Install on Fedora/Centos/RHEL")
+          help << yellow("Install Docker on Fedora/Centos/RHEL")
           help << "    sudo yum install docker"
           help << "    sudo systemctl start docker"
           help << ""
-          help << yellow("Install on SuSE")
+          help << yellow("Install Docker on SuSE")
           help << "    sudo zypper install docker"
           help << "    sudo systemctl start docker"
         when /darwin/

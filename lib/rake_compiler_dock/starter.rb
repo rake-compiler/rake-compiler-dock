@@ -46,7 +46,7 @@ module RakeCompilerDock
               "larskanis/rake-compiler-dock-#{rubyvm}:#{IMAGE_VERSION}"
         end
 
-        check_docker(mountdir) if options.fetch(:check_docker){ true }
+        check = check_docker(mountdir) if options.fetch(:check_docker){ true }
         runargs.unshift("sigfw") if options.fetch(:sigfw){ true }
         runargs.unshift("runas") if options.fetch(:runas){ true }
         docker_opts = options.fetch(:options) do
@@ -55,7 +55,7 @@ module RakeCompilerDock
           opts
         end
 
-        cmd = ["docker", "run",
+        cmd = [check.docker_command, "run",
             "-v", "#{mountdir}:#{make_valid_path(mountdir)}",
             "-e", "UID=#{uid}",
             "-e", "GID=#{gid}",
@@ -133,17 +133,16 @@ module RakeCompilerDock
       @@docker_checked = {}
 
       def check_docker(pwd)
-        return if @@docker_checked[pwd]
-
-        check = DockerCheck.new($stderr, pwd)
-        unless check.ok?
-          at_exit do
-            check.print_help_text
+        @@docker_checked[pwd] ||= begin
+          check = DockerCheck.new($stderr, pwd)
+          unless check.ok?
+            at_exit do
+              check.print_help_text
+            end
+            raise DockerIsNotAvailable, "Docker is not available"
           end
-          raise DockerIsNotAvailable, "Docker is not available"
+          check
         end
-
-        @@docker_checked[pwd] = check
       end
 
       # Change Path from "C:\Path" to "/c/Path" as used by boot2docker
