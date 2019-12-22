@@ -83,7 +83,7 @@ ENV XRUBIES 2.7.0-rc2 2.6.0 2.5.0 2.4.0 2.3.0
 # Then build all xruby versions in parallel
 # Then cleanup all build artifacts
 RUN for rv in $XRUBIES; do \
-        bash -c "rake-compiler /home/rvm/.rake-compiler/sources/ruby-$rv/Makefile.in VERSION=$rv HOST=x86_64-linux-gnu"; \
+        bash -c "rake-compiler prepare-sources VERSION=$rv HOST=x86_64-linux-gnu"; \
     done; \
     for rv in $XRUBIES; do \
         for host in i686-linux-gnu x86_64-linux-gnu i686-w64-mingw32 x86_64-w64-mingw32; do \
