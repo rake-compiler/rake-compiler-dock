@@ -56,10 +56,25 @@ RUN bash -c " \
 USER rvm
 
 # Patch rake-compiler to build and install static libraries for Linux rubies
-RUN cd /usr/local/rvm/gems/ruby-2.5.3/gems/rake-compiler-1.0.7 && \
-    ( git apply /home/rvm/patches/rake-compiler-1.0.7/*.diff || true )
+RUN cd /usr/local/rvm/gems/ruby-2.5.3/gems/rake-compiler-1.0.8 && \
+    ( git apply /home/rvm/patches/rake-compiler-1.0.8/*.patch || true )
 
-ENV XRUBIES 2.6.0 2.5.0 2.4.0 2.3.0 2.2.2
+
+# Patch ruby-2.7.0-rc2 for cross build
+USER root
+COPY build2/patches /home/rvm/patches/
+RUN curl -SL http://cache.ruby-lang.org/pub/ruby/2.7/ruby-2.7.0-rc2.tar.xz | tar -xJC /root/ && \
+    cd /root/ruby-2.7.0-rc2 && \
+    git apply /home/rvm/patches/ruby-2.7.0-rc2/*.patch && \
+    cd .. && \
+    mkdir -p /usr/local/rake-compiler/sources/ && \
+    tar cjf /usr/local/rake-compiler/sources/ruby-2.7.0-rc2.tar.bz2 ruby-2.7.0-rc2 && \
+    chown rvm /usr/local/rake-compiler -R && \
+    rm -rf /root/ruby-2.7.0-rc2
+USER rvm
+
+
+ENV XRUBIES 2.7.0-rc2 2.6.0 2.5.0 2.4.0 2.3.0
 
 # First do downloads sequentially since they can not run in parallel
 # Then build all xruby versions in parallel
@@ -117,6 +132,6 @@ COPY build/runas /usr/local/bin/
 # Install sudoers configuration
 COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 
-ENV RUBY_CC_VERSION 2.6.0:2.5.0:2.4.0:2.3.0:2.2.2
+ENV RUBY_CC_VERSION 2.7.0:2.6.0:2.5.0:2.4.0:2.3.0
 
 CMD bash
