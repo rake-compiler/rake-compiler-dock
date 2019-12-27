@@ -1,5 +1,9 @@
 /.bundle/
 /.yardoc
+/Dockerfile.mri.x86-linux
+/Dockerfile.mri.x86-mingw32
+/Dockerfile.mri.x86_64-linux
+/Dockerfile.mri.x64-mingw32
 /Gemfile.lock
 /_yardoc/
 /coverage/

@@ -122,8 +122,11 @@ Rake-compiler-dock makes use of several environment variables.
 
 The following variables are recognized by rake-compiler-dock:
 
-* `RCD_RUBYVM` - The flavour of docker image to be used.
+* `RCD_RUBYVM` - The ruby VM and toolchain to be used.
     Must be one of `mri`, `jruby`.
+* `RCD_PLATFORM` - The target rubygems platform.
+    Must be a space separated list out of `x86-mingw32`, `x64-mingw32`, `x86-linux` and `x86_64-linux`.
+    It is ignored when `rubyvm` is set to `:jruby`.
 * `RCD_IMAGE` - The docker image that is downloaded and started.
     Defaults to "larskanis/rake-compiler-dock:IMAGE_VERSION" with an image version that is determined by the gem version.
 

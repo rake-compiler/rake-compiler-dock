@@ -9,15 +9,11 @@ module RakeCompilerDock
   class Starter
     class << self
       def sh(cmd, options={}, &block)
-        if verbose_flag(options)
-          $stderr.puts "rake-compiler-dock bash -c #{ cmd.inspect }"
-        end
         exec('bash', '-c', cmd, options, &block)
       end
 
       def exec(*args)
         options = (Hash === args.last) ? args.pop : {}
-        runargs = args.dup
 
         mountdir = options.fetch(:mountdir){ ENV['RCD_MOUNTDIR'] || Dir.pwd }
         workdir = options.fetch(:workdir){ ENV['RCD_WORKDIR'] || Dir.pwd }
@@ -40,49 +36,60 @@ module RakeCompilerDock
         user = options.fetch(:username){ current_user }
         group = options.fetch(:groupname){ current_group }
         rubyvm = options.fetch(:rubyvm){ ENV['RCD_RUBYVM'] } || "mri"
-        image_name = options.fetch(:image) do
-          ENV['RCD_IMAGE'] ||
-              ENV['RAKE_COMPILER_DOCK_IMAGE'] ||
-              "larskanis/rake-compiler-dock-#{rubyvm}:#{IMAGE_VERSION}"
-        end
 
-        check = check_docker(mountdir) if options.fetch(:check_docker){ true }
-        runargs.unshift("sigfw") if options.fetch(:sigfw){ true }
-        runargs.unshift("runas") if options.fetch(:runas){ true }
-        docker_opts = options.fetch(:options) do
-          opts = ["--rm", "-i"]
-          opts << "-t" if $stdin.tty?
-          opts
-        end
+        platforms = options.fetch(:platform){ ENV['RCD_PLATFORM'] } || "x86-mingw32 x64-mingw32"
+        platforms.split(" ").each do |platform|
+          image_name = options.fetch(:image) do
+            platform_postfix = rubyvm.to_s == "jruby" ? "" : "-#{platform}"
+            ENV['RCD_IMAGE'] ||
+                ENV['RAKE_COMPILER_DOCK_IMAGE'] ||
+                "larskanis/rake-compiler-dock-#{rubyvm}#{platform_postfix}:#{IMAGE_VERSION}"
+          end
 
-        cmd = [check.docker_command, "run",
-            "-v", "#{mountdir}:#{make_valid_path(mountdir)}",
-            "-e", "UID=#{uid}",
-            "-e", "GID=#{gid}",
-            "-e", "USER=#{user}",
-            "-e", "GROUP=#{group}",
-            "-e", "ftp_proxy=#{ENV['ftp_proxy']}",
-            "-e", "http_proxy=#{ENV['http_proxy']}",
-            "-e", "https_proxy=#{ENV['https_proxy']}",
-            "-e", "RCD_HOST_RUBY_PLATFORM=#{RUBY_PLATFORM}",
-            "-e", "RCD_HOST_RUBY_VERSION=#{RUBY_VERSION}",
-            "-e", "RCD_IMAGE=#{image_name}",
-            "-w", make_valid_path(workdir),
-            *docker_opts,
-            image_name,
-            *runargs]
+          check = check_docker(mountdir) if options.fetch(:check_docker){ true }
+          docker_opts = options.fetch(:options) do
+            opts = ["--rm", "-i"]
+            opts << "-t" if $stdin.tty?
+            opts
+          end
 
-        cmdline = Shellwords.join(cmd)
-        if verbose_flag(options) == true
-          $stderr.puts cmdline
-        end
+          if verbose_flag(options) && args.size == 3 && args[0] == "bash" && args[1] == "-c"
+            $stderr.puts "rake-compiler-dock bash -c #{ args[2].inspect }"
+          end
 
-        ok = system(*cmd)
-        if block_given?
-          yield(ok, $?)
-        elsif !ok
-          fail "Command failed with status (#{$?.exitstatus}): " +
-          "[#{cmdline}]"
+          runargs = args.dup
+          runargs.unshift("sigfw") if options.fetch(:sigfw){ true }
+          runargs.unshift("runas") if options.fetch(:runas){ true }
+
+          cmd = [check.docker_command, "run",
+              "-v", "#{mountdir}:#{make_valid_path(mountdir)}",
+              "-e", "UID=#{uid}",
+              "-e", "GID=#{gid}",
+              "-e", "USER=#{user}",
+              "-e", "GROUP=#{group}",
+              "-e", "ftp_proxy",
+              "-e", "http_proxy",
+              "-e", "https_proxy",
+              "-e", "RCD_HOST_RUBY_PLATFORM=#{RUBY_PLATFORM}",
+              "-e", "RCD_HOST_RUBY_VERSION=#{RUBY_VERSION}",
+              "-e", "RCD_IMAGE=#{image_name}",
+              "-w", make_valid_path(workdir),
+              *docker_opts,
+              image_name,
+              *runargs]
+
+          cmdline = Shellwords.join(cmd)
+          if verbose_flag(options) == true
+            $stderr.puts cmdline
+          end
+
+          ok = system(*cmd)
+          if block_given?
+            yield(ok, $?)
+          elsif !ok
+            fail "Command failed with status (#{$?.exitstatus}): " +
+            "[#{cmdline}]"
+          end
         end
       end
 

@@ -21,6 +21,16 @@ module RakeCompilerDock
   # Option +:verbose+ can be set to enable printing of the command line.
   # If not set, rake's verbose flag is used.
   #
+  # Option +:rubyvm+ can be set to +:mri+ or +:jruby+ .
+  # It selects the docker image with an appropriate toolchain.
+  #
+  # Option +:platform+ can be set to a list of space separated values.
+  # It selects the docker image(s) with an appropriate toolchain.
+  # Allowed values are +:x86-mingw32+, +x64-mingw32+, +x86-linux+ or +x86_64-linux+.
+  # If the list contains multiple values, +cmd+ is consecutively executed in each of the docker images,
+  # Option +:platform+ is ignored when +:rubyvm+ is set to +:jruby+.
+  # Default is "x86-mingw32 x64-mingw32" .
+  #
   # Examples:
   #
   #   RakeCompilerDock.sh 'bundle && rake cross native gem'
