@@ -138,18 +138,21 @@ module RakeCompilerDock
         name = name.gsub(/[ ]/i, "_")
       end
 
+      @@docker_checked_lock = Mutex.new
       @@docker_checked = {}
 
       def check_docker(pwd)
-        @@docker_checked[pwd] ||= begin
-          check = DockerCheck.new($stderr, pwd)
-          unless check.ok?
-            at_exit do
-              check.print_help_text
+        @@docker_checked_lock.synchronize do
+          @@docker_checked[pwd] ||= begin
+            check = DockerCheck.new($stderr, pwd)
+            unless check.ok?
+              at_exit do
+                check.print_help_text
+              end
+              raise DockerIsNotAvailable, "Docker is not available"
             end
-            raise DockerIsNotAvailable, "Docker is not available"
+            check
           end
-          check
         end
       end
 
