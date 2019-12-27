@@ -67,6 +67,7 @@ module RakeCompilerDock
               "-e", "GID=#{gid}",
               "-e", "USER=#{user}",
               "-e", "GROUP=#{group}",
+              "-e", "GEM_PRIVATE_KEY_PASSPHRASE",
               "-e", "ftp_proxy",
               "-e", "http_proxy",
               "-e", "https_proxy",

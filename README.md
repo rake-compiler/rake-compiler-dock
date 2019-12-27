@@ -133,6 +133,7 @@ The following variables are recognized by rake-compiler-dock:
 The following variables are passed through to the docker container without modification:
 
 * `http_proxy`, `https_proxy`, `ftp_proxy` - See [Frequently asked questions](https://github.com/rake-compiler/rake-compiler-dock/wiki/FAQ) for more details.
+* `GEM_PRIVATE_KEY_PASSPHRASE` - To avoid interactive password prompts in the container.
 
 The following variables are provided to the running docker container:
 
