@@ -10,6 +10,7 @@ RUN groupadd -r rvm && useradd -r -g rvm -G sudo -p "" --create-home rvm && \
 USER rvm
 
 RUN mkdir ~/.gnupg && \
+    chmod 700 ~/.gnupg && \
     echo "disable-ipv6" >> ~/.gnupg/dirmngr.conf
 
 # install rvm, RVM 1.26.0+ has signed releases, source rvm for usage outside of package scripts
