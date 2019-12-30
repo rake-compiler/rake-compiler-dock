@@ -1,6 +1,7 @@
 require 'erb'
 require "rake_compiler_dock"
 require_relative "build/gem_helper"
+require_relative "build/parallel_docker_build"
 
 RakeCompilerDock::GemHelper.install_tasks
 
@@ -12,18 +13,23 @@ namespace :build do
     ["x86_64-linux", "x86_64-linux-gnu"],
   ]
   platforms.each do |platform, target|
+    sdf = "Dockerfile.mri.#{platform}"
     desc "Build image for platform #{platform}"
-    task platform do
+    task platform => sdf
+    task sdf do
       df = ERB.new(File.read("Dockerfile.mri.erb")).result(binding)
-      File.write("Dockerfile.mri.#{platform}", df)
+      File.write(sdf, df)
       sh "docker build -t larskanis/rake-compiler-dock-mri-#{platform}:#{RakeCompilerDock::IMAGE_VERSION} -f Dockerfile.mri.#{platform} ."
     end
   end
 
   desc "Build image for JRuby"
-  task :jruby do
+  task :jruby => "Dockerfile.jruby"
+  task "Dockerfile.jruby" do
     sh "docker build -t larskanis/rake-compiler-dock-jruby:#{RakeCompilerDock::IMAGE_VERSION} -f Dockerfile.jruby ."
   end
+
+  RakeCompilerDock::ParallelDockerBuild.new(platforms.map{|pl, _| "Dockerfile.mri.#{pl}" } + ["Dockerfile.jruby"], workdir: "tmp/docker")
 
   desc "Build images for all platforms in parallel"
   multitask :all => platforms.map(&:first) + ["jruby"]
