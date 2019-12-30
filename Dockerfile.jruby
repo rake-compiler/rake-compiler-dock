@@ -1,7 +1,8 @@
 FROM ubuntu:18.04
 
 RUN apt-get -y update && \
-    apt-get install -y curl git-core xz-utils wget unzip sudo gpg dirmngr openjdk-11-jdk-headless
+    apt-get install -y curl git-core xz-utils wget unzip sudo gpg dirmngr openjdk-11-jdk-headless && \
+    rm -rf /var/lib/apt/lists/*
 
 # Add "rvm" as system group, to avoid conflicts with host GIDs typically starting with 1000
 RUN groupadd -r rvm && useradd -r -g rvm -G sudo -p "" --create-home rvm && \
