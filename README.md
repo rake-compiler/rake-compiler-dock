@@ -39,11 +39,14 @@ Your Rakefile should enable cross compilation like so:
       ext.cross_platform = %w[x86-mingw32 x64-mingw32 x86-linux x86_64-linux]
     end
 
-It may also be used to build ffi based binary gems like [libusb](https://github.com/larskanis/libusb), but currently doesn't provide any additional build helpers for this use case, beyond docker invocation and cross compilers.
+See below, how to invoke cross builds in your Rakefile.
+
+Additionally it may also be used to build ffi based binary gems like [libusb](https://github.com/larskanis/libusb), but currently doesn't provide any additional build helpers for this use case, beyond docker invocation and cross compilers.
 
 ### Interactive Usage
 
 Rake-compiler-dock offers the shell command `rake-compiler-dock` and a [ruby API](http://www.rubydoc.info/gems/rake-compiler-dock/RakeCompilerDock) for issuing commands within the docker image, described below.
+There dedicated are images for `x86-mingw32`, `x64-mingw32`, `x86-linux`, `x86_64-linux` and `jruby` targets.
 
 `rake-compiler-dock` without arguments starts an interactive shell session.
 This is best suited to try out and debug a build.
@@ -55,16 +58,22 @@ But note, that all other changes to the file system of the container are dropped
 All commands are executed with the same user and group of the host.
 This is done by copying user account data into the container and sudo to it.
 
-To build x86 and x64 Windows and Linux binary gems interactively, it can be called like this:
+To build x86 Windows and x86_64 Linux binary gems interactively, it can be called like this:
 
     user@host:$ cd your-gem-dir/
-    user@host:$ rake-compiler-dock   # this enters a container with an interactive shell
+    user@host:$ rake-compiler-dock   # this enters a container with an interactive shell for x86 Windows (default)
     user@5b53794ada92:$ bundle
     user@5b53794ada92:$ rake cross native gem
     user@5b53794ada92:$ exit
     user@host:$ ls pkg/*.gem
-    your-gem-1.0.0.gem  your-gem-1.0.0-x64-mingw32.gem  your-gem-1.0.0-x86-mingw32.gem
-    your-gem-1.0.0-x86_64-linux.gem  your-gem-1.0.0-x86-linux.gem
+    your-gem-1.0.0.gem  your-gem-1.0.0-x86-mingw32.gem
+
+    user@host:$ RCD_PLATFORM=x86_64-linux rake-compiler-dock   # this enters a container for amd64 Linux target
+    user@adc55b2b92a9:$ bundle
+    user@adc55b2b92a9:$ rake cross native gem
+    user@adc55b2b92a9:$ exit
+    user@host:$ ls pkg/*.gem
+    your-gem-1.0.0.gem  your-gem-1.0.0-x86-mingw32.gem  your-gem-1.0.0-x86_64-linux.gem
 
 Or non-interactive:
 
@@ -105,13 +114,49 @@ This can be done like this:
     task 'gem:native' do
       require 'rake_compiler_dock'
       sh "bundle package"   # Avoid repeated downloads of gems by using gem files from the host.
-      RakeCompilerDock.sh "bundle --local && rake cross native gem"
+      RakeCompilerDock.sh "bundle --local && rake cross native gem", platform: "x86-mingw32 x64-mingw32 x86-linux x86_64-linux"
       RakeCompilerDock.sh "bundle --local && rake java gem", rubyvm: :jruby
     end
 
+This runs the `bundle` and `rake` commands once for each platform.
+That is once for the jruby gems and 4 times for the specified MRI platforms.
+
+### Run builds in parallel
+
+rake-compiler-dock uses dedicated docker images per build target (since rake-compiler-dock-1.0).
+Because each target runs in a separate docker container, it is simple to run all targets in parallel.
+The following example defines `rake gem:native` as a multitask and separates the preparation which should run only once.
+It also shows how gem signing can be done with parallel builds.
+
+```ruby
+  namespace "gem" do
+    "x86-mingw32 x64-mingw32 x86-linux x86_64-linux".split.each do |plat|
+      desc "Build the native binary gems"
+      multitask 'native' => plat
+
+      task 'prepare' do
+        require 'rake_compiler_dock'
+        sh "cp ~/.gem/gem-*.pem build/gem/ || true"
+        require 'io/console'
+        ENV["GEM_PRIVATE_KEY_PASSPHRASE"] = STDIN.getpass("Enter passphrase of gem signature key: ")
+      end
+
+      task plat => 'prepare' do
+        RakeCompilerDock.sh <<-EOT, platform: plat
+          (cp build/gem/gem-*.pem ~/.gem/ || true) &&
+          bundle --local &&
+          rake cross native gem
+        EOT
+      end
+    end
+  end
+```
+
+### Add to your Gemfile
+
 Rake-compiler-dock uses [semantic versioning](http://semver.org/), so you should add it into your Gemfile, to make sure, that future changes will not break your build.
 
-    gem 'rake-compiler-dock', '~> 0.7.0'
+    gem 'rake-compiler-dock', '~> 1.0'
 
 See [the wiki](https://github.com/rake-compiler/rake-compiler-dock/wiki/Projects-using-rake-compiler-dock) for projects which make use of rake-compiler-dock.
 
