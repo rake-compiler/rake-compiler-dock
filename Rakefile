@@ -1,6 +1,6 @@
 require 'erb'
 require "rake_compiler_dock"
-require "rake_compiler_dock/gem_helper"
+require_relative "build/gem_helper"
 
 RakeCompilerDock::GemHelper.install_tasks
 
