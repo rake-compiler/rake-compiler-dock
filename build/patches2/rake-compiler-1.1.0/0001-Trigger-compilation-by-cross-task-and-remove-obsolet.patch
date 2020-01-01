@@ -1,0 +1,95 @@
+From bbe6ab56e23aafe3708c8d089267403c86d2a198 Mon Sep 17 00:00:00 2001
+From: Lars Kanis <lars@greiz-reinsdorf.de>
+Date: Tue, 31 Dec 2019 16:02:35 +0100
+Subject: [PATCH 1/2] Trigger compilation by 'cross' task and remove obsolete
+ code
+
+So far cross build of gems was triggered by 'rake cross native gem'.
+The "cross" task adds the cross targets to the "native" task.
+Invoking of "native" then compiles for all cross targets and for the native running ruby.
+The "gem" task then packages everything into corresponding gem files.
+
+This has the downside, that cross build always bundles native target and cross targets together.
+If only cross targets are wanted, then they have to be triggered directly by "native:<target>" tasks.
+
+Rake-compiler-dock-1.0 uses a separate image for each target and it leads to issues,
+if the native target is triggered in addition to the image cross target.
+This commit therefore changes "cross" to trigger the cross targets without the native running ruby.
+The cross build of gems can now be done by:
+
+    rake cross gem
+
+Adding "native" to the command leads to the previous behaviour of building for cross and native rubies.
+
+This commit also removes a bunch of code that predates to the logik before commit a3365c995770ceddba098937c2ec9a5e4b3914d9 .
+To that time there wasn't a "stage" directory for cross rubies, so that the cross builds couldn't be proberly triggered.
+The "Sooo brittle" code removed the native running Linux or MacOS target from extensions that are not intended to be cross compiled for the native running ruby, but it was no generic solution.
+Getting rid of this code and trigger cross compile directly is far easier.
+---
+ lib/rake/extensiontask.rb           | 30 ++---------------------------
+ spec/lib/rake/extensiontask_spec.rb |  3 +--
+ 2 files changed, 3 insertions(+), 30 deletions(-)
+
+diff --git a/lib/rake/extensiontask.rb b/lib/rake/extensiontask.rb
+index d85b1a3..31fba02 100644
+--- a/lib/rake/extensiontask.rb
++++ b/lib/rake/extensiontask.rb
+@@ -428,38 +428,12 @@ Java extension should be preferred.
+       end
+ 
+       # create cross task
+-      task 'cross' do
+-        # clear compile dependencies
+-        Rake::Task['compile'].prerequisites.reject! { |t| !compiles_cross_platform.include?(t) }
+-
+-        # chain the cross platform ones
+-        task 'compile' => ["compile:#{for_platform}"]
+-
+-        # clear lib/binary dependencies and trigger cross platform ones
+-        # check if lib/binary is defined (damn bundle versus so versus dll)
+-        if Rake::Task.task_defined?("#{lib_path}/#{binary(for_platform)}") then
+-          Rake::Task["#{lib_path}/#{binary(for_platform)}"].prerequisites.clear
+-        end
+-
+-        # FIXME: targeting multiple platforms copies the file twice
+-        file "#{lib_path}/#{binary(for_platform)}" => ["copy:#{@name}:#{for_platform}:#{ruby_ver}"]
+-
+-        # if everything for native task is in place
+-        if @gem_spec && @gem_spec.platform == 'ruby' then
+-          # double check: only cross platform native tasks should be here
+-          # FIXME: Sooo brittle
+-          Rake::Task['native'].prerequisites.reject! { |t| !natives_cross_platform.include?(t) }
+-          task 'native' => ["native:#{for_platform}"]
+-        end
+-      end
++      task 'cross' => "native:#{for_platform}"
+     end
+ 
+     def define_dummy_cross_platform_tasks
+       task 'cross' do
+-        Rake::Task['compile'].clear
+-        task 'compile' do
+-          raise "rake-compiler must be configured first to enable cross-compilation"
+-        end
++        raise "rake-compiler-dock must be used or rake-compiler must be configured first to enable cross-compilation"
+       end
+     end
+ 
+diff --git a/spec/lib/rake/extensiontask_spec.rb b/spec/lib/rake/extensiontask_spec.rb
+index 47dad7d..2090922 100644
+--- a/spec/lib/rake/extensiontask_spec.rb
++++ b/spec/lib/rake/extensiontask_spec.rb
+@@ -364,9 +364,8 @@ describe Rake::ExtensionTask do
+ 
+         it 'should create a dummy nested cross-compile target that raises an error' do
+           Rake::Task.should have_defined("cross")
+-          Rake::Task["cross"].invoke
+           lambda {
+-            Rake::Task["compile"].invoke
++            Rake::Task["cross"].invoke
+           }.should raise_error(RuntimeError,
+                                /rake-compiler must be configured first to enable cross-compilation/)
+         end
+-- 
+2.20.1
+
