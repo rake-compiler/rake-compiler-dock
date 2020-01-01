@@ -1,5 +1,6 @@
 require "shellwords"
 require "etc"
+require "io/console"
 require "rake_compiler_dock/version"
 
 module RakeCompilerDock
@@ -9,7 +10,9 @@ module RakeCompilerDock
   class Starter
     class << self
       def sh(cmd, options={}, &block)
-        exec('bash', '-c', cmd, options, &block)
+        res = exec('bash', '-c', cmd, options, &block)
+        STDIN.cooked!
+        res
       end
 
       def exec(*args)
