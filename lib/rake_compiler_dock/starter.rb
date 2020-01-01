@@ -10,9 +10,11 @@ module RakeCompilerDock
   class Starter
     class << self
       def sh(cmd, options={}, &block)
-        res = exec('bash', '-c', cmd, options, &block)
-        STDIN.cooked!
-        res
+        begin
+          exec('bash', '-c', cmd, options, &block)
+        ensure
+          STDIN.cooked!
+        end
       end
 
       def exec(*args)
