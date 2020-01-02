@@ -1,4 +1,5 @@
 require 'erb'
+require "rake/clean"
 require "rake_compiler_dock"
 require_relative "build/gem_helper"
 require_relative "build/parallel_docker_build"
@@ -17,10 +18,12 @@ namespace :build do
     desc "Build image for platform #{platform}"
     task platform => sdf
     task sdf do
-      df = ERB.new(File.read("Dockerfile.mri.erb")).result(binding)
-      File.write(sdf, df)
       sh "docker build -t larskanis/rake-compiler-dock-mri-#{platform}:#{RakeCompilerDock::IMAGE_VERSION} -f Dockerfile.mri.#{platform} ."
     end
+
+    df = ERB.new(File.read("Dockerfile.mri.erb")).result(binding)
+    File.write(sdf, df)
+    CLEAN.include(sdf)
   end
 
   desc "Build image for JRuby"
