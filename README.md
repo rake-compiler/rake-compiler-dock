@@ -73,7 +73,7 @@ To build x86 Windows and x86_64 Linux binary gems interactively, it can be calle
     user@adc55b2b92a9:$ rake cross native gem
     user@adc55b2b92a9:$ exit
     user@host:$ ls pkg/*.gem
-    your-gem-1.0.0.gem  your-gem-1.0.0-x86-mingw32.gem  your-gem-1.0.0-x86_64-linux.gem
+    your-gem-1.0.0.gem  your-gem-1.0.0-x86_64-linux.gem
 
 Or non-interactive:
 
@@ -114,7 +114,9 @@ This can be done like this:
     task 'gem:native' do
       require 'rake_compiler_dock'
       sh "bundle package"   # Avoid repeated downloads of gems by using gem files from the host.
-      RakeCompilerDock.sh "bundle --local && rake cross native gem", platform: "x86-mingw32 x64-mingw32 x86-linux x86_64-linux"
+      %w[ x86-mingw32 x64-mingw32 x86-linux x86_64-linux ].each do |plat|
+        RakeCompilerDock.sh "bundle --local && rake native:#{plat} gem", platform: plat
+      end
       RakeCompilerDock.sh "bundle --local && rake java gem", rubyvm: :jruby
     end
 
@@ -145,7 +147,7 @@ It also shows how gem signing can be done with parallel builds.
         RakeCompilerDock.sh <<-EOT, platform: plat
           (cp build/gem/gem-*.pem ~/.gem/ || true) &&
           bundle --local &&
-          rake cross native gem
+          rake native:#{plat} gem
         EOT
       end
     end
