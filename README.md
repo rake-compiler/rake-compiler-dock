@@ -34,7 +34,7 @@ Rake-compiler-dock provides the necessary tools to build Ruby extensions for Win
 It is intended to be used in conjunction with [rake-compiler's](https://github.com/rake-compiler/rake-compiler) cross build capability.
 Your Rakefile should enable cross compilation like so:
 
-    Rake::ExtensionTask.new('my_extension', my_gem_spec) do |ext|
+    exttask = Rake::ExtensionTask.new('my_extension', my_gem_spec) do |ext|
       ext.cross_compile = true
       ext.cross_platform = %w[x86-mingw32 x64-mingw32 x86-linux x86_64-linux]
     end
@@ -129,10 +129,11 @@ rake-compiler-dock uses dedicated docker images per build target (since rake-com
 Because each target runs in a separate docker container, it is simple to run all targets in parallel.
 The following example defines `rake gem:native` as a multitask and separates the preparation which should run only once.
 It also shows how gem signing can be done with parallel builds.
+Please note, that parallel builds only work reliable, if the specific platform gem is requested (instead of just "rake gem").
 
 ```ruby
   namespace "gem" do
-    "x86-mingw32 x64-mingw32 x86-linux x86_64-linux".split.each do |plat|
+    exttask.cross_platform.each do |plat|
       desc "Build the native binary gems"
       multitask 'native' => plat
 
@@ -147,7 +148,7 @@ It also shows how gem signing can be done with parallel builds.
         RakeCompilerDock.sh <<-EOT, platform: plat
           (cp build/gem/gem-*.pem ~/.gem/ || true) &&
           bundle --local &&
-          rake native:#{plat} gem
+          rake native:#{plat} pkg/#{exttask.gem_spec.full_name}-#{plat}.gem
         EOT
       end
     end
