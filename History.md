@@ -1,3 +1,26 @@
+1.0.0 / 2020-01-04
+------------------
+* Add ruby-2.7.0 cross ruby.
+* Use per-target docker images.
+  There are currently 5 docker images:
+  * larskanis/rake-compiler-dock-mri-x86-mingw32
+  * larskanis/rake-compiler-dock-mri-x64-mingw32
+  * larskanis/rake-compiler-dock-mri-x86-linux
+  * larskanis/rake-compiler-dock-mri-x86_64-linux
+  * larskanis/rake-compiler-dock-jruby
+  Since every image has only the taget specific compilers and rubies, care has to be taken, that only rake tasks are triggered, that belong to the specific target.
+  See the README.md for more information.
+* Ensure the separate docker images always use as much as possible common docker images layers to avoid increased download sizes.
+* Pass GEM_PRIVATE_KEY_PASSPHRASE to the container.
+* Update JRuby to 9.2.9.0 and native CRuby to 2.5.7.
+* Create empty ~/.gem to be used for gem signing key.
+* Ensure terminal is in cooked mode after build.
+  This fixes terminal misconfiguration after parallel builds.
+* Raise Windows-API to Vista (affects ruby < 2.6 only)
+* Use posix pthread for mingw so that C++ standard library for thread could be available such as std::thread, std::mutex, so on.
+* Make the system to have GLIBC 2.12 instead of 2.23 so that generated ruby package can run on CentOS 6 with GLIBC 2.12
+
+
 0.7.2 / 2019-03-18
 ------------------
 * Fix missing libruby.a of cross rubies. Fixes #26
