@@ -121,6 +121,10 @@ RUN find /usr/local/rake-compiler/ruby/*linux*/ -name mkmf.rb | while read f ; d
 <% if platform=~/mingw/ %>
 # RubyInstaller doesn't install libgcc -> link it static.
 RUN find /usr/local/rake-compiler/ruby/*mingw*/ -name rbconfig.rb | while read f ; do sed -i 's/."LDFLAGS". = "/&-static-libgcc /' $f ; done
+# Raise Windows-API to Vista (affects ruby < 2.6 only)
+RUN find /usr/local/rake-compiler/ruby -name rbconfig.rb | while read f ; do sed -i 's/0x0501/0x0600/' $f ; done
+# Don't link to static libruby
+RUN find /usr/local/rake-compiler/ruby -name *msvcrt-ruby*.dll.a | while read f ; do n=`echo $f | sed s/.dll//` ; mv $f $n ; done
 <% end %>
 
 USER root
@@ -143,6 +147,22 @@ RUN sed -i -- "s:/root/.rake-compiler:/usr/local/rake-compiler:g" /usr/local/rak
 COPY build/strip_wrapper /root/
 RUN mv /usr/bin/<%= target %>-strip /usr/bin/<%= target %>-strip.bin && \
     ln /root/strip_wrapper /usr/bin/<%= target %>-strip
+
+# Don't link to winpthread.dll but link static, since the DLL is not distributed with RubyInstaller
+RUN find / -name libwinpthread.dll.a | xargs rm
+RUN find / -name libwinpthread-1.dll | xargs rm
+
+# Use posix pthread for mingw so that C++ standard library for thread could be
+# available such as std::thread, std::mutex, so on.
+# https://sourceware.org/pthreads-win32/
+RUN printf "1\n" | update-alternatives --config <%= target %>-gcc && \
+    printf "1\n" | update-alternatives --config <%= target %>-g++
+<% end %>
+
+<% if platform=~/linux/ %>
+# Make the system to have GLIBC 2.12 instead of 2.23 so that
+# generated ruby package can run on CentOS 6 with GLIBC 2.12
+RUN sed -i 's/__GLIBC_MINOR__\t[0-9][0-9]/__GLIBC_MINOR__\t12/' /usr/include/features.h
 <% end %>
 
 # Install SIGINT forwarder
