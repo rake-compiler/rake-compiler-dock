@@ -13,7 +13,7 @@ module RakeCompilerDock
         begin
           exec('bash', '-c', cmd, options, &block)
         ensure
-          STDIN.cooked!
+          STDIN.cooked! if STDIN.tty?
         end
       end
 
