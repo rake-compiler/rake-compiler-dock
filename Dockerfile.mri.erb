@@ -139,10 +139,6 @@ COPY build/strip_wrapper /root/
 RUN mv /usr/bin/<%= target %>-strip /usr/bin/<%= target %>-strip.bin && \
     ln /root/strip_wrapper /usr/bin/<%= target %>-strip
 
-# Don't link to winpthread.dll but link static, since the DLL is not distributed with RubyInstaller
-RUN find / -name libwinpthread.dll.a | xargs rm
-RUN find / -name libwinpthread-1.dll | xargs rm
-
 # Use posix pthread for mingw so that C++ standard library for thread could be
 # available such as std::thread, std::mutex, so on.
 # https://sourceware.org/pthreads-win32/
