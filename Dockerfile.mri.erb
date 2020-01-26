@@ -89,23 +89,14 @@ RUN curl -SL http://cache.ruby-lang.org/pub/ruby/2.7/ruby-2.7.0.tar.xz | tar -xJ
 USER rvm
 
 
-ENV XRUBIES 2.7.0 2.6.0 2.5.0 2.4.0 2.3.0 2.2.2
+ENV XRUBIES 2.7.0:2.6.0:2.5.0:2.4.0:2.3.0:2.2.2
 
-# First do downloads sequentially since they can not run in parallel
-# Then build all xruby versions in parallel
+# Build all xruby versions in parallel
 # Then cleanup all build artifacts
-RUN for rv in $XRUBIES; do \
-        bash -c "rake-compiler prepare-sources VERSION=$rv HOST=x86_64-linux"; \
-    done; \
-    for rv in $XRUBIES; do \
-        for host in <%= target %>; do \
-            echo -n "'env MAKE=\"make V=0\" rake-compiler cross-ruby VERSION=$rv HOST=$host' " >> ~/xbuild_rubies; \
-        done; \
-    done && \
-    cat ~/xbuild_rubies; \
-    bash -c " \
+RUN bash -c " \
     export CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math' && \
-    parallel -- $( cat ~/xbuild_rubies ) && \
+    export MAKE='make V=0' && \
+    rake-compiler cross-ruby VERSION=$XRUBIES HOST=<%= target %> && \
     rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources && \
     find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw "
 

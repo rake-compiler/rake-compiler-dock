@@ -15,14 +15,14 @@ index c9b0bbb..2a73be7 100644
 --- a/tasks/bin/cross-ruby.rake
 +++ b/tasks/bin/cross-ruby.rake
 @@ -108,6 +108,8 @@ end
- file "#{build_dir}/Makefile" => [build_dir, makefile_in] do |t|
+     file "#{build_dir}/Makefile" => [build_dir, source_dir] do |t|
 
-   options = [
-+    '--enable-static',
-+    '--enable-install-static-library',
-     "--host=#{MINGW_HOST}",
-     "--target=#{MINGW_TARGET}",
-     "--build=#{RUBY_BUILD}",
+       options = [
++        '--enable-static',
++        '--enable-install-static-library',
+         "--host=#{mingw_host}",
+         "--target=#{mingw_target}",
+         "--build=#{RUBY_BUILD}",
 --
 2.20.1
 
