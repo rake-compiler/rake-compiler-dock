@@ -1,3 +1,9 @@
+1.0.1 / 2020-01-13
+------------------
+
+* Fix error when using rake-compiler-dock on non-tty STDIN. #31
+
+
 1.0.0 / 2020-01-04
 ------------------
 * Add ruby-2.7.0 cross ruby.
@@ -8,7 +14,7 @@
   * larskanis/rake-compiler-dock-mri-x86-linux
   * larskanis/rake-compiler-dock-mri-x86_64-linux
   * larskanis/rake-compiler-dock-jruby
-  
+
   Since every image has only the taget specific compilers and rubies, care has to be taken, that only rake tasks are triggered, that belong to the specific target.
   See the README.md for more information.
 * Ensure the separate docker images always use as much as possible common docker images layers to avoid increased download sizes.
