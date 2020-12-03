@@ -6,6 +6,8 @@ require_relative "build/parallel_docker_build"
 
 RakeCompilerDock::GemHelper.install_tasks
 
+DOCKERHUB_USER = ENV['DOCKERHUB_USER'] || "larskanis"
+
 namespace :build do
   platforms = [
     ["x86-mingw32", "i686-w64-mingw32"],
@@ -19,7 +21,7 @@ namespace :build do
     desc "Build image for platform #{platform}"
     task platform => sdf
     task sdf do
-      sh "docker build -t larskanis/rake-compiler-dock-mri-#{platform}:#{RakeCompilerDock::IMAGE_VERSION} -f Dockerfile.mri.#{platform} ."
+      sh "docker build -t #{DOCKERHUB_USER}/rake-compiler-dock-mri-#{platform}:#{RakeCompilerDock::IMAGE_VERSION} -f Dockerfile.mri.#{platform} ."
     end
 
     df = ERB.new(File.read("Dockerfile.mri.erb")).result(binding)
@@ -30,7 +32,7 @@ namespace :build do
   desc "Build image for JRuby"
   task :jruby => "Dockerfile.jruby"
   task "Dockerfile.jruby" do
-    sh "docker build -t larskanis/rake-compiler-dock-jruby:#{RakeCompilerDock::IMAGE_VERSION} -f Dockerfile.jruby ."
+    sh "docker build -t #{DOCKERHUB_USER}/rake-compiler-dock-jruby:#{RakeCompilerDock::IMAGE_VERSION} -f Dockerfile.jruby ."
   end
 
   RakeCompilerDock::ParallelDockerBuild.new(platforms.map{|pl, _| "Dockerfile.mri.#{pl}" } + ["Dockerfile.jruby"], workdir: "tmp/docker")
