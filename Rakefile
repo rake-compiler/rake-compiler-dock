@@ -15,6 +15,7 @@ namespace :build do
   ]
   platforms.each do |platform, target|
     sdf = "Dockerfile.mri.#{platform}"
+
     desc "Build image for platform #{platform}"
     task platform => sdf
     task sdf do
@@ -33,6 +34,9 @@ namespace :build do
   end
 
   RakeCompilerDock::ParallelDockerBuild.new(platforms.map{|pl, _| "Dockerfile.mri.#{pl}" } + ["Dockerfile.jruby"], workdir: "tmp/docker")
+
+  desc "Build images for all MRI platforms in parallel"
+  multitask :mri => platforms.map(&:first)
 
   desc "Build images for all platforms in parallel"
   multitask :all => platforms.map(&:first) + ["jruby"]
