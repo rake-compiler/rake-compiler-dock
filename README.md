@@ -35,6 +35,7 @@ It is intended to be used in conjunction with [rake-compiler's](https://github.c
 Your Rakefile should enable cross compilation like so:
 
     exttask = Rake::ExtensionTask.new('my_extension', my_gem_spec) do |ext|
+      ext.no_native = ENV.key?("RCD_HOST_RUBY_PLATFORM") # Disable native builds within the container
       ext.cross_compile = true
       ext.cross_platform = %w[x86-mingw32 x64-mingw32 x86-linux x86_64-linux]
     end
