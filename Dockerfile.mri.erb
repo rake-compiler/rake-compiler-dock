@@ -72,18 +72,22 @@ RUN bash -c " \
 <% if platform=~/darwin/ %>
 RUN git clone -q --depth=1 https://github.com/tpoechtrager/osxcross.git /opt/osxcross && rm -rf /opt/osxcross/.git && \
     cd /opt/osxcross/tarballs && \
-    curl -L -o MacOSX10.15.sdk.tar.xz https://github.com/phracker/MacOSX-SDKs/releases/download/10.15/MacOSX10.15.sdk.tar.xz && \
-    tar -xf MacOSX10.15.sdk.tar.xz -C . && \
-    cp -rf /usr/lib/llvm-10/include/c++ MacOSX10.15.sdk/usr/include/c++ && \
-    cp -rf /usr/include/x86_64-linux-gnu/c++/9/bits/ MacOSX10.15.sdk/usr/include/c++/v1/bits && \
-    tar -cJf MacOSX10.15.sdk.tar.xz MacOSX10.15.sdk && \
+    curl -L -o MacOSX11.1.sdk.tar.xz https://github.com/larskanis/MacOSX-SDKs/releases/download/11.1/MacOSX11.1.sdk.tar.xz && \
+    tar -xf MacOSX11.1.sdk.tar.xz -C . && \
+    cp -rf /usr/lib/llvm-10/include/c++ MacOSX11.1.sdk/usr/include/c++ && \
+    cp -rf /usr/include/x86_64-linux-gnu/c++/9/bits/ MacOSX11.1.sdk/usr/include/c++/v1/bits && \
+    mv MacOSX11.1.sdk MacOSX11.0.sdk && \
+    tar -cJf MacOSX11.0.sdk.tar.xz MacOSX11.0.sdk && \
     cd /opt/osxcross && \
-    UNATTENDED=1 SDK_VERSION=10.15 OSX_VERSION_MIN=10.13 USE_CLANG_AS=1 ./build.sh && \
+    UNATTENDED=1 SDK_VERSION=11.0 OSX_VERSION_MIN=10.13 USE_CLANG_AS=1 ./build.sh && \
     rm -rf *~ build tarballs/*
 
 RUN echo "export PATH=/opt/osxcross/target/bin:\$PATH" >> /etc/rubybashrc && \
     echo "export MACOSX_DEPLOYMENT_TARGET=10.13" >> /etc/rubybashrc && \
     echo "export OSXCROSS_MP_INC=1" >> /etc/rubybashrc
+
+# There's no objdump in osxcross but we can use llvm's
+RUN ln -s /usr/lib/llvm-10/bin/llvm-objdump /opt/osxcross/target/bin/x86_64-apple-darwin20-objdump
 
 <% end %>
 
@@ -185,9 +189,7 @@ RUN sed -i 's/__GLIBC_MINOR__\t[0-9][0-9]/__GLIBC_MINOR__\t12/' /usr/include/fea
 
 <% if platform=~/darwin/ %>
 # Add a generic darwin target without version number
-RUN grep rbconfig-x86_64-darwin19 /usr/local/rake-compiler/config.yml | sed 's/darwin19/darwin/' >> /usr/local/rake-compiler/config.yml
-# There's no objdump in osxcross but we can use llvm's
-RUN ln -s /usr/lib/llvm-10/bin/llvm-objdump /opt/osxcross/target/bin/x86_64-apple-darwin19-objdump
+RUN grep rbconfig-x86_64-darwin20 /usr/local/rake-compiler/config.yml | sed 's/darwin20/darwin/' >> /usr/local/rake-compiler/config.yml
 <% end %>
 
 # Install SIGINT forwarder
