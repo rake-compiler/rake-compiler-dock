@@ -81,7 +81,7 @@ RUN bash -c " \
 # Patch rubies for cross build
 USER root
 RUN bash -c " \
-    for v in 2.7.0 3.0.0-preview2 ; do \
+    for v in 2.7.0 3.0.0-rc1 ; do \
       curl -SL http://cache.ruby-lang.org/pub/ruby/\${v:0:3}/ruby-\$v.tar.xz | tar -xJC /root/ && \
       cd /root/ruby-\$v && \
       git apply /home/rvm/patches/ruby-\$v/*.patch && \
@@ -94,7 +94,7 @@ RUN bash -c " \
 USER rvm
 
 
-ENV XRUBIES 3.0.0-preview2:2.7.0:2.6.0:2.5.0:2.4.0:2.3.0
+ENV XRUBIES 3.0.0-rc1:2.7.0:2.6.0:2.5.0:2.4.0:2.3.0
 
 # Build all xruby versions in parallel
 # Then cleanup all build artifacts
