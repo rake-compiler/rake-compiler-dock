@@ -11,4 +11,5 @@ chown "$USER" "$HOME"/.gem
 
 sudo -u "$USER" --set-home \
     BASH_ENV=/etc/rubybashrc \
+    RAKE_EXTENSION_TASK_NO_NATIVE=true \
     -- "$@"
