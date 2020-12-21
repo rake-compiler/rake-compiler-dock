@@ -49,8 +49,10 @@ RUN sudo mkdir -p /usr/local/rake-compiler && \
 
 # Add cross compilers for Windows and Linux
 USER root
+ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -y update && \
     apt-get install -y moreutils <%
+if platform=~/darwin/     %> clang cmake python lzma-dev libxml2-dev libssl-dev libc++-10-dev <% end %><%
 if platform=~/x86-mingw32/   %> gcc-mingw-w64-i686 g++-mingw-w64-i686 <% end %><%
 if platform=~/x64-mingw32/ %> gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 <% end %><%
 if platform=~/x86-linux/     %> gcc-multilib g++-multilib <% end %> && \
@@ -65,6 +67,24 @@ RUN bash -c " \
 COPY build/mk_i686.rb /root/
 RUN bash -c " \
         ruby /root/mk_i686.rb "
+<% end %>
+
+<% if platform=~/darwin/ %>
+RUN git clone -q --depth=1 https://github.com/tpoechtrager/osxcross.git /opt/osxcross && rm -rf /opt/osxcross/.git && \
+    cd /opt/osxcross/tarballs && \
+    curl -L -o MacOSX10.15.sdk.tar.xz https://github.com/phracker/MacOSX-SDKs/releases/download/10.15/MacOSX10.15.sdk.tar.xz && \
+    tar -xf MacOSX10.15.sdk.tar.xz -C . && \
+    cp -rf /usr/lib/llvm-10/include/c++ MacOSX10.15.sdk/usr/include/c++ && \
+    cp -rf /usr/include/x86_64-linux-gnu/c++/9/bits/ MacOSX10.15.sdk/usr/include/c++/v1/bits && \
+    tar -cJf MacOSX10.15.sdk.tar.xz MacOSX10.15.sdk && \
+    cd /opt/osxcross && \
+    UNATTENDED=1 SDK_VERSION=10.15 OSX_VERSION_MIN=10.13 USE_CLANG_AS=1 ./build.sh && \
+    rm -rf *~ build tarballs/*
+
+RUN echo "export PATH=/opt/osxcross/target/bin:\$PATH" >> /etc/rubybashrc && \
+    echo "export MACOSX_DEPLOYMENT_TARGET=10.13" >> /etc/rubybashrc && \
+    echo "export OSXCROSS_MP_INC=1" >> /etc/rubybashrc
+
 <% end %>
 
 # Patch rake-compiler to build and install static libraries for Linux rubies
@@ -96,11 +116,14 @@ USER rvm
 
 ENV XRUBIES 3.0.0-rc1:2.7.0:2.6.0:2.5.0:2.4.0:2.3.0
 
+<% strip = '-s' if platform !~ /darwin/ %>
 # Build all xruby versions in parallel
 # Then cleanup all build artifacts
 RUN bash -c " \
-    export CFLAGS='-s -O1 -fno-omit-frame-pointer -fno-fast-math -fstack-protector-strong' && \
+    export CFLAGS='-O1 -fno-omit-frame-pointer -fno-fast-math -fstack-protector-strong <%= strip %>' && \
+    export LDFLAGS='-pipe -fstack-protector-strong <%= strip %>' && \
     export LIBS='-fstack-protector-strong' && \
+    <%= "export CC=#{target}-clang &&" if platform =~ /darwin/ %> \
     export MAKE='make V=1' && \
     rake-compiler cross-ruby VERSION=$XRUBIES HOST=<%= target %> && \
     rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources && \
@@ -125,7 +148,6 @@ RUN find /usr/local/rake-compiler/ruby -name *msvcrt-ruby*.dll.a | while read f 
 <% end %>
 
 USER root
-ENV DEBIAN_FRONTEND noninteractive
 
 # Add more libraries and tools to support cross build
 RUN <%
@@ -138,7 +160,7 @@ if platform=~/x86_64-linux/ %> libudev-dev <% end %> && \
 
 # Fix paths in rake-compiler/config.yml and add rvm and mingw-tools to the global bashrc
 RUN sed -i -- "s:/root/.rake-compiler:/usr/local/rake-compiler:g" /usr/local/rake-compiler/config.yml && \
-    echo "source /etc/profile.d/rvm.sh" >> /etc/bash.bashrc
+    echo "source /etc/rubybashrc" >> /etc/bash.bashrc
 
 <% if platform=~/mingw/ %>
 # Install wrappers for strip commands as a workaround for "Protocol error" in boot2docker.
@@ -157,6 +179,13 @@ RUN printf "1\n" | update-alternatives --config <%= target %>-gcc && \
 # Make the system to have GLIBC 2.12 instead of 2.23 so that
 # generated ruby package can run on CentOS 6 with GLIBC 2.12
 RUN sed -i 's/__GLIBC_MINOR__\t[0-9][0-9]/__GLIBC_MINOR__\t12/' /usr/include/features.h
+<% end %>
+
+<% if platform=~/darwin/ %>
+# Add a generic darwin target without version number
+RUN grep rbconfig-x86_64-darwin19 /usr/local/rake-compiler/config.yml | sed 's/darwin19/darwin/' >> /usr/local/rake-compiler/config.yml
+# There's no objdump in osxcross but we can use llvm's
+RUN ln -s /usr/lib/llvm-10/bin/llvm-objdump /opt/osxcross/target/bin/x86_64-apple-darwin19-objdump
 <% end %>
 
 # Install SIGINT forwarder
