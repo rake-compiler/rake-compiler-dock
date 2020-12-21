@@ -93,8 +93,10 @@ COPY build/patches2 /home/rvm/patches/
 RUN bash -c " \
     for v in ${RVM_RUBIES} ; do \
       cd /usr/local/rvm/gems/ruby-\$v/gems/rake-compiler-1.1.1 && \
+      echo applying patches to ruby-\$v /home/rvm/patches/rake-compiler-1.1.1/*.patch && \
       ( git apply /home/rvm/patches/rake-compiler-1.1.1/*.patch || true ) && \
       cd /usr/local/rvm/gems/ruby-\$v/gems/hoe-3.20.0 && \
+      echo applying patches to ruby-\$v /home/rvm/patches/hoe-3.20.0/*.patch && \
       ( git apply /home/rvm/patches/hoe-3.20.0/*.patch || true ) \
     done "
 
