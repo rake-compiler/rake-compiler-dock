@@ -15,6 +15,7 @@ namespace :build do
     ["x86-linux", "i686-linux-gnu"],
     ["x86_64-linux", "x86_64-linux-gnu"],
     ["x86_64-darwin", "x86_64-apple-darwin20"],
+    ["arm64-darwin", "aarch64-apple-darwin20"],
   ]
   platforms.each do |platform, target|
     sdf = "Dockerfile.mri.#{platform}"

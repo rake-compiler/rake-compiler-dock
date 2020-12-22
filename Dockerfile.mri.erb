@@ -87,7 +87,7 @@ RUN echo "export PATH=/opt/osxcross/target/bin:\$PATH" >> /etc/rubybashrc && \
     echo "export OSXCROSS_MP_INC=1" >> /etc/rubybashrc
 
 # There's no objdump in osxcross but we can use llvm's
-RUN ln -s /usr/lib/llvm-10/bin/llvm-objdump /opt/osxcross/target/bin/x86_64-apple-darwin20-objdump
+RUN ln -s /usr/lib/llvm-10/bin/llvm-objdump /opt/osxcross/target/bin/<%= target %>-objdump
 
 <% end %>
 
@@ -189,7 +189,7 @@ RUN sed -i 's/__GLIBC_MINOR__\t[0-9][0-9]/__GLIBC_MINOR__\t12/' /usr/include/fea
 
 <% if platform=~/darwin/ %>
 # Add a generic darwin target without version number
-RUN grep rbconfig-x86_64-darwin20 /usr/local/rake-compiler/config.yml | sed 's/darwin20/darwin/' >> /usr/local/rake-compiler/config.yml
+RUN grep -E 'rbconfig-[-0-9a-z_]+-darwin20' /usr/local/rake-compiler/config.yml | sed 's/rbconfig-[a-z0-9_]*-darwin20/rbconfig-<%= platform %>/' >> /usr/local/rake-compiler/config.yml
 <% end %>
 
 # Install SIGINT forwarder
