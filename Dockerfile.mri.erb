@@ -121,14 +121,15 @@ USER rvm
 
 
 ENV XRUBIES 3.0.0-rc1:2.7.0:2.6.0:2.5.0:2.4.0:2.3.0
+#ENV XRUBIES 3.0.0-rc1
 
 <% strip = '-s' if platform !~ /darwin/ %>
 # Build all xruby versions in parallel
 # Then cleanup all build artifacts
 RUN bash -c " \
     export CFLAGS='-O1 -fno-omit-frame-pointer -fno-fast-math -fstack-protector-strong <%= strip %>' && \
-    export LDFLAGS='-pipe -fstack-protector-strong <%= strip %>' && \
-    export LIBS='-fstack-protector-strong' && \
+    export LDFLAGS='-pipe <%= strip %>' && \
+    <%= "export LIBS='-l:libssp.a' &&" if platform =~ /mingw/ %> \
     <%= "export CC=#{target}-clang &&" if platform =~ /darwin/ %> \
     export MAKE='make V=1' && \
     rake-compiler cross-ruby VERSION=$XRUBIES HOST=<%= target %> && \
