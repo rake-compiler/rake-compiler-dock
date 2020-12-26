@@ -11,14 +11,14 @@ index ebe3d8c..a336b73 100755
 
  fi
 diff --git a/io.c b/io.c
-index 82c5940538..a8d3661ec8 100644
+index 48592ac51a..2635ac8ec6 100644
 --- a/io.c
 +++ b/io.c
-@@ -10721,7 +10721,6 @@ nogvl_copy_stream_wait_write(struct copy_stream_struct *stp)
+@@ -11111,6 +11111,7 @@ nogvl_copy_stream_wait_write(struct copy_stream_struct *stp)
+     return 0;
  }
 
- #if defined HAVE_COPY_FILE_RANGE || (defined __linux__ && defined __NR_copy_file_range)
--#  define USE_COPY_FILE_RANGE
- #endif
-
++#undef USE_COPY_FILE_RANGE
  #ifdef USE_COPY_FILE_RANGE
+
+ static ssize_t
