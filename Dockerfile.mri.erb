@@ -1,13 +1,13 @@
 FROM <%=
   case platform
-    when /x86_64-linux/ then "quay.io/pypa/manylinux2010_x86_64"
-    when /x86-linux/ then "quay.io/pypa/manylinux2010_i686"
+    when /x86_64-linux/ then "quay.io/pypa/manylinux2014_x86_64"
+    when /x86-linux/ then "quay.io/pypa/manylinux2014_i686"
     else "ubuntu:20.04"
   end %>
 
 <% if platform=~/linux/ %>
 # install packages which rvm will require
-RUN yum install -y autoconf gcc-c++ libtool readline-devel sqlite-devel ruby openssl-devel xz cmake sudo
+RUN yum install -y autoconf gcc-c++ libtool readline-devel sqlite-devel ruby openssl-devel xz cmake sudo less
 
 # Prepare sudo and delete sudo as alias to gosu
 RUN rm -f /usr/local/bin/sudo && \
