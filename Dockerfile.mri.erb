@@ -25,7 +25,8 @@ RUN groupadd -r rvm && useradd -r -g rvm -G sudo -p "" --create-home rvm
 
 # Make sure rvm and later settings are available in interactive and non-interactive shells
 RUN echo "source /etc/profile.d/rvm.sh" >> /etc/rubybashrc && \
-    echo "source /etc/rubybashrc" >> /etc/bashrc
+    echo "source /etc/rubybashrc" >> /etc/bashrc && \
+    echo "source /etc/rubybashrc" >> /etc/bash.bashrc
 ENV BASH_ENV /etc/rubybashrc
 
 USER rvm
