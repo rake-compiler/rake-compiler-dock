@@ -1,12 +1,33 @@
-FROM ubuntu:<%= platform=~/linux/ ? "16.04" : "20.04" %>
+FROM <%=
+  case platform
+    when /x86_64-linux/ then "quay.io/pypa/manylinux2010_x86_64"
+    when /x86-linux/ then "quay.io/pypa/manylinux2010_i686"
+    else "ubuntu:20.04"
+  end %>
 
+<% if platform=~/linux/ %>
+# install packages which rvm will require
+RUN yum install -y autoconf gcc-c++ libtool readline-devel sqlite-devel ruby openssl-devel xz cmake sudo
+
+# Prepare sudo and delete sudo as alias to gosu
+RUN rm -f /usr/local/bin/sudo && \
+    groupadd -r sudo && \
+    echo "%sudo  ALL=(ALL)       ALL" >> /etc/sudoers
+<% else %>
+ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -y update && \
-    apt-get install -y curl git-core xz-utils build-essential wget unzip sudo gnupg2 dirmngr && \
+    apt-get install -y curl git-core xz-utils build-essential zlib1g-dev libreadline-dev libssl-dev wget unzip sudo gnupg2 dirmngr cmake && \
     rm -rf /var/lib/apt/lists/*
+<% end %>
 
 # Add "rvm" as system group, to avoid conflicts with host GIDs typically starting with 1000
-RUN groupadd -r rvm && useradd -r -g rvm -G sudo -p "" --create-home rvm && \
-    echo "source /etc/profile.d/rvm.sh" >> /etc/rubybashrc
+RUN groupadd -r rvm && useradd -r -g rvm -G sudo -p "" --create-home rvm
+
+# Make sure rvm and later settings are available in interactive and non-interactive shells
+RUN echo "source /etc/profile.d/rvm.sh" >> /etc/rubybashrc && \
+    echo "source /etc/rubybashrc" >> /etc/bashrc
+ENV BASH_ENV /etc/rubybashrc
+
 USER rvm
 
 RUN mkdir ~/.gnupg && \
@@ -18,11 +39,11 @@ RUN gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 409B6B1796C275462A
     (curl -L http://get.rvm.io | sudo bash) && \
     bash -c " \
         source /etc/rubybashrc && \
+        rvm autolibs disable && \
         rvmsudo rvm cleanup all "
 
 # Import patch files for ruby and gems
 COPY build/patches /home/rvm/patches/
-ENV BASH_ENV /etc/rubybashrc
 
 # install rubies and fix permissions on
 ENV RVM_RUBIES 2.5.8 3.0.0
@@ -49,14 +70,15 @@ RUN sudo mkdir -p /usr/local/rake-compiler && \
 
 # Add cross compilers for Windows and Linux
 USER root
-ENV DEBIAN_FRONTEND noninteractive
+
+<% if platform !~ /linux/ %>
 RUN apt-get -y update && \
-    apt-get install -y moreutils <%
-if platform=~/darwin/     %> clang cmake python lzma-dev libxml2-dev libssl-dev libc++-10-dev <% end %><%
+    apt-get install -y <%
+if platform=~/darwin/     %> clang python lzma-dev libxml2-dev libssl-dev libc++-10-dev <% end %><%
 if platform=~/x86-mingw32/   %> gcc-mingw-w64-i686 g++-mingw-w64-i686 <% end %><%
-if platform=~/x64-mingw32/ %> gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 <% end %><%
-if platform=~/x86-linux/     %> gcc-multilib g++-multilib <% end %> && \
+if platform=~/x64-mingw32/ %> gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 <% end %> && \
     rm -rf /var/lib/apt/lists/*
+<% end %>
 
 RUN bash -c " \
         rvm alias create default 2.5.8 && \
@@ -160,18 +182,9 @@ RUN find /usr/local/rake-compiler/ruby -name *msvcrt-ruby*.dll.a | while read f 
 
 USER root
 
-# Add more libraries and tools to support cross build
-RUN <%
-if platform=~/x86-linux/   %> dpkg --add-architecture i386 && <% end %> \
-    apt-get -y update && \
-    apt-get install -y cmake <%
-if platform=~/x86-linux/   %> libc6-dev:i386 libudev-dev:i386 <% end %><%
-if platform=~/x86_64-linux/ %> libudev-dev <% end %> && \
-    rm -rf /var/lib/apt/lists/*
+# Fix paths in rake-compiler/config.yml
+RUN sed -i -- "s:/root/.rake-compiler:/usr/local/rake-compiler:g" /usr/local/rake-compiler/config.yml
 
-# Fix paths in rake-compiler/config.yml and add rvm and mingw-tools to the global bashrc
-RUN sed -i -- "s:/root/.rake-compiler:/usr/local/rake-compiler:g" /usr/local/rake-compiler/config.yml && \
-    echo "source /etc/rubybashrc" >> /etc/bash.bashrc
 
 <% if platform=~/mingw/ %>
 # Install wrappers for strip commands as a workaround for "Protocol error" in boot2docker.
@@ -187,9 +200,14 @@ RUN printf "1\n" | update-alternatives --config <%= target %>-gcc && \
 <% end %>
 
 <% if platform=~/linux/ %>
-# Make the system to have GLIBC 2.12 instead of 2.23 so that
-# generated ruby package can run on CentOS 6 with GLIBC 2.12
-RUN sed -i 's/__GLIBC_MINOR__\t[0-9][0-9]/__GLIBC_MINOR__\t12/' /usr/include/features.h
+# Enable modern compiler toolset of manylinux image
+RUN echo "export PATH=\$DEVTOOLSET_ROOTPATH/usr/bin:\$PATH" >> /etc/rubybashrc
+
+# Add prefixed versions of compiler tools
+RUN for f in addr2line gcc gcov-tool ranlib ar dwp gcc-ranlib nm readelf as elfedit gcc-ar gprof objcopy size c++filt g++ gcov ld objdump strings cpp gcc-nm pkg-config strip ; do ln -sf $DEVTOOLSET_ROOTPATH/usr/bin/$f $DEVTOOLSET_ROOTPATH/usr/bin/<%= target %>-$f ; done
+
+# ruby-2.5 links to libcrypt, which isn't necessary for extensions
+RUN find /usr/local/rake-compiler/ruby -name rbconfig.rb | while read f ; do sed -i 's/-lcrypt//' $f ; done
 <% end %>
 
 <% if platform=~/arm64-darwin/ %>
@@ -199,10 +217,10 @@ RUN grep -E 'rbconfig-aarch64-darwin' /usr/local/rake-compiler/config.yml | sed 
 
 # Install SIGINT forwarder
 COPY build/sigfw.c /root/
-RUN gcc $HOME/sigfw.c -o /usr/local/bin/sigfw
+RUN gcc $HOME/sigfw.c -o /usr/bin/sigfw
 
 # Install user mapper
-COPY build/runas /usr/local/bin/
+COPY build/runas /usr/bin/
 
 # Install sudoers configuration
 COPY build/sudoers /etc/sudoers.d/rake-compiler-dock

@@ -9,7 +9,7 @@ ln -s /usr/local/rake-compiler "$HOME"/.rake-compiler
 mkdir -p "$HOME"/.gem
 chown "$USER" "$HOME"/.gem
 
-sudo -u "$USER" --set-home \
+/usr/bin/sudo -u "$USER" -H \
     BASH_ENV=/etc/rubybashrc \
     RAKE_EXTENSION_TASK_NO_NATIVE=true \
     -- "$@"
