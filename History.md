@@ -1,6 +1,8 @@
-1.1.0 / YYYY-MM-DD
+1.1.0 / 2020-12-28
 ------------------
 
+* Use ManyLinux2014 as docker base image for linux targets.
+  That way compatibility to very old linux dists can be provided, while still using modern compilers.
 * Add macOS cross build targets "x86_64-darwin" and "arm64-darwin".
   They are based on MacOSX-SDK-11.1
 * Add Ruby-3.0 as native rvm and cross ruby version.
