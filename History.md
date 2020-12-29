@@ -1,4 +1,4 @@
-1.1.0 / 2020-12-28
+1.1.0 / 2020-12-29
 ------------------
 
 * Use ManyLinux2014 as docker base image for linux targets.
