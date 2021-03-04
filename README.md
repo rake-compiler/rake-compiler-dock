@@ -12,11 +12,7 @@ It is also more reliable, since the underlying docker images are versioned and i
 
 ## Installation
 
-Install docker natively on Linux:
-
-    $ sudo apt-get install docker.io
-
-... or install [docker-toolbox for Windows and OSX](https://github.com/docker/toolbox/releases) or boot2docker on [Windows](https://github.com/boot2docker/windows-installer/releases) or [OS X](https://github.com/boot2docker/osx-installer/releases) .
+Install docker [following the instructions on the docker website](https://docs.docker.com/engine/install/) ... or install [docker-toolbox for Windows and OSX](https://github.com/docker/toolbox/releases) or boot2docker on [Windows](https://github.com/boot2docker/windows-installer/releases) or [OS X](https://github.com/boot2docker/osx-installer/releases) .
 
 Install rake-compiler-dock as a gem. The docker image is downloaded later on demand:
 
