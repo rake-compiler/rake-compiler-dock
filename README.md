@@ -115,7 +115,7 @@ This can be done like this:
 
     task 'gem:native' do
       require 'rake_compiler_dock'
-      sh "bundle package"   # Avoid repeated downloads of gems by using gem files from the host.
+      sh "bundle package --all"   # Avoid repeated downloads of gems by using gem files from the host.
       %w[ x86-mingw32 x64-mingw32 x86-linux x86_64-linux x86_64-darwin arm64-darwin ].each do |plat|
         RakeCompilerDock.sh "bundle --local && rake native:#{plat} gem", platform: plat
       end
