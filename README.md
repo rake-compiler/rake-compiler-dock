@@ -30,10 +30,12 @@ Rake-compiler-dock provides the necessary tools to build Ruby extensions for Win
 It is intended to be used in conjunction with [rake-compiler's](https://github.com/rake-compiler/rake-compiler) cross build capability.
 Your Rakefile should enable cross compilation like so:
 
-    exttask = Rake::ExtensionTask.new('my_extension', my_gem_spec) do |ext|
-      ext.cross_compile = true
-      ext.cross_platform = %w[x86-mingw32 x64-mingw32 x86-linux x86_64-linux x86_64-darwin arm64-darwin]
-    end
+```ruby
+exttask = Rake::ExtensionTask.new('my_extension', my_gem_spec) do |ext|
+  ext.cross_compile = true
+  ext.cross_platform = %w[x86-mingw32 x64-mingw32 x86-linux x86_64-linux x86_64-darwin arm64-darwin]
+end
+```
 
 See below, how to invoke cross builds in your Rakefile.
 
@@ -113,14 +115,16 @@ To build java binary gems interactively, it can be called like this:
 To make the build process reproducible for other parties, it is recommended to add rake-compiler-dock to your Rakefile.
 This can be done like this:
 
-    task 'gem:native' do
-      require 'rake_compiler_dock'
-      sh "bundle package --all"   # Avoid repeated downloads of gems by using gem files from the host.
-      %w[ x86-mingw32 x64-mingw32 x86-linux x86_64-linux x86_64-darwin arm64-darwin ].each do |plat|
-        RakeCompilerDock.sh "bundle --local && rake native:#{plat} gem", platform: plat
-      end
-      RakeCompilerDock.sh "bundle --local && rake java gem", rubyvm: :jruby
-    end
+```ruby
+task 'gem:native' do
+  require 'rake_compiler_dock'
+  sh "bundle package --all"   # Avoid repeated downloads of gems by using gem files from the host.
+  %w[ x86-mingw32 x64-mingw32 x86-linux x86_64-linux x86_64-darwin arm64-darwin ].each do |plat|
+    RakeCompilerDock.sh "bundle --local && rake native:#{plat} gem", platform: plat
+  end
+  RakeCompilerDock.sh "bundle --local && rake java gem", rubyvm: :jruby
+end
+```
 
 This runs the `bundle` and `rake` commands once for each platform.
 That is once for the jruby gems and 6 times for the specified MRI platforms.
@@ -161,7 +165,9 @@ Please note, that parallel builds only work reliable, if the specific platform g
 
 Rake-compiler-dock uses [semantic versioning](http://semver.org/), so you should add it into your Gemfile, to make sure, that future changes will not break your build.
 
-    gem 'rake-compiler-dock', '~> 1.0'
+```ruby
+gem 'rake-compiler-dock', '~> 1.0'
+```
 
 See [the wiki](https://github.com/rake-compiler/rake-compiler-dock/wiki/Projects-using-rake-compiler-dock) for projects which make use of rake-compiler-dock.
 
@@ -199,7 +205,9 @@ The following variables are provided to the running docker container:
 
 Other environment variables can be set or passed through to the container like this:
 
-    RakeCompilerDock.sh "rake cross native gem OPENSSL_VERSION=#{ENV['OPENSSL_VERSION']}"
+```ruby
+RakeCompilerDock.sh "rake cross native gem OPENSSL_VERSION=#{ENV['OPENSSL_VERSION']}"
+```
 
 
 ## More information
