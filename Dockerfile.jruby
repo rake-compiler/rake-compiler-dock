@@ -26,7 +26,7 @@ ENV BASH_ENV /etc/rubybashrc
 # install rubies and fix permissions on
 RUN bash -c " \
     export CFLAGS='-s -O3 -fno-fast-math -fPIC' && \
-    for v in jruby-9.2.14.0 ; do \
+    for v in jruby-9.2.19.0 ; do \
         rvm install --binary \$v --patch \$(echo ~/patches/ruby-\$v/* | tr ' ' ','); \
     done && \
     rvm cleanup all && \
@@ -46,8 +46,8 @@ RUN sudo mkdir -p /usr/local/rake-compiler && \
 
 USER root
 
-RUN bash -c "rvm alias create default jruby-9.2.14.0"
-RUN echo "rvm use jruby-9.2.14.0 > /dev/null" >> /etc/rubybashrc
+RUN bash -c "rvm alias create default jruby-9.2.19.0"
+RUN echo "rvm use jruby-9.2.19.0 > /dev/null" >> /etc/rubybashrc
 
 # Add rvm to the global bashrc
 RUN echo "source /etc/profile.d/rvm.sh" >> /etc/bash.bashrc
