@@ -41,11 +41,12 @@ module RakeCompilerDock
         user = options.fetch(:username){ current_user }
         group = options.fetch(:groupname){ current_group }
         rubyvm = options.fetch(:rubyvm){ ENV['RCD_RUBYVM'] } || "mri"
+        jrubyvm = rubyvm.to_s == "jruby"
 
-        platforms = options.fetch(:platform){ ENV['RCD_PLATFORM'] } || "x86-mingw32 x64-mingw32"
+        platforms = options.fetch(:platform){ ENV['RCD_PLATFORM'] } || (jrubyvm ? "jruby" : "x86-mingw32 x64-mingw32")
         platforms.split(" ").each do |platform|
           image_name = options.fetch(:image) do
-            platform_postfix = rubyvm.to_s == "jruby" ? "" : "-#{platform}"
+            platform_postfix = jrubyvm ? "" : "-#{platform}"
             ENV['RCD_IMAGE'] ||
                 ENV['RAKE_COMPILER_DOCK_IMAGE'] ||
                 "larskanis/rake-compiler-dock-#{rubyvm}#{platform_postfix}:#{IMAGE_VERSION}"
