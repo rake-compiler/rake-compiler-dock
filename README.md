@@ -197,7 +197,7 @@ The following variables are provided to the running docker container:
 * `RCD_HOST_RUBY_PLATFORM` - The `RUBY_PLATFORM` of the host ruby.
 * `RCD_HOST_RUBY_VERSION` - The `RUBY_VERSION` of the host ruby.
 * `RUBY_CC_VERSION` - The target ruby versions for rake-compiler.
-    The default is defined in the [Dockerfile](https://github.com/rake-compiler/rake-compiler-dock/blob/master/Dockerfile), but can be changed as a parameter to rake.
+    The default is defined in the [Dockerfile](https://github.com/rake-compiler/rake-compiler-dock/blob/94770238d68d71df5f70abe76097451a575ce46c/Dockerfile.mri.erb#L229), but can be changed as a parameter to rake.
 * `RCD_MOUNTDIR` - The directory which is mounted into the docker container.
     Defaults to pwd.
 * `RCD_WORKDIR` - The working directory within the docker container.
