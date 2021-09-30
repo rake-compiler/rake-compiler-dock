@@ -16,6 +16,7 @@ namespace :build do
     ["x86_64-linux", "x86_64-redhat-linux"],
     ["x86_64-darwin", "x86_64-apple-darwin"],
     ["arm64-darwin", "aarch64-apple-darwin"],
+    ["aarch64-linux", "aarch64-linux-gnu"],
   ]
   platforms.each do |platform, target|
     sdf = "Dockerfile.mri.#{platform}"
@@ -26,7 +27,7 @@ namespace :build do
       sh "docker build -t #{DOCKERHUB_USER}/rake-compiler-dock-mri-#{platform}:#{RakeCompilerDock::IMAGE_VERSION} -f Dockerfile.mri.#{platform} ."
     end
 
-    df = ERB.new(File.read("Dockerfile.mri.erb")).result(binding)
+    df = ERB.new(File.read("Dockerfile.mri.erb"), trim_mode: ">").result(binding)
     File.write(sdf, df)
     CLEAN.include(sdf)
   end

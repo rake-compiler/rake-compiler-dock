@@ -1,11 +1,14 @@
-FROM <%=
-  case platform
-    when /x86_64-linux/ then "quay.io/pypa/manylinux2014_x86_64"
-    when /x86-linux/ then "quay.io/pypa/manylinux2014_i686"
-    else "ubuntu:20.04"
-  end %>
+<%
+image = case platform
+  when /x86_64-linux/ then "quay.io/pypa/manylinux2014_x86_64"
+  when /x86-linux/ then "quay.io/pypa/manylinux2014_i686"
+  else "ubuntu:20.04"
+end
+manylinux = !!(image =~ manylinux)
+%>
+FROM <%= image %>
 
-<% if platform=~/linux/ %>
+<% if manylinux %>
 # install packages which rvm will require
 RUN yum install -y autoconf gcc-c++ libtool readline-devel sqlite-devel ruby openssl-devel xz cmake sudo less
 
@@ -72,12 +75,13 @@ RUN sudo mkdir -p /usr/local/rake-compiler && \
 # Add cross compilers for Windows and Linux
 USER root
 
-<% if platform !~ /linux/ %>
+<% unless manylinux %>
 RUN apt-get -y update && \
     apt-get install -y <%
-if platform=~/darwin/     %> clang python lzma-dev libxml2-dev libssl-dev libc++-10-dev <% end %><%
+if platform=~/darwin/        %> clang python lzma-dev libxml2-dev libssl-dev libc++-10-dev <% end %><%
+if platform=~/aarch64-linux/ %> gcc-aarch64-linux-gnu g++-aarch64-linux-gnu <% end %><%
 if platform=~/x86-mingw32/   %> gcc-mingw-w64-i686 g++-mingw-w64-i686 <% end %><%
-if platform=~/x64-mingw32/ %> gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 <% end %> && \
+if platform=~/x64-mingw32/   %> gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 <% end %> && \
     rm -rf /var/lib/apt/lists/*
 <% end %>
 
@@ -85,7 +89,7 @@ RUN bash -c " \
         rvm alias create default 2.5.8 && \
         rvm use default "
 
-<% if platform=~/linux/   %>
+<% if manylinux %>
 # Create dev tools x86-linux-*
 COPY build/mk_i686.rb /root/
 RUN bash -c " \
@@ -200,7 +204,7 @@ RUN printf "1\n" | update-alternatives --config <%= target %>-gcc && \
     printf "1\n" | update-alternatives --config <%= target %>-g++
 <% end %>
 
-<% if platform=~/linux/ %>
+<% if manylinux %>
 # Enable modern compiler toolset of manylinux image
 RUN echo "export PATH=\$DEVTOOLSET_ROOTPATH/usr/bin:\$PATH" >> /etc/rubybashrc
 
