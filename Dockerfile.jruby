@@ -1,5 +1,6 @@
 FROM ubuntu:20.04
 
+ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -y update && \
     apt-get install -y curl git-core xz-utils wget unzip sudo gpg dirmngr openjdk-17-jdk-headless maven && \
     rm -rf /var/lib/apt/lists/*
