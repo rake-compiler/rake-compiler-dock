@@ -4,7 +4,7 @@ image = case platform
   when /x86-linux/ then "quay.io/pypa/manylinux2014_i686"
   else "ubuntu:20.04"
 end
-manylinux = !!(image =~ manylinux)
+manylinux = !!(image =~ /manylinux/)
 %>
 FROM <%= image %>
 
