@@ -50,7 +50,7 @@ RUN gpg --keyserver hkp://keys.openpgp.org --recv-keys 409B6B1796C275462A1703113
 COPY build/patches /home/rvm/patches/
 
 # install rubies and fix permissions on
-ENV RVM_RUBIES 2.5.8 3.0.0
+ENV RVM_RUBIES 2.5.9 3.0.2
 RUN bash -c " \
     export CFLAGS='-s -O3 -fno-fast-math -fPIC' && \
     for v in ${RVM_RUBIES} ; do \
@@ -86,7 +86,7 @@ if platform=~/x64-mingw32/   %> gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 <% end
 <% end %>
 
 RUN bash -c " \
-        rvm alias create default 2.5.8 && \
+        rvm alias create default 2.5.9 && \
         rvm use default "
 
 <% if manylinux %>
