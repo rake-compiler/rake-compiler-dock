@@ -16,3 +16,8 @@
 *.o
 *.a
 mkmf.log
+.byebug_history
+test/rcd_test/Gemfile.lock
+test/rcd_test/pkg/
+test/rcd_test/tmp/
+test/rcd_test/vendor/
