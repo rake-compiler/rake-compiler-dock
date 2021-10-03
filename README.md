@@ -119,7 +119,7 @@ This can be done like this:
 task 'gem:native' do
   require 'rake_compiler_dock'
   sh "bundle package --all"   # Avoid repeated downloads of gems by using gem files from the host.
-  %w[ x86-mingw32 x64-mingw32 x86-linux x86_64-linux x86_64-darwin arm64-darwin ].each do |plat|
+  %w[ x86-mingw32 x64-mingw32 x86-linux x86_64-linux aarch64-linux x86_64-darwin arm64-darwin ].each do |plat|
     RakeCompilerDock.sh "bundle --local && rake native:#{plat} gem", platform: plat
   end
   RakeCompilerDock.sh "bundle --local && rake java gem", rubyvm: :jruby
@@ -139,17 +139,19 @@ Please note, that parallel builds only work reliable, if the specific platform g
 
 ```ruby
   namespace "gem" do
+    task 'prepare' do
+      require 'rake_compiler_dock'
+      require 'io/console'
+      sh "bundle package --all"
+      sh "cp ~/.gem/gem-*.pem build/gem/ || true"
+      ENV["GEM_PRIVATE_KEY_PASSPHRASE"] = STDIN.getpass("Enter passphrase of gem signature key: ")
+    end
+
     exttask.cross_platform.each do |plat|
-      desc "Build the native binary gems"
+      desc "Build all native binary gems"
       multitask 'native' => plat
 
-      task 'prepare' do
-        require 'rake_compiler_dock'
-        sh "cp ~/.gem/gem-*.pem build/gem/ || true"
-        require 'io/console'
-        ENV["GEM_PRIVATE_KEY_PASSPHRASE"] = STDIN.getpass("Enter passphrase of gem signature key: ")
-      end
-
+      desc "Build the native gem for #{plat}"
       task plat => 'prepare' do
         RakeCompilerDock.sh <<-EOT, platform: plat
           (cp build/gem/gem-*.pem ~/.gem/ || true) &&
