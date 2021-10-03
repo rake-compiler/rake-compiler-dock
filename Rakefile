@@ -16,6 +16,7 @@ namespace :build do
     ["x86_64-linux", "x86_64-redhat-linux"],
     ["x86_64-darwin", "x86_64-apple-darwin"],
     ["arm64-darwin", "aarch64-apple-darwin"],
+    ["arm-linux", "arm-linux-gnueabihf"],
     ["aarch64-linux", "aarch64-linux-gnu"],
   ]
   platforms.each do |platform, target|
