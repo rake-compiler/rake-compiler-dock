@@ -10,4 +10,4 @@ puts "RUBY_PLATFORM: #{RUBY_PLATFORM.inspect}"
 puts "Gem::Platform.local.to_s: #{Gem::Platform.local.to_s.inspect}"
 puts "-"*70
 
-create_makefile("rcd_test_ext")
+create_makefile("rcd_test/rcd_test_ext")
