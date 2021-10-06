@@ -4,7 +4,6 @@ require "rake/testtask"
 require "rake/extensiontask"
 
 rcd_test_spec = Bundler.load_gemspec("rcd_test.gemspec")
-Gem::PackageTask.new(rcd_test_spec).define
 
 exttask = Rake::ExtensionTask.new('rcd_test_ext', rcd_test_spec) do |ext|
   ext.ext_dir = 'ext'
@@ -44,5 +43,6 @@ Rake::TestTask.new(:test) do |t|
 end
 
 task default: [:clobber, :compile, :test]
+task gem: :build
 
 CLEAN.add("{ext,lib}/**/*.{o,so}", "pkg", "tmp")
