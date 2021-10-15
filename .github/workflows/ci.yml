@@ -21,6 +21,8 @@ jobs:
           - platform: jruby
 
     runs-on: ubuntu-latest
+    env:
+      PLATFORM: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v2
 
@@ -38,8 +40,6 @@ jobs:
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
       - name: Build docker image
-        env:
-          PLATFORM: ${{ matrix.platform }}
         run: |
           docker buildx create --driver docker-container --use
           bundle exec rake build:${PLATFORM} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new --load"
@@ -48,3 +48,19 @@ jobs:
         run: |
           rm -rf tmp/build-cache
           mv tmp/build-cache-new tmp/build-cache
+
+      - name: Build rcd_test.gem
+        run: |
+          cd test/rcd_test/
+          bundle install
+          bundle exec rake gem:${PLATFORM}
+
+      - name: Install rcd_test.gem
+        run: |
+          cd test/rcd_test/
+          bundle exec gem inst -l pkg/rcd_test-*-${PLATFORM}.gem
+
+      - name: Test rcd_test.gem
+        run: |
+          cd test/rcd_test/
+          bundle exec rake test

@@ -19,7 +19,9 @@ namespace "gem" do
     sh "bundle package --all"
     sh "mkdir -p tmp/gem"
     sh "cp ~/.gem/gem-*.pem tmp/gem/ || true"
-    ENV["GEM_PRIVATE_KEY_PASSPHRASE"] = STDIN.getpass("Enter passphrase of gem signature key: ")
+    unless ENV['CI']
+      ENV["GEM_PRIVATE_KEY_PASSPHRASE"] = STDIN.getpass("Enter passphrase of gem signature key: ")
+    end
   end
 
   exttask.cross_platform.each do |plat|
