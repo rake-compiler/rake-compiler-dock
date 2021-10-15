@@ -9,6 +9,9 @@ RakeCompilerDock::GemHelper.install_tasks
 DOCKERHUB_USER = ENV['DOCKERHUB_USER'] || "larskanis"
 
 namespace :build do
+
+  docker_build_cmd = Shellwords.split(ENV['RCD_DOCKER_BUILD'] || "docker build")
+
   platforms = [
     ["x86-mingw32", "i686-w64-mingw32"],
     ["x64-mingw32", "x86_64-w64-mingw32"],
@@ -25,7 +28,7 @@ namespace :build do
     desc "Build image for platform #{platform}"
     task platform => sdf
     task sdf do
-      sh "docker build -t #{DOCKERHUB_USER}/rake-compiler-dock-mri-#{platform}:#{RakeCompilerDock::IMAGE_VERSION} -f Dockerfile.mri.#{platform} ."
+      sh *docker_build_cmd, "-t", "#{DOCKERHUB_USER}/rake-compiler-dock-mri-#{platform}:#{RakeCompilerDock::IMAGE_VERSION}", "-f", "Dockerfile.mri.#{platform}", "."
     end
 
     df = ERB.new(File.read("Dockerfile.mri.erb"), trim_mode: ">").result(binding)
@@ -39,7 +42,7 @@ namespace :build do
     sh "docker build -t #{DOCKERHUB_USER}/rake-compiler-dock-jruby:#{RakeCompilerDock::IMAGE_VERSION} -f Dockerfile.jruby ."
   end
 
-  RakeCompilerDock::ParallelDockerBuild.new(platforms.map{|pl, _| "Dockerfile.mri.#{pl}" } + ["Dockerfile.jruby"], workdir: "tmp/docker")
+  RakeCompilerDock::ParallelDockerBuild.new(platforms.map{|pl, _| "Dockerfile.mri.#{pl}" } + ["Dockerfile.jruby"], workdir: "tmp/docker", docker_build_cmd: docker_build_cmd)
 
   desc "Build images for all MRI platforms in parallel"
   multitask :mri => platforms.map(&:first)

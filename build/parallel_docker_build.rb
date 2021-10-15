@@ -6,7 +6,11 @@ module RakeCompilerDock
   class ParallelDockerBuild
     include Rake::DSL
 
-    def initialize(dockerfiles, workdir: "tmp/docker", inputdir: ".", task_prefix: "common-")
+    attr_reader :docker_build_cmd
+
+    def initialize(dockerfiles, workdir: "tmp/docker", inputdir: ".", task_prefix: "common-",
+                   docker_build_cmd: %w["docker", "build"])
+      @docker_build_cmd = docker_build_cmd
       FileUtils.mkdir_p(workdir)
 
       files = parse_dockerfiles(dockerfiles, inputdir)
@@ -96,7 +100,7 @@ module RakeCompilerDock
     #
     # The layers will be reused in subsequent builds, even if they run in parallel.
     def docker_build(filename, workdir)
-      sh "docker", "build", "-f", File.join(workdir, filename), "."
+      sh *docker_build_cmd, "-f", File.join(workdir, filename), "."
     end
   end
 end
