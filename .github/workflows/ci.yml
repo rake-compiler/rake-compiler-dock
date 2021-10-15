@@ -2,8 +2,24 @@ name: Build docker images
 on: [push, pull_request]
 
 jobs:
-  # This job uses Buildx layer caching
-  aarch64-linux:
+  # These jobs use Buildx layer caching
+  docker_build:
+    name: Build docker images
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: x86-mingw32
+          - platform: x64-mingw32
+          - platform: x86-linux
+          - platform: x86_64-linux
+          - platform: x86_64-darwin
+          - platform: arm64-darwin
+          - platform: arm-linux
+          - platform: aarch64-linux
+          - platform: jruby
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -12,9 +28,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: tmp/build-cache
-          key: ${{ runner.os }}-single-buildx-${{ github.sha }}
+          key: ${{ runner.os }}-${{ matrix.platform }}-buildx-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-single-buildx
+            ${{ runner.os }}-${{ matrix.platform }}-buildx
 
       - uses: ruby/setup-ruby@v1
         with:
@@ -22,9 +38,11 @@ jobs:
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
       - name: Build docker image
+        env:
+          PLATFORM: ${{ matrix.platform }}
         run: |
           docker buildx create --driver docker-container --use
-          bundle exec rake build:aarch64-linux RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new --load"
+          bundle exec rake build:${PLATFORM} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new --load"
 
       - name: Move cache
         run: |
