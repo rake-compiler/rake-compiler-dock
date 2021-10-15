@@ -47,8 +47,8 @@ RUN sudo mkdir -p /usr/local/rake-compiler && \
 
 USER root
 
-RUN bash -c "rvm alias create default jruby-9.2.19.0"
-RUN echo "rvm use jruby-9.2.19.0 > /dev/null" >> /etc/rubybashrc
+RUN bash -c "rvm alias create default jruby-9.3.1.0"
+RUN echo "rvm use jruby-9.3.1.0 > /dev/null" >> /etc/rubybashrc
 
 # Add rvm to the global bashrc
 RUN echo "source /etc/profile.d/rvm.sh" >> /etc/bash.bashrc

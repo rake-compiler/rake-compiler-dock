@@ -39,7 +39,7 @@ namespace :build do
   desc "Build image for JRuby"
   task :jruby => "Dockerfile.jruby"
   task "Dockerfile.jruby" do
-    sh "docker build -t #{DOCKERHUB_USER}/rake-compiler-dock-jruby:#{RakeCompilerDock::IMAGE_VERSION} -f Dockerfile.jruby ."
+    sh *docker_build_cmd, "-t", "#{DOCKERHUB_USER}/rake-compiler-dock-jruby:#{RakeCompilerDock::IMAGE_VERSION}", "-f", "Dockerfile.jruby", "."
   end
 
   RakeCompilerDock::ParallelDockerBuild.new(platforms.map{|pl, _| "Dockerfile.mri.#{pl}" } + ["Dockerfile.jruby"], workdir: "tmp/docker", docker_build_cmd: docker_build_cmd)

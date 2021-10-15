@@ -56,11 +56,13 @@ jobs:
           bundle exec rake gem:${PLATFORM}
 
       - name: Install rcd_test.gem
+        if: matrix.platform != 'jruby'
         run: |
           cd test/rcd_test/
           bundle exec gem inst -l pkg/rcd_test-*-${PLATFORM}.gem
 
       - name: Test rcd_test.gem
+        if: matrix.platform == 'x86_64-linux'
         run: |
           cd test/rcd_test/
           bundle exec rake test
