@@ -4,7 +4,7 @@ on: [push, pull_request]
 jobs:
   # These jobs use Buildx layer caching
   docker_build:
-    name: Build docker images
+    name: Build
 
     strategy:
       fail-fast: false
@@ -44,7 +44,7 @@ jobs:
           docker buildx create --driver docker-container --use
           bundle exec rake build:${PLATFORM} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new --load"
 
-      - name: Move cache
+      - name: Move build cache and remove outdated layers
         run: |
           rm -rf tmp/build-cache
           mv tmp/build-cache-new tmp/build-cache
@@ -54,6 +54,12 @@ jobs:
           cd test/rcd_test/
           bundle install
           bundle exec rake gem:${PLATFORM}
+
+      - name: Upload binary gem
+        uses: actions/upload-artifact@v2
+        with:
+          name: binary-gem-${{ matrix.platform }}
+          path: test/rcd_test/pkg/*.gem
 
       - name: Install rcd_test.gem
         if: matrix.platform != 'jruby'
@@ -66,3 +72,54 @@ jobs:
         run: |
           cd test/rcd_test/
           bundle exec rake test
+
+
+  job_test_binary:
+    name: Test
+    needs: docker_build
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows
+            ruby: "3.0"
+            platform: x64-mingw32
+          - os: windows
+            ruby: "2.3"
+            platform: x64-mingw32
+          - os: macos
+            ruby: "3.0"
+            platform: x86_64-darwin
+          - os: macos
+            ruby: "2.3"
+            platform: x86_64-darwin
+          - os: ubuntu
+            ruby: "3.0"
+            platform: x86_64-linux
+          - os: ubuntu
+            ruby: "2.3"
+            platform: x86_64-linux
+          - os: ubuntu
+            ruby: jruby-head
+            platform: jruby
+
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+
+      - name: Download gem from build job
+        uses: actions/download-artifact@v2
+        with:
+          name: binary-gem-${{ matrix.platform }}
+
+      - run: gem install --local *.gem --verbose
+
+      - name: Run tests
+        run: |
+          cd test/rcd_test/
+          bundle install
+          ruby -rrcd_test -S rake test
