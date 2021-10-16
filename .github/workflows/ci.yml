@@ -58,8 +58,15 @@ jobs:
       - name: Upload binary gem
         uses: actions/upload-artifact@v2
         with:
-          name: binary-gem-${{ matrix.platform }}
-          path: test/rcd_test/pkg/*.gem
+          name: gem-${{ matrix.platform }}
+          path: test/rcd_test/pkg/*-*-*.gem
+
+      - name: Upload source gem
+        uses: actions/upload-artifact@v2
+        if: matrix.platform == 'jruby'
+        with:
+          name: gem-ruby
+          path: test/rcd_test/pkg/*-?.?.?.gem
 
       - name: Install rcd_test.gem
         if: matrix.platform != 'jruby'
@@ -102,6 +109,9 @@ jobs:
           - os: ubuntu
             ruby: jruby-head
             platform: jruby
+          - os: ubuntu
+            ruby: "3.0"
+            platform: ruby
 
     runs-on: ${{ matrix.os }}-latest
     steps:
@@ -114,7 +124,7 @@ jobs:
       - name: Download gem from build job
         uses: actions/download-artifact@v2
         with:
-          name: binary-gem-${{ matrix.platform }}
+          name: gem-${{ matrix.platform }}
 
       - run: gem install --local *.gem --verbose
 
