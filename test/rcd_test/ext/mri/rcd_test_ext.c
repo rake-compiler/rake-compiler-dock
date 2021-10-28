@@ -7,6 +7,20 @@
 VALUE rb_mRcdTest;
 
 static VALUE
+rcdt_isinf_eh(VALUE self, VALUE rb_float) {
+  Check_Type(rb_float, T_FLOAT);
+
+  return isinf(RFLOAT_VALUE(rb_float)) ? Qtrue : Qfalse;
+}
+
+static VALUE
+rcdt_isnan_eh(VALUE self, VALUE rb_float) {
+  Check_Type(rb_float, T_FLOAT);
+
+  return isnan(RFLOAT_VALUE(rb_float)) ? Qtrue : Qfalse;
+}
+
+static VALUE
 rcdt_do_something(VALUE self)
 {
   return rb_str_new_cstr("something has been done");
@@ -32,4 +46,6 @@ Init_rcd_test_ext(void)
   rb_mRcdTest = rb_define_module("RcdTest");
   rb_define_singleton_method(rb_mRcdTest, "do_something", rcdt_do_something, 0);
   rb_define_singleton_method(rb_mRcdTest, "darwin_builtin_available?", rcdt_darwin_builtin_available_eh, 0);
+  rb_define_singleton_method(rb_mRcdTest, "isinf?", rcdt_isinf_eh, 1);
+  rb_define_singleton_method(rb_mRcdTest, "isnan?", rcdt_isnan_eh, 1);
 }
