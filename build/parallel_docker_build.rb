@@ -29,7 +29,7 @@ module RakeCompilerDock
     #    "File1"=>["      FROM a\n",
     #    ...
     def parse_dockerfiles(dockerfiles, inputdir)
-      files = dockerfiles.map do |fn|
+      dockerfiles.map do |fn|
         [fn, File.read(File.join(inputdir, fn))]
       end.map do |fn, f|
         # Split file contant in lines unless line ends with backslash
@@ -100,7 +100,7 @@ module RakeCompilerDock
     #
     # The layers will be reused in subsequent builds, even if they run in parallel.
     def docker_build(filename, workdir)
-      sh *docker_build_cmd, "-f", File.join(workdir, filename), "."
+      sh(*docker_build_cmd, "-f", File.join(workdir, filename), ".")
     end
   end
 end
