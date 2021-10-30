@@ -95,6 +95,51 @@ For Linux:
 You can also choose between different executable ruby versions by `rvm use <version>` .
 The current default is 3.1.
 
+
+### As a CI System Container
+
+The OCI images provided by rake-compiler-dock can be used without the `rake-compiler-dock` gem or wrapper. This may be useful if your CI pipeline is building native gems.
+
+For example, a Github Actions job might look like this:
+
+``` yaml
+jobs:
+  native-gem:
+    name: "native-gem"
+    runs-on: ubuntu-latest
+    container:
+      image: "larskanis/rake-compiler-dock-mri-x86_64-linux:1.1.0"
+    steps:
+      - uses: actions/checkout@v2
+      - run: bundle install && bundle exec rake gem:x86_64-linux:rcd
+      - uses: actions/upload-artifact@v2
+        with:
+          name: native-gem
+          path: gems
+          retention-days: 1
+```
+
+Where the referenced rake task might be defined by:
+
+``` ruby
+cross_platforms = ["x64-mingw32", "x86_64-linux", "x86_64-darwin", "arm64-darwin"]
+
+namespace "gem" do
+  cross_platforms.each do |platform|
+    namespace platform do
+      task "rcd" do
+        Rake::Task["native:#{platform}"].invoke
+        Rake::Task["pkg/#{rcee_precompiled_spec.full_name}-#{Gem::Platform.new(platform)}.gem"].invoke
+      end
+    end
+  end
+end
+
+```
+
+For an example of rake tasks that support this style of invocation, visit https://github.com/flavorjones/ruby-c-extensions-explained/tree/main/precompiled
+
+
 ### JRuby support
 
 Rake-compiler-dock offers a dedicated docker image for JRuby.
