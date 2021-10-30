@@ -51,4 +51,17 @@ class TestEnvironmentVariables < Test::Unit::TestCase
     assert_equal Dir.pwd, rcd_env['PWD']
   end
 
+  def test_RAKE_EXTENSION_TASK_NO_NATIVE
+    assert_equal "true", rcd_env['RAKE_EXTENSION_TASK_NO_NATIVE']
+  end
+
+  def test_symlink_rake_compiler
+    cmd = invocation("if test -h $HOME/.rake-compiler ; then echo yes ; else echo no ; fi")
+    assert_equal("yes", %x(#{cmd}).strip)
+  end
+
+  def test_gem_directory
+    cmd = invocation("if test -d $HOME/.gem ; then echo yes ; else echo no ; fi")
+    assert_equal("yes", %x(#{cmd}).strip)
+  end
 end
