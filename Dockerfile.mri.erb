@@ -260,6 +260,8 @@ RUN gcc $HOME/sigfw.c -o /usr/bin/sigfw
 
 # Install user mapper
 COPY build/runas /usr/bin/
+COPY build/rcd-env.sh /etc/profile.d/
+RUN echo "source /etc/profile.d/rcd-env.sh" >> /etc/rubybashrc
 
 # Install sudoers configuration
 COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
