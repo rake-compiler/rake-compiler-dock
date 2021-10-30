@@ -28,7 +28,7 @@ namespace :build do
     desc "Build image for platform #{platform}"
     task platform => sdf
     task sdf do
-      sh *docker_build_cmd, "-t", "#{DOCKERHUB_USER}/rake-compiler-dock-mri-#{platform}:#{RakeCompilerDock::IMAGE_VERSION}", "-f", "Dockerfile.mri.#{platform}", "."
+      sh(*docker_build_cmd, "-t", "#{DOCKERHUB_USER}/rake-compiler-dock-mri-#{platform}:#{RakeCompilerDock::IMAGE_VERSION}", "-f", "Dockerfile.mri.#{platform}", ".")
     end
 
     df = ERB.new(File.read("Dockerfile.mri.erb"), trim_mode: ">").result(binding)
@@ -39,7 +39,7 @@ namespace :build do
   desc "Build image for JRuby"
   task :jruby => "Dockerfile.jruby"
   task "Dockerfile.jruby" do
-    sh *docker_build_cmd, "-t", "#{DOCKERHUB_USER}/rake-compiler-dock-jruby:#{RakeCompilerDock::IMAGE_VERSION}", "-f", "Dockerfile.jruby", "."
+    sh(*docker_build_cmd, "-t", "#{DOCKERHUB_USER}/rake-compiler-dock-jruby:#{RakeCompilerDock::IMAGE_VERSION}", "-f", "Dockerfile.jruby", ".")
   end
 
   RakeCompilerDock::ParallelDockerBuild.new(platforms.map{|pl, _| "Dockerfile.mri.#{pl}" } + ["Dockerfile.jruby"], workdir: "tmp/docker", docker_build_cmd: docker_build_cmd)
