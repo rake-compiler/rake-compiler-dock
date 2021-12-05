@@ -107,6 +107,8 @@ RUN git clone -q --depth=1 https://github.com/tpoechtrager/osxcross.git /opt/osx
     tar -cJf MacOSX11.1.sdk.tar.xz MacOSX11.1.sdk && \
     cd /opt/osxcross && \
     UNATTENDED=1 SDK_VERSION=11.1 OSX_VERSION_MIN=10.13 USE_CLANG_AS=1 ./build.sh && \
+    ln -s /usr/bin/llvm-config-10 /usr/bin/llvm-config && \
+    ENABLE_COMPILER_RT_INSTALL=1 SDK_VERSION=11.1 ./build_compiler_rt.sh && \
     rm -rf *~ build tarballs/*
 
 RUN echo "export PATH=/opt/osxcross/target/bin:\$PATH" >> /etc/rubybashrc && \
