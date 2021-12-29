@@ -1,8 +1,8 @@
 diff --git a/tasks/bin/cross-ruby.rake b/tasks/bin/cross-ruby.rake
-index 8edf5cd..5d25b82 100644
+index 8317a2a..5a1b3ea 100644
 --- a/tasks/bin/cross-ruby.rake
 +++ b/tasks/bin/cross-ruby.rake
-@@ -116,11 +116,22 @@ RUBY_CC_VERSIONS.split(":").each do |ruby_cc_version|
+@@ -116,10 +116,22 @@ RUBY_CC_VERSIONS.split(":").each do |ruby_cc_version|
          "--host=#{mingw_host}",
          "--target=#{mingw_target}",
          "--build=#{RUBY_BUILD}",
@@ -11,7 +11,6 @@ index 8edf5cd..5d25b82 100644
 +        '--disable-jit-support',
          '--disable-install-doc',
          '--with-ext=',
--        'LDFLAGS=-pipe -s',
        ]
 +      if mingw_host=~/darwin/
 +        options += [
@@ -24,6 +23,6 @@ index 8edf5cd..5d25b82 100644
 +          '--enable-shared',
 +        ]
 +      end
-
+ 
        # Force Winsock2 for Ruby 1.8, 1.9 defaults to it
        options << "--with-winsock2" if major == "1.8"

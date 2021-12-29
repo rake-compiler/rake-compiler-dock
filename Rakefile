@@ -7,14 +7,14 @@ require_relative "build/parallel_docker_build"
 RakeCompilerDock::GemHelper.install_tasks
 
 DOCKERHUB_USER = ENV['DOCKERHUB_USER'] || "larskanis"
+docker_build_cmd = Shellwords.split(ENV['RCD_DOCKER_BUILD'] || "docker build")
 
 namespace :build do
-
-  docker_build_cmd = Shellwords.split(ENV['RCD_DOCKER_BUILD'] || "docker build")
 
   platforms = [
     ["x86-mingw32", "i686-w64-mingw32"],
     ["x64-mingw32", "x86_64-w64-mingw32"],
+    ["x64-mingw-ucrt", "x86_64-w64-mingw32"],
     ["x86-linux", "i686-redhat-linux"],
     ["x86_64-linux", "x86_64-redhat-linux"],
     ["x86_64-darwin", "x86_64-apple-darwin"],
@@ -52,6 +52,14 @@ namespace :build do
 end
 
 task :build => "build:all"
+
+namespace :prepare do
+  desc "Build cross compiler for x64-mingw-ucrt aka RubyInstaller-3.1+"
+  task "mingw64-ucrt" do
+    sh(*docker_build_cmd, "-t", "#{DOCKERHUB_USER}/mingw64-ucrt:20.04", ".",
+       chdir: "mingw64-ucrt")
+  end
+end
 
 desc "Run tests"
 task :test do

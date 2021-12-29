@@ -50,7 +50,7 @@ RUN gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys 409B6B1796C275462A170
 COPY build/patches /home/rvm/patches/
 
 # install rubies and fix permissions on
-ENV RVM_RUBIES 2.5.9 3.0.2
+ENV RVM_RUBIES 2.5.9 3.1.0
 RUN bash -c " \
     export CFLAGS='-s -O3 -fno-fast-math -fPIC' && \
     for v in ${RVM_RUBIES} ; do \
@@ -64,7 +64,7 @@ RUN bash -c " \
 RUN echo "gem: --no-ri --no-rdoc" >> ~/.gemrc && \
     bash -c " \
         rvm all do gem update --system --no-document && \
-        rvm all do gem install --no-document bundler 'bundler:~>1.16' 'rake-compiler:1.1.1' 'hoe:3.20.0' mini_portile rubygems-tasks mini_portile2 && \
+        rvm all do gem install --no-document bundler 'bundler:~>1.16' 'rake-compiler:1.1.6' hoe mini_portile rubygems-tasks mini_portile2 && \
         find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw "
 
 # Install rake-compiler's cross rubies in global dir instead of /root
@@ -75,7 +75,11 @@ RUN sudo mkdir -p /usr/local/rake-compiler && \
 # Add cross compilers for Windows and Linux
 USER root
 
-<% unless manylinux %>
+<% if platform=~/x64-mingw-ucrt/ %>
+COPY --from=larskanis/mingw64-ucrt:20.04 /build/*.deb /debs/
+RUN dpkg -i /debs/*.deb
+
+<% elsif !manylinux %>
 RUN apt-get -y update && \
     apt-get install -y <%
 if platform=~/darwin/        %> clang python lzma-dev libxml2-dev libssl-dev libc++-10-dev <% end %><%
@@ -87,7 +91,7 @@ if platform=~/x64-mingw32/   %> gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 <% end
 <% end %>
 
 RUN bash -c " \
-        rvm alias create default 2.5.9 && \
+        rvm alias create default 3.1.0 && \
         rvm use default "
 
 <% if manylinux %>
@@ -131,44 +135,65 @@ USER rvm
 COPY build/patches2 /home/rvm/patches/
 RUN bash -c " \
     for v in ${RVM_RUBIES} ; do \
-      cd /usr/local/rvm/gems/ruby-\$v/gems/rake-compiler-1.1.1 && \
-      echo applying patches to ruby-\$v /home/rvm/patches/rake-compiler-1.1.1/*.patch && \
-      ( git apply /home/rvm/patches/rake-compiler-1.1.1/*.patch || true ) && \
-      cd /usr/local/rvm/gems/ruby-\$v/gems/hoe-3.20.0 && \
-      echo applying patches to ruby-\$v /home/rvm/patches/hoe-3.20.0/*.patch && \
-      ( git apply /home/rvm/patches/hoe-3.20.0/*.patch || true ) \
+      cd /usr/local/rvm/gems/ruby-\$v/gems/rake-compiler-1.1.6 && \
+      echo applying patches to ruby-\$v /home/rvm/patches/rake-compiler-1.1.6/*.patch && \
+      ( git apply /home/rvm/patches/rake-compiler-1.1.6/*.patch || true ) \
     done "
 
 # Patch rubies for cross build
-USER root
-RUN bash -c " \
-    for v in 2.7.0 3.0.0 ; do \
-      curl -SL http://cache.ruby-lang.org/pub/ruby/\${v:0:3}/ruby-\$v.tar.xz | tar -xJC /root/ && \
-      cd /root/ruby-\$v && \
-      git apply /home/rvm/patches/ruby-\$v/*.patch && \
-      cd .. && \
-      mkdir -p /usr/local/rake-compiler/sources/ && \
-      tar cjf /usr/local/rake-compiler/sources/ruby-\$v.tar.bz2 ruby-\$v && \
-      chown rvm /usr/local/rake-compiler -R && \
-      rm -rf /root/ruby-\$v ; \
-    done "
-USER rvm
+#USER root
+#RUN bash -c " \
+#    for v in 2.7.0 3.0.0 3.1.0 ; do \
+#      curl -SL http://cache.ruby-lang.org/pub/ruby/\${v:0:3}/ruby-\$v.tar.xz | tar -xJC /root/ && \
+#      cd /root/ruby-\$v && \
+#      git apply /home/rvm/patches/ruby-\$v/*.patch && \
+#      cd .. && \
+#      mkdir -p /usr/local/rake-compiler/sources/ && \
+#      tar cjf /usr/local/rake-compiler/sources/ruby-\$v.tar.bz2 ruby-\$v && \
+#      chown rvm /usr/local/rake-compiler -R && \
+#      rm -rf /root/ruby-\$v ; \
+#    done "
+#USER rvm
 
+<%
+axrubies = if platform =~ /x64-mingw-ucrt/
+  [
+    # Rubyinstaller-3.1.0+ is platform x64-mingw-ucrt
+    ["3.1.0", "3.1.0", true],
+  ]
+elsif platform =~ /x64-mingw32/
+  [
+    # Rubyinstaller prior to 3.1.0 is platform x64-mingw32
+    ["2.6.0:2.5.0:2.4.0", "2.5.9", false],
+    ["3.0.0:2.7.0", "3.1.0", true],
+  ]
+else
+  [
+    # Build xruby versions prior ruby2_keywords in parallel using ruby-2.5
+    ["2.6.0:2.5.0:2.4.0", "2.5.9", false],
+    # Build xruby versions with ruby2_keywords in parallel using ruby-3.x
+    ["3.1.0:3.0.0:2.7.0", "3.1.0", true],
+  ]
+end
 
-ENV XRUBIES 3.0.0:2.7.0:2.6.0:2.5.0:2.4.0:2.3.0
+axrubies.each do |xrubies, rvm, parallel| %>
+ENV XRUBIES <%= xrubies %>
 
 <% strip = '-s' if platform !~ /darwin/ %>
-# Build all xruby versions in parallel
+# Build xruby versions in parallel
 # Then cleanup all build artifacts
 RUN bash -c " \
+    rvm use <%= rvm %> && \
+    export CPPFLAGS='<%= "-D__USE_MINGW_ANSI_STDIO=1" if platform=~/x64-mingw-ucrt/ %>' && \
     export CFLAGS='-O1 -fno-omit-frame-pointer -fno-fast-math -fstack-protector-strong <%= strip %>' && \
     export LDFLAGS='-pipe <%= strip %>' && \
     <%= "export LIBS='-l:libssp.a' &&" if platform =~ /mingw/ %> \
     <%= "export CC=#{target}-clang &&" if platform =~ /darwin/ %> \
-    export MAKE='make V=1' && \
+    export MAKE='make V=1 <%= "-j`nproc`" if parallel %>' && \
     rake-compiler cross-ruby VERSION=$XRUBIES HOST=<%= target %> && \
     rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources && \
     find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw "
+<% end %>
 
 <% if platform=~/linux/ %>
 # Avoid linking against libruby shared object.
@@ -233,6 +258,6 @@ COPY build/runas /usr/bin/
 # Install sudoers configuration
 COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 
-ENV RUBY_CC_VERSION 3.0.0:2.7.0:2.6.0:2.5.0:2.4.0:2.3.0
+ENV RUBY_CC_VERSION 3.1.0:3.0.0:2.7.0:2.6.0:2.5.0:2.4.0
 
 CMD bash

@@ -18,7 +18,7 @@ else
     ext.ext_dir = 'ext/mri'
     ext.lib_dir = 'lib/rcd_test'
     ext.cross_compile = true
-    ext.cross_platform = %w[x86-mingw32 x64-mingw32 x86-linux x86_64-linux aarch64-linux arm-linux x86_64-darwin arm64-darwin]
+    ext.cross_platform = %w[x86-mingw32 x64-mingw-ucrt x64-mingw32 x86-linux x86_64-linux aarch64-linux arm-linux x86_64-darwin arm64-darwin]
   end
 end
 
