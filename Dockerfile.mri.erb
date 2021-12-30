@@ -10,7 +10,7 @@ FROM <%= image %>
 
 <% if manylinux %>
 # install packages which rvm will require
-RUN yum install -y autoconf gcc-c++ libtool readline-devel sqlite-devel ruby openssl-devel xz cmake sudo less libffi-devel git
+RUN yum install -y autoconf gcc-c++ libtool readline-devel sqlite-devel ruby openssl-devel xz cmake sudo less libffi-devel git wget
 
 # Prepare sudo and delete sudo as alias to gosu
 RUN rm -f /usr/local/bin/sudo && \
