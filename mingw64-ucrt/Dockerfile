@@ -28,25 +28,12 @@ RUN cd mingw-w64-* && \
     cat debian/rules && \
     ls ../mingw-w64-*.patch | xargs -n1 patch --verbose -p1 -i && \
     dpkg-buildpackage -b && \
-    rm -r `pwd`
+    rm -rf ../*.ddeb ../*i686* `pwd`
 
 # Install UCRT enabled deb-packages
 RUN dpkg -i mingw-w64-common_7.0.0-2_all.deb \
     mingw-w64-tools_7.0.0-2_amd64.deb \
-    mingw-w64-i686-dev_7.0.0-2_all.deb \
     mingw-w64-x86-64-dev_7.0.0-2_all.deb
-
-# Download gcc sources for mingw
-RUN apt-get source gcc-mingw-w64 && \
-    cd gcc-mingw-w64-* && \
-    mk-build-deps -ir -t "apt-get -o Debug::pkgProblemResolver=yes -y --no-install-recommends"
-
-# Build gcc (only C and C++) based on UCRT headers and crt
-ADD gcc-mingw-w64-*.patch ./
-RUN cd gcc-mingw-w64-* && \
-    ls ../gcc-mingw-w64-*.patch | xargs -n1 patch --verbose -p1 -i && \
-    dpkg-buildpackage -b -j16 && \
-    rm -r `pwd`
 
 # Download gcc-binutils sources for mingw
 RUN apt-get source binutils-mingw-w64 && \
@@ -57,7 +44,19 @@ RUN apt-get source binutils-mingw-w64 && \
 ADD binutils-mingw-w64-*.patch ./
 RUN cd binutils-mingw-w64-* && \
     ls ../binutils-mingw-w64-*.patch | xargs -n1 patch --verbose -p1 -i && \
-    dpkg-buildpackage -b && \
-    rm -r `pwd`
+    dpkg-buildpackage -b --jobs=auto && \
+    rm -rf ../*.ddeb ../*i686* `pwd`
+
+# Download gcc sources for mingw
+RUN apt-get source gcc-mingw-w64 && \
+    cd gcc-mingw-w64-* && \
+    mk-build-deps -ir -t "apt-get -o Debug::pkgProblemResolver=yes -y --no-install-recommends"
+
+# Build gcc (only C and C++) based on UCRT headers and crt
+ADD gcc-mingw-w64-*.patch ./
+RUN cd gcc-mingw-w64-* && \
+    ls ../gcc-mingw-w64-*.patch | xargs -n1 patch --verbose -p1 -i && \
+    dpkg-buildpackage -b --jobs=auto && \
+    rm -rf ../*.ddeb ../*i686* `pwd`
 
 RUN ls -l *.deb

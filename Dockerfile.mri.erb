@@ -77,7 +77,13 @@ USER root
 
 <% if platform=~/x64-mingw-ucrt/ %>
 COPY --from=larskanis/mingw64-ucrt:20.04 /build/*.deb /debs/
-RUN dpkg -i /debs/*.deb
+RUN dpkg -i /debs/binutils-mingw-w64-x86-64_2.34-6ubuntu1.3+8.8_amd64.deb \
+    /debs/g++-mingw-w64-x86-64_9.3.0-17ubuntu1~20.04+22~exp1ubuntu4_amd64.deb \
+    /debs/gcc-mingw-w64-base_9.3.0-17ubuntu1~20.04+22~exp1ubuntu4_amd64.deb \
+    /debs/gcc-mingw-w64-x86-64_9.3.0-17ubuntu1~20.04+22~exp1ubuntu4_amd64.deb \
+    /debs/mingw-w64-common_7.0.0-2_all.deb \
+    /debs/mingw-w64-tools_7.0.0-2_amd64.deb \
+    /debs/mingw-w64-x86-64-dev_7.0.0-2_all.deb
 
 <% elsif !manylinux %>
 RUN apt-get -y update && \
