@@ -84,19 +84,19 @@ jobs:
             ruby: "3.0"
             platform: x64-mingw32
           - os: windows
-            ruby: "2.3"
+            ruby: "2.4"
             platform: x64-mingw32
           - os: macos
             ruby: "3.0"
             platform: x86_64-darwin
           - os: macos
-            ruby: "2.3"
+            ruby: "2.4"
             platform: x86_64-darwin
           - os: ubuntu
             ruby: "3.0"
             platform: x86_64-linux
           - os: ubuntu
-            ruby: "2.3"
+            ruby: "2.4"
             platform: x86_64-linux
           - os: ubuntu
             ruby: jruby-head
