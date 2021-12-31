@@ -2,7 +2,7 @@
 
 **Easy to use and reliable cross compiler environment for building Windows, Linux, Mac and JRuby binary gems.**
 
-It provides cross compilers and Ruby environments for 2.2 and newer versions of the [RubyInstaller](http://rubyinstaller.org/) and Linux runtime environments.
+It provides cross compilers and Ruby environments for 2.4 and newer versions of the [RubyInstaller](http://rubyinstaller.org/) and Linux runtime environments.
 They are prepared for use with [rake-compiler](https://github.com/rake-compiler/rake-compiler).
 It is used by [many gems with C or JRuby extentions](https://github.com/rake-compiler/rake-compiler-dock/wiki/Projects-using-rake-compiler-dock).
 
@@ -33,7 +33,7 @@ Your Rakefile should enable cross compilation like so:
 ```ruby
 exttask = Rake::ExtensionTask.new('my_extension', my_gem_spec) do |ext|
   ext.cross_compile = true
-  ext.cross_platform = %w[x86-mingw32 x64-mingw32 x86-linux x86_64-linux x86_64-darwin arm64-darwin]
+  ext.cross_platform = %w[x86-mingw32 x64-mingw-ucrt x64-mingw32 x86-linux x86_64-linux x86_64-darwin arm64-darwin]
 end
 ```
 
@@ -44,7 +44,9 @@ Additionally it may also be used to build ffi based binary gems like [libusb](ht
 ### Interactive Usage
 
 Rake-compiler-dock offers the shell command `rake-compiler-dock` and a [ruby API](http://www.rubydoc.info/gems/rake-compiler-dock/RakeCompilerDock) for issuing commands within the docker image, described below.
-There dedicated are images for `x86-mingw32`, `x64-mingw32`, `x86-linux`, `x86_64-linux`, `x86_64-darwin`, `arm64-darwin` and `jruby` targets.
+There are dedicated images for `x86-mingw32`, `x64-mingw-ucrt`, `x64-mingw32`, `x86-linux`, `x86_64-linux`, `x86_64-darwin`, `arm64-darwin` and `jruby` targets.
+The images contain all supported cross ruby versions, with the exception of `x64-mingw32`, which has versions before 3.1 only, and `x64-mingw-ucrt`, which has only ruby-3.1+.
+This is to match the [changed platform of RubyInstaller-3.1](https://rubyinstaller.org/2021/12/31/rubyinstaller-3.1.0-1-released.html).
 
 `rake-compiler-dock` without arguments starts an interactive shell session.
 This is best suited to try out and debug a build.
@@ -91,7 +93,7 @@ For Linux:
     sudo yum install your-package
 
 You can also choose between different executable ruby versions by `rvm use <version>` .
-The current default is 2.5.
+The current default is 3.1.
 
 ### JRuby support
 
@@ -119,7 +121,7 @@ This can be done like this:
 task 'gem:native' do
   require 'rake_compiler_dock'
   sh "bundle package --all"   # Avoid repeated downloads of gems by using gem files from the host.
-  %w[ x86-mingw32 x64-mingw32 x86-linux x86_64-linux aarch64-linux x86_64-darwin arm64-darwin ].each do |plat|
+  %w[ x86-mingw32 x64-mingw-ucrt x64-mingw32 x86-linux x86_64-linux aarch64-linux x86_64-darwin arm64-darwin ].each do |plat|
     RakeCompilerDock.sh "bundle --local && rake native:#{plat} gem", platform: plat
   end
   RakeCompilerDock.sh "bundle --local && rake java gem", rubyvm: :jruby
@@ -148,7 +150,7 @@ Please note, that parallel builds only work reliable, if the specific platform g
     end
 
     exttask.cross_platform.each do |plat|
-      desc "Build all native binary gems"
+      desc "Build all native binary gems in parallel"
       multitask 'native' => plat
 
       desc "Build the native gem for #{plat}"
@@ -168,7 +170,7 @@ Please note, that parallel builds only work reliable, if the specific platform g
 Rake-compiler-dock uses [semantic versioning](http://semver.org/), so you should add it into your Gemfile, to make sure, that future changes will not break your build.
 
 ```ruby
-gem 'rake-compiler-dock', '~> 1.0'
+gem 'rake-compiler-dock', '~> 1.2'
 ```
 
 See [the wiki](https://github.com/rake-compiler/rake-compiler-dock/wiki/Projects-using-rake-compiler-dock) for projects which make use of rake-compiler-dock.
@@ -183,7 +185,7 @@ The following variables are recognized by rake-compiler-dock:
 * `RCD_RUBYVM` - The ruby VM and toolchain to be used.
     Must be one of `mri`, `jruby`.
 * `RCD_PLATFORM` - The target rubygems platform.
-    Must be a space separated list out of `x86-mingw32`, `x64-mingw32`, `x86-linux`, `x86_64-linux`, `x86_64-darwin` and `arm64-darwin`.
+    Must be a space separated list out of `x86-mingw32`, `x64-mingw-ucrt`, `x64-mingw32`, `x86-linux`, `x86_64-linux`, `x86_64-darwin` and `arm64-darwin`.
     It is ignored when `rubyvm` is set to `:jruby`.
 * `RCD_IMAGE` - The docker image that is downloaded and started.
     Defaults to "larskanis/rake-compiler-dock:IMAGE_VERSION" with an image version that is determined by the gem version.
