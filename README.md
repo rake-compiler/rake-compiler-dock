@@ -166,7 +166,7 @@ This can be done like this:
 task 'gem:native' do
   require 'rake_compiler_dock'
   sh "bundle package --all"   # Avoid repeated downloads of gems by using gem files from the host.
-  %w[ x86-mingw32 x64-mingw-ucrt x64-mingw32 x86-linux x86_64-linux aarch64-linux x86_64-darwin arm64-darwin ].each do |plat|
+  %w[ x86-mingw32 x64-mingw-ucrt x64-mingw32 x86-linux x86_64-linux arm-linux aarch64-linux x86_64-darwin arm64-darwin ].each do |plat|
     RakeCompilerDock.sh "bundle --local && rake native:#{plat} gem", platform: plat
   end
   RakeCompilerDock.sh "bundle --local && rake java gem", rubyvm: :jruby
@@ -230,7 +230,7 @@ The following variables are recognized by rake-compiler-dock:
 * `RCD_RUBYVM` - The ruby VM and toolchain to be used.
     Must be one of `mri`, `jruby`.
 * `RCD_PLATFORM` - The target rubygems platform.
-    Must be a space separated list out of `x86-mingw32`, `x64-mingw-ucrt`, `x64-mingw32`, `x86-linux`, `x86_64-linux`, `x86_64-darwin` and `arm64-darwin`.
+    Must be a space separated list out of `x86-mingw32`, `x64-mingw-ucrt`, `x64-mingw32`, `x86-linux`, `x86_64-linux`, `arm-linux`, `aarch64-linux`, `x86_64-darwin` and `arm64-darwin`.
     It is ignored when `rubyvm` is set to `:jruby`.
 * `RCD_IMAGE` - The docker image that is downloaded and started.
     Defaults to "larskanis/rake-compiler-dock:IMAGE_VERSION" with an image version that is determined by the gem version.
