@@ -9,19 +9,20 @@ RakeCompilerDock::GemHelper.install_tasks
 DOCKERHUB_USER = ENV['DOCKERHUB_USER'] || "larskanis"
 docker_build_cmd = Shellwords.split(ENV['RCD_DOCKER_BUILD'] || "docker build")
 
+platforms = [
+  ["x86-mingw32", "i686-w64-mingw32"],
+  ["x64-mingw32", "x86_64-w64-mingw32"],
+  ["x64-mingw-ucrt", "x86_64-w64-mingw32"],
+  ["x86-linux", "i686-redhat-linux"],
+  ["x86_64-linux", "x86_64-redhat-linux"],
+  ["x86_64-darwin", "x86_64-apple-darwin"],
+  ["arm64-darwin", "aarch64-apple-darwin"],
+  ["arm-linux", "arm-linux-gnueabihf"],
+  ["aarch64-linux", "aarch64-linux-gnu"],
+]
+
 namespace :build do
 
-  platforms = [
-    ["x86-mingw32", "i686-w64-mingw32"],
-    ["x64-mingw32", "x86_64-w64-mingw32"],
-    ["x64-mingw-ucrt", "x86_64-w64-mingw32"],
-    ["x86-linux", "i686-redhat-linux"],
-    ["x86_64-linux", "x86_64-redhat-linux"],
-    ["x86_64-darwin", "x86_64-apple-darwin"],
-    ["arm64-darwin", "aarch64-apple-darwin"],
-    ["arm-linux", "arm-linux-gnueabihf"],
-    ["aarch64-linux", "aarch64-linux-gnu"],
-  ]
   platforms.each do |platform, target|
     sdf = "Dockerfile.mri.#{platform}"
 
@@ -85,5 +86,18 @@ task :update_lists do
         PredefinedGroups = #{groups.inspect}
       end
     EOT
+  end
+end
+
+namespace :release do
+  desc "push all docker images"
+  task :images do
+    jimg = "#{DOCKERHUB_USER}/rake-compiler-dock-jruby:#{RakeCompilerDock::IMAGE_VERSION}"
+    sh "docker", "push", jimg
+
+    platforms.each do |platform, _|
+      img = "#{DOCKERHUB_USER}/rake-compiler-dock-mri-#{platform}:#{RakeCompilerDock::IMAGE_VERSION}"
+      sh "docker", "push", img
+    end
   end
 end
