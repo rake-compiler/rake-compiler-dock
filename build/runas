@@ -4,12 +4,4 @@ groupadd -o -g "$GID" "$GROUP"
 mkdir -p /tmp/home
 useradd -o -g "$GID" -u "$UID" -G rvm,sudo -p "" -b /tmp/home -m "$USER"
 
-HOME=$(bash <<< "echo ~$USER")
-ln -s /usr/local/rake-compiler "$HOME"/.rake-compiler
-mkdir -p "$HOME"/.gem
-chown "$USER" "$HOME"/.gem
-
-/usr/bin/sudo -u "$USER" -H \
-    BASH_ENV=/etc/rubybashrc \
-    RAKE_EXTENSION_TASK_NO_NATIVE=true \
-    -- "$@"
+/usr/bin/sudo -u "$USER" -H BASH_ENV=/etc/rubybashrc -- "$@"
