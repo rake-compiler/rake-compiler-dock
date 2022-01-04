@@ -1,3 +1,21 @@
+1.2.0 / 2022-01-04
+------------------
+
+* Add Ruby-3.1 as native rvm and cross ruby versions.
+* Remove Ruby-2.2 and 2.3 from RUBY_CC_VERSION and cross rubies.
+* Add Linux cross build targets "arm-linux" and "aarch64-linux".
+* Add cross build target "x64-mingw-ucrt" for ruby-3.1 on Windows.
+* Add `wget` and `git` to Linux image.
+* Add `maven` to JRuby image.
+* Update JRuby to 9.3.2.0
+* Fix default value of platform for JRuby. #50
+* Update openjdk version from 14 to 17
+* Add a test gem and build and run it on all supported platforms on Github Actions.
+* Allow alternative build command like `docker buildx build`
+* Provide compiler-rt libraries for darwin builds. #60
+* Extract build environment from `runas` into `rcd-env.sh` and loaded it in non-interactive non-login shells. #57
+
+
 1.1.0 / 2020-12-29
 ------------------
 
