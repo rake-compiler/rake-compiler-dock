@@ -248,6 +248,11 @@ RUN for f in addr2line gcc gcov-tool ranlib ar dwp gcc-ranlib nm readelf as elfe
 
 # ruby-2.5 links to libcrypt, which isn't necessary for extensions
 RUN find /usr/local/rake-compiler/ruby -name rbconfig.rb | while read f ; do sed -i 's/-lcrypt//' $f ; done
+
+# Use builtin functions of newer gcc to avoid linker issues on Musl based Linux
+COPY build/math_h.patch /root/
+RUN cd /usr/include/ && \
+    patch -p1 < /root/math_h.patch
 <% end %>
 
 <% if platform=~/arm64-darwin/ %>
