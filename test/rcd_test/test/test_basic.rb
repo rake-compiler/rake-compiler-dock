@@ -19,4 +19,13 @@ class TestBasic < Minitest::Test
       assert_equal("__builtin_available is not defined", e.message)
     end
   end
+
+  def test_floating_point_classification_macros
+    skip("jruby should not run libc-specific tests") if RUBY_ENGINE == "jruby"
+    refute(RcdTest.isinf?(42.0))
+    assert(RcdTest.isinf?(Float::INFINITY))
+    refute(RcdTest.isnan?(42.0))
+    assert(RcdTest.isnan?(Float::NAN))
+  end
+
 end
