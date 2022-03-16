@@ -16,5 +16,8 @@ else
   puts "Gem::Platform.local.to_s: #{Gem::Platform.local.to_s.inspect}"
   puts "-"*70
 
+  have_func('rb_thread_call_without_gvl', 'ruby/thread.h') ||
+      raise("rb_thread_call_without_gvl() not found")
+
   create_makefile("rcd_test/rcd_test_ext")
 end
