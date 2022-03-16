@@ -2,6 +2,11 @@ ARG from_image
 FROM ${from_image}
 
 RUN uname -a
+
+# Change download address of Centos-8 which is EOL
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+
 RUN yum install -y ruby git
 
 RUN ruby --version
