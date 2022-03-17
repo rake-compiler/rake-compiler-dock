@@ -1,3 +1,12 @@
+1.2.1 / 2022-03-17
+------------------
+
+* Fix testing for ruby C-API functions in mkmf. #65, #67
+* Use openjdk 11 to make maven work on ubuntu 20.04. #64
+* Remove x86_64-w64-mingw32-pkg-config from the x64-mingw-ucrt image. #63
+* Add a patch for math.h to use gcc builtins and to improve compat with musl based systems. #42
+
+
 1.2.0 / 2022-01-04
 ------------------
 
