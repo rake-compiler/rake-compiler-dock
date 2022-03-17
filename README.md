@@ -108,7 +108,7 @@ jobs:
     name: "native-gem"
     runs-on: ubuntu-latest
     container:
-      image: "larskanis/rake-compiler-dock-mri-x86_64-linux:1.2.0"
+      image: "larskanis/rake-compiler-dock-mri-x86_64-linux:1.2.1"
     steps:
       - uses: actions/checkout@v2
       - run: bundle install && bundle exec rake gem:x86_64-linux:rcd
