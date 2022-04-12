@@ -52,7 +52,7 @@ jobs:
 
       - name: Enable Multiarch
         run: |
-          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes --credential yes
         if: matrix.platform == 'aarch64-linux'
 
       - name: Create builder
