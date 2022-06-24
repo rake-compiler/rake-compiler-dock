@@ -41,11 +41,12 @@ namespace "gem" do
 
       desc "Build the native gem for #{plat}"
       task plat => 'prepare' do
+        config = "-- #{ENV['RCD_TEST_CONFIG']}"
         # Set mountdir of the directory where .git resides, so that git ls-files in the gemspec works
         RakeCompilerDock.sh <<-EOT, platform: plat, mountdir: Dir.pwd + "/../.."
           (cp tmp/gem/gem-*.pem ~/.gem/ || true) &&
           bundle --local &&
-          rake native:#{plat} pkg/#{exttask.gem_spec.full_name}-#{plat}.gem
+          rake native:#{plat} pkg/#{exttask.gem_spec.full_name}-#{plat}.gem #{config}
         EOT
       end
     end

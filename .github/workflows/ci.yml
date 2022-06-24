@@ -69,6 +69,7 @@ jobs:
           gem install -l rake-compiler-dock-*.gem
           cd test/rcd_test/
           bundle install
+          bundle exec rake clean clobber
           bundle exec rake gem:${PLATFORM}
 
       - name: Upload binary gem
@@ -77,16 +78,34 @@ jobs:
           name: gem-${{ matrix.platform }}
           path: test/rcd_test/pkg/*-*-*.gem
 
-      - name: Upload source gem
+      - if: matrix.platform == 'jruby'
+        name: Upload source gem
         uses: actions/upload-artifact@v2
-        if: matrix.platform == 'jruby'
         with:
           name: gem-ruby
           path: test/rcd_test/pkg/*-?.?.?.gem
 
+      - if: contains(matrix.platform, 'x64-mingw')
+        name: Build static rcd_test.gem
+        env:
+          RCD_TEST_CONFIG: "--link-static"
+        run: |
+          gem build rake-compiler-dock.gemspec
+          gem install -l rake-compiler-dock-*.gem
+          cd test/rcd_test/
+          bundle install
+          bundle exec rake clean clobber
+          bundle exec rake gem:${PLATFORM}
+
+      - if: contains(matrix.platform, 'x64-mingw')
+        name: Upload static binary gem
+        uses: actions/upload-artifact@v2
+        with:
+          name: gem-${{ matrix.platform }}-static
+          path: test/rcd_test/pkg/*-*-*.gem
 
   job_test_native:
-    name: Test ${{matrix.ruby}} ${{matrix.platform}}
+    name: Test (${{matrix.ruby}}, ${{matrix.platform}})
     needs: docker_build
     strategy:
       fail-fast: false
@@ -133,6 +152,50 @@ jobs:
         with:
           name: gem-${{ matrix.platform }}
       - name: Install gem-${{matrix.platform}}
+        run: gem install --local *.gem --verbose
+      - name: Run tests
+        run: |
+          cd test/rcd_test/
+          bundle install
+          ruby -rrcd_test -S rake test
+
+  job_test_native_static:
+    name: Test static (${{matrix.ruby}}, ${{matrix.platform}})
+    needs: docker_build
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - windows
+        ruby:
+          - "3.1"
+          - "3.0"
+          - "2.7"
+          - "2.6"
+          - "2.5"
+          - "2.4"
+        include:
+          - os: windows
+            platform: x64-mingw32
+          - os: windows
+            ruby: "3.1"
+            platform: x64-mingw-ucrt
+        exclude:
+          - os: windows
+            ruby: "3.1"
+
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+      - run: ruby --version
+      - name: Download gem-${{matrix.platform}}-static
+        uses: actions/download-artifact@v2
+        with:
+          name: gem-${{ matrix.platform }}-static
+      - name: Install gem-${{matrix.platform}}-static
         run: gem install --local *.gem --verbose
       - name: Run tests
         run: |

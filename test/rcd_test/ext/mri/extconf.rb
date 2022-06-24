@@ -19,5 +19,11 @@ else
   have_func('rb_thread_call_without_gvl', 'ruby/thread.h') ||
       raise("rb_thread_call_without_gvl() not found")
 
+  if arg_config("--link-static", false)
+    # https://github.com/rake-compiler/rake-compiler-dock/issues/69
+    puts "Linking with '-static' flag"
+    $LDFLAGS << ' -static'
+  end
+
   create_makefile("rcd_test/rcd_test_ext")
 end
