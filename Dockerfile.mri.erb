@@ -217,7 +217,7 @@ RUN find /usr/local/rake-compiler/ruby/*mingw*/ -name rbconfig.rb | while read f
 # Raise Windows-API to Vista (affects ruby < 2.6 only)
 RUN find /usr/local/rake-compiler/ruby -name rbconfig.rb | while read f ; do sed -i 's/0x0501/0x0600/' $f ; done
 # Don't link to static libruby
-RUN find /usr/local/rake-compiler/ruby -name *msvcrt-ruby*.dll.a | while read f ; do n=`echo $f | sed s/.dll//` ; mv $f $n ; done
+RUN find /usr/local/rake-compiler/ruby -name lib*-ruby*.dll.a | while read f ; do n=`echo $f | sed s/.dll//` ; mv $f $n ; done
 <% end %>
 
 USER root
