@@ -64,7 +64,7 @@ RUN bash -c " \
 RUN echo "gem: --no-ri --no-rdoc" >> ~/.gemrc && \
     bash -c " \
         rvm all do gem update --system --no-document && \
-        rvm all do gem install --no-document bundler 'bundler:~>1.16' 'rake-compiler:~>1.2.0' hoe mini_portile rubygems-tasks mini_portile2 && \
+        rvm all do gem install --no-document bundler 'bundler:~>1.16' 'rake-compiler:1.2.0' hoe mini_portile rubygems-tasks mini_portile2 && \
         find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw "
 
 # Install rake-compiler's cross rubies in global dir instead of /root
@@ -142,9 +142,9 @@ USER rvm
 COPY build/patches2 /home/rvm/patches/
 RUN bash -c " \
     for v in ${RVM_RUBIES} ; do \
-      cd /usr/local/rvm/gems/ruby-\$v/gems/rake-compiler-1.1.6 && \
-      echo applying patches to ruby-\$v /home/rvm/patches/rake-compiler-1.1.6/*.patch && \
-      ( git apply /home/rvm/patches/rake-compiler-1.1.6/*.patch || true ) \
+      cd /usr/local/rvm/gems/ruby-\$v/gems/rake-compiler-1.2.0 && \
+      echo applying patches to ruby-\$v /home/rvm/patches/rake-compiler-1.2.0/*.patch && \
+      ( git apply /home/rvm/patches/rake-compiler-1.2.0/*.patch || true ) \
     done "
 
 # Patch rubies for cross build
