@@ -33,6 +33,9 @@ jobs:
           - arm-linux
           - aarch64-linux
           - jruby
+        docker-platform:
+          - linux/amd64
+          - linux/arm64
 
     runs-on: ubuntu-latest
     env:
@@ -53,10 +56,13 @@ jobs:
           ruby-version: "3.0"
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
       - name: Build docker image
         run: |
           docker buildx create --driver docker-container --use
-          bundle exec rake build:${PLATFORM} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new --load"
+          bundle exec rake build:${PLATFORM} RCD_DOCKER_BUILD="docker buildx build --platform ${{ inputs.docker-platform }} --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new --load"
 
       - name: Move build cache and remove outdated layers
         run: |
