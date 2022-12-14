@@ -61,9 +61,10 @@ RUN bash -c " \
 
 # Install rake-compiler and typical gems in all Rubies
 # do not generate documentation for gems
+# TODO: stop pinning rubygems to 3.3.20 once https://github.com/rake-compiler/rake-compiler/pull/209 is merged
 RUN echo "gem: --no-ri --no-rdoc" >> ~/.gemrc && \
     bash -c " \
-        rvm all do gem update --system --no-document && \
+        rvm all do gem update --system=3.3.20 --no-document && \
         rvm all do gem install --no-document bundler 'bundler:~>1.16' 'rake-compiler:1.1.6' hoe mini_portile rubygems-tasks mini_portile2 && \
         find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw "
 
