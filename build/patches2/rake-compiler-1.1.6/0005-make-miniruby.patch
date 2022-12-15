@@ -1,0 +1,19 @@
+fix(temp): rake-compiler explicitly builds miniruby first
+
+See https://bugs.ruby-lang.org/issues/19239 for the upstream bug
+report.
+
+TODO: This patch can be removed if that's fixed in a 3.2.0 final release.
+
+diff --git a/tasks/bin/cross-ruby.rake b/tasks/bin/cross-ruby.rake
+index 8317a2a..d9bfe4c 100644
+--- a/tasks/bin/cross-ruby.rake
++++ b/tasks/bin/cross-ruby.rake
+@@ -129,6 +129,7 @@
+ 
+     # make
+     file "#{build_dir}/ruby.exe" => ["#{build_dir}/Makefile"] do |t|
++      sh "#{MAKE} miniruby", chdir: File.dirname(t.prerequisites.first)
+       sh MAKE, chdir: File.dirname(t.prerequisites.first)
+     end
+ 
