@@ -19,7 +19,7 @@ RUN rm -f /usr/local/bin/sudo && \
 <% else %>
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -y update && \
-    apt-get install -y curl git-core xz-utils build-essential zlib1g-dev libreadline-dev libssl-dev wget unzip sudo gnupg2 dirmngr cmake pkg-config && \
+    apt-get install -y curl git-core xz-utils build-essential zlib1g-dev libreadline-dev libssl-dev wget unzip sudo gnupg2 dirmngr cmake pkg-config autoconf && \
     rm -rf /var/lib/apt/lists/*
 <% end %>
 
