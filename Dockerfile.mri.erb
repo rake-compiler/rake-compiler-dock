@@ -104,37 +104,12 @@ RUN bash -c " \
 <% if manylinux %>
 # Create dev tools x86-linux-*
 COPY build/mk_i686.rb /root/
-RUN bash -c " \
-        ruby /root/mk_i686.rb "
+RUN /root/mk_i686.rb
 <% end %>
 
 <% if platform=~/darwin/ %>
-RUN git clone -q --depth=1 https://github.com/tpoechtrager/osxcross.git /opt/osxcross && rm -rf /opt/osxcross/.git && \
-    cd /opt/osxcross/tarballs && \
-    curl -L -o MacOSX11.1.sdk.tar.xz https://github.com/larskanis/MacOSX-SDKs/releases/download/11.1/MacOSX11.1.sdk.tar.xz && \
-    tar -xf MacOSX11.1.sdk.tar.xz -C . && \
-    cp -rf /usr/lib/llvm-10/include/c++ MacOSX11.1.sdk/usr/include/c++ && \
-    cp -rf /usr/include/x86_64-linux-gnu/c++/9/bits/ MacOSX11.1.sdk/usr/include/c++/v1/bits && \
-    tar -cJf MacOSX11.1.sdk.tar.xz MacOSX11.1.sdk && \
-    cd /opt/osxcross && \
-    UNATTENDED=1 SDK_VERSION=11.1 OSX_VERSION_MIN=10.13 USE_CLANG_AS=1 ./build.sh && \
-    ln -s /usr/bin/llvm-config-10 /usr/bin/llvm-config && \
-    ENABLE_COMPILER_RT_INSTALL=1 SDK_VERSION=11.1 ./build_compiler_rt.sh && \
-    rm -rf *~ build tarballs/*
-
-RUN echo "export PATH=/opt/osxcross/target/bin:\$PATH" >> /etc/rubybashrc && \
-    echo "export MACOSX_DEPLOYMENT_TARGET=10.13" >> /etc/rubybashrc && \
-    echo "export OSXCROSS_MP_INC=1" >> /etc/rubybashrc
-
-# Add links to build tools without target version kind of:
-#   arm64-apple-darwin-clang   =>   arm64-apple-darwin20.1-clang
-RUN rm /opt/osxcross/target/bin/*-apple-darwin-* ; \
-    find /opt/osxcross/target/bin/ -name '*-apple-darwin[0-9]*' | sort | while read f ; do d=`echo $f | sed s/darwin[0-9\.]*/darwin/`; echo $f '"$@"' | tee $d && chmod +x $d ; done
-
-# There's no objdump in osxcross but we can use llvm's
-RUN ln -s /usr/lib/llvm-10/bin/llvm-objdump /opt/osxcross/target/bin/x86_64-apple-darwin-objdump && \
-    ln -s /usr/lib/llvm-10/bin/llvm-objdump /opt/osxcross/target/bin/aarch64-apple-darwin-objdump
-
+COPY build/mk_osxcross.sh /home/rvm
+RUN /home/rvm/mk_osxcross.sh
 <% end %>
 
 # Patch rake-compiler to build and install static libraries for Linux rubies
