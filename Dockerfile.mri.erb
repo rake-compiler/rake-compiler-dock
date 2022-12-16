@@ -167,8 +167,8 @@ RUN bash -c " \
 axrubies = if platform =~ /x64-mingw-ucrt/
   [
     # Rubyinstaller-3.1.0+ is platform x64-mingw-ucrt
-    ["3.2.0-rc1", "3.1.0", true],
-    ["3.1.0", "3.1.0", true],
+    # parallel=false because 3.2.0-rc1 has undefined references when using a high -j arg
+    ["3.2.0-rc1:3.1.0", "3.1.0", false],
   ]
 elsif platform =~ /x64-mingw32/
   [
