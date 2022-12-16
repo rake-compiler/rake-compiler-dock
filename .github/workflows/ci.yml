@@ -4,6 +4,8 @@ concurrency:
   cancel-in-progress: true
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 5 * * 3" # At 05:00 on Wednesday # https://crontab.guru/#0_5_*_*_3
   push:
     branches:
       - main
