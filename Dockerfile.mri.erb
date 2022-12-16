@@ -8,9 +8,12 @@ manylinux = !!(image =~ /manylinux/)
 %>
 FROM <%= image %>
 
+##
+## RVM and native rubies
+##
+# Install packages which rvm will require
 <% if manylinux %>
-# install packages which rvm will require
-RUN yum install -y autoconf gcc-c++ libtool readline-devel sqlite-devel ruby openssl-devel xz cmake sudo less libffi-devel git wget libyaml-devel
+RUN yum install -y sudo ruby less git wget curl autoconf libtool cmake gcc-c++ xz readline-devel sqlite-devel openssl-devel libffi-devel libyaml-devel
 
 # Prepare sudo and delete sudo as alias to gosu
 RUN rm -f /usr/local/bin/sudo && \
@@ -19,7 +22,7 @@ RUN rm -f /usr/local/bin/sudo && \
 <% else %>
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -y update && \
-    apt-get install -y curl git-core xz-utils build-essential zlib1g-dev libreadline-dev libssl-dev wget unzip sudo gnupg2 dirmngr cmake pkg-config autoconf libyaml-dev && \
+    apt-get install -y sudo wget autoconf cmake curl git-core pkg-config build-essential xz-utils unzip gnupg2 dirmngr zlib1g-dev libreadline-dev libsqlite0-dev libssl-dev libyaml-dev libffi-dev && \
     rm -rf /var/lib/apt/lists/*
 <% end %>
 
