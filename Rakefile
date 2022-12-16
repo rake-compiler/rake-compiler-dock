@@ -26,6 +26,28 @@ namespace :build do
   platforms.each do |platform, target|
     sdf = "Dockerfile.mri.#{platform}"
 
+    # Native images to alleviate qemu slowness, and manylinux2014 provides per-arch
+    # images. But they are not yet conformant to the Docker platform spec (i.e.
+    # amd64/linux). We have to do some string manipulation to get the right for
+    # now, but you should be able to nuke this code soon, and rely on only the
+    # buildx `--platform` feature instead....
+    #
+    # See: https://github.com/pypa/manylinux/issues/1306
+    cpu = case ENV["DOCKER_BUILD_PLATFORM"]
+    when /arm64/
+      "aarch64"
+    when /amd64/
+      "x86_64"
+    else
+      if ENV["CI"]
+        raise "Couldnt infer manylinux CPU for #{ENV["DOCKER_BUILD_PLATFORM"].inspect}"
+      else
+        "x86_64"
+      end
+    end
+
+    manylinux_image = "quay.io/pypa/manylinux2014_#{cpu}"
+
     desc "Build image for platform #{platform}"
     task platform => sdf
     task sdf do

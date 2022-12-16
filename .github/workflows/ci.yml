@@ -64,7 +64,7 @@ jobs:
       - name: Build docker image
         run: |
           docker buildx create --driver docker-container --use
-          bundle exec rake build:${PLATFORM} RCD_DOCKER_BUILD="docker buildx build --platform=${{ matrix.docker-platform }} --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new --load"
+          bundle exec rake build:${PLATFORM} DOCKER_PLATFORM="${{ matrix.docker-platform }}" RCD_DOCKER_BUILD="docker buildx build --platform=${{ matrix.docker-platform }} --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new --load"
 
       - name: Move build cache and remove outdated layers
         run: |
