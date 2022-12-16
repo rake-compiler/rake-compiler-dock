@@ -45,37 +45,31 @@ RUN mkdir ~/.gnupg && \
 RUN gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB && \
     (curl -L http://get.rvm.io | sudo bash) && \
     bash -c " \
-        source /etc/rubybashrc && \
-        rvm autolibs disable && \
-        rvmsudo rvm cleanup all "
+      source /etc/rubybashrc && \
+      rvm autolibs disable && \
+      rvmsudo rvm cleanup all \
+    "
 
-# Import patch files for ruby and gems
+# Install native rubies and fix permissions
 COPY build/patches /home/rvm/patches/
-
-# install rubies and fix permissions on
 ENV RVM_RUBIES 2.5.9 3.1.0
 RUN bash -c " \
-    export CFLAGS='-s -O3 -fno-fast-math -fPIC' && \
-    for v in ${RVM_RUBIES} ; do \
+      export CFLAGS='-s -O3 -fno-fast-math -fPIC' && \
+      for v in ${RVM_RUBIES} ; do \
         rvm install \$v --patch \$(echo ~/patches/ruby-\$v/* | tr ' ' ','); \
-    done && \
-    rvm cleanup all && \
-    find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw "
+      done && \
+      rvm cleanup all \
+    "
 
-# Install rake-compiler and typical gems in all Rubies
-# do not generate documentation for gems
-RUN echo "gem: --no-ri --no-rdoc" >> ~/.gemrc && \
-    bash -c " \
-        rvm all do gem update --no-document && \
-        rvm all do gem install --no-document bundler 'bundler:~>1.16' 'rake-compiler:1.2.1' hoe mini_portile rubygems-tasks mini_portile2 && \
-        find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw "
+RUN bash -c " \
+      rvm all do gem update --system --no-document && \
+      rvm all do gem update --no-document && \
+      rvm all do gem install bundler --no-document \
+    "
 
-# Install rake-compiler's cross rubies in global dir instead of /root
-RUN sudo mkdir -p /usr/local/rake-compiler && \
-    sudo chown rvm.rvm /usr/local/rake-compiler && \
-    ln -s /usr/local/rake-compiler ~/.rake-compiler
-
-# Add cross compilers for Windows and Linux
+##
+## Cross compilers
+##
 USER root
 
 <% if platform=~/x64-mingw-ucrt/ %>
@@ -100,10 +94,6 @@ if platform=~/x64-mingw32/   %> gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 <% end
     rm -rf /var/lib/apt/lists/*
 <% end %>
 
-RUN bash -c " \
-        rvm alias create default 3.1.0 && \
-        rvm use default "
-
 <% if manylinux %>
 # Create dev tools x86-linux-*
 COPY build/mk_i686.rb /root/
@@ -115,30 +105,28 @@ COPY build/mk_osxcross.sh /home/rvm
 RUN /home/rvm/mk_osxcross.sh
 <% end %>
 
-# Patch rake-compiler to build and install static libraries for Linux rubies
+
+##
+## Cross-compile rubies
+##
 USER rvm
+
+RUN bash -c "rvm all do gem install --no-document rake-compiler:1.2.1"
+
+# Install rake-compiler's cross rubies in global dir instead of /root
+RUN sudo mkdir -p /usr/local/rake-compiler && \
+    sudo chown rvm.rvm /usr/local/rake-compiler && \
+    ln -s /usr/local/rake-compiler ~/.rake-compiler
+
+# Patch rake-compiler to build and install static libraries for Linux rubies
 COPY build/patches2 /home/rvm/patches/
 RUN bash -c " \
-    for v in ${RVM_RUBIES} ; do \
-      cd /usr/local/rvm/gems/ruby-\$v/gems/rake-compiler-1.2.1 && \
-      echo applying patches to ruby-\$v /home/rvm/patches/rake-compiler-1.2.1/*.patch && \
-      ( git apply /home/rvm/patches/rake-compiler-1.2.1/*.patch || true ) \
-    done "
-
-# Patch rubies for cross build
-#USER root
-#RUN bash -c " \
-#    for v in 2.7.0 3.0.0 3.1.0 ; do \
-#      curl -SL http://cache.ruby-lang.org/pub/ruby/\${v:0:3}/ruby-\$v.tar.xz | tar -xJC /root/ && \
-#      cd /root/ruby-\$v && \
-#      git apply /home/rvm/patches/ruby-\$v/*.patch && \
-#      cd .. && \
-#      mkdir -p /usr/local/rake-compiler/sources/ && \
-#      tar cjf /usr/local/rake-compiler/sources/ruby-\$v.tar.bz2 ruby-\$v && \
-#      chown rvm /usr/local/rake-compiler -R && \
-#      rm -rf /root/ruby-\$v ; \
-#    done "
-#USER rvm
+      for v in ${RVM_RUBIES} ; do \
+        cd /usr/local/rvm/gems/ruby-\$v/gems/rake-compiler-1.2.1 && \
+        echo applying patches to ruby-\$v /home/rvm/patches/rake-compiler-1.2.1/*.patch && \
+        ( git apply /home/rvm/patches/rake-compiler-1.2.1/*.patch || true ) \
+      done \
+    "
 
 <%
 axrubies = if platform =~ /x64-mingw-ucrt/
@@ -169,16 +157,16 @@ ENV XRUBIES <%= xrubies %>
 # Build xruby versions in parallel
 # Then cleanup all build artifacts
 RUN bash -c " \
-    rvm use <%= rvm %> && \
-    export CPPFLAGS='<%= "-D__USE_MINGW_ANSI_STDIO=1" if platform=~/x64-mingw-ucrt/ %>' && \
-    export CFLAGS='-O1 -fno-omit-frame-pointer -fno-fast-math -fstack-protector-strong <%= strip %>' && \
-    export LDFLAGS='-pipe <%= strip %>' && \
-    <%= "export LIBS='-l:libssp.a' &&" if platform =~ /mingw/ %> \
-    <%= "export CC=#{target}-clang &&" if platform =~ /darwin/ %> \
-    export MAKE='make V=1 <%= "-j`nproc`" if parallel %>' && \
-    rake-compiler cross-ruby VERSION=$XRUBIES HOST=<%= target %> && \
-    rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources && \
-    find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw "
+      rvm use <%= rvm %> && \
+      export CPPFLAGS='<%= "-D__USE_MINGW_ANSI_STDIO=1" if platform=~/x64-mingw-ucrt/ %>' && \
+      export CFLAGS='-O1 -fno-omit-frame-pointer -fno-fast-math -fstack-protector-strong <%= strip %>' && \
+      export LDFLAGS='-pipe <%= strip %>' && \
+      <%= "export LIBS='-l:libssp.a' &&" if platform =~ /mingw/ %> \
+      <%= "export CC=#{target}-clang &&" if platform =~ /darwin/ %> \
+      export MAKE='make V=1 <%= "-j`nproc`" if parallel %>' && \
+      rake-compiler cross-ruby VERSION=$XRUBIES HOST=<%= target %> && \
+      rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources \
+    "
 <% end %>
 
 <% if platform=~/linux/ %>
@@ -199,11 +187,13 @@ RUN find /usr/local/rake-compiler/ruby -name rbconfig.rb | while read f ; do sed
 RUN find /usr/local/rake-compiler/ruby -name lib*-ruby*.dll.a | while read f ; do n=`echo $f | sed s/.dll//` ; mv $f $n ; done
 <% end %>
 
+##
+##  Final adjustments
+##
 USER root
 
 # Fix paths in rake-compiler/config.yml
 RUN sed -i -- "s:/root/.rake-compiler:/usr/local/rake-compiler:g" /usr/local/rake-compiler/config.yml
-
 
 <% if platform=~/mingw/ %>
 # Install wrappers for strip commands as a workaround for "Protocol error" in boot2docker.
@@ -250,6 +240,12 @@ RUN echo "source /etc/profile.d/rcd-env.sh" >> /etc/rubybashrc
 
 # Install sudoers configuration
 COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
+
+RUN find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw
+RUN bash -c " \
+      rvm alias create default 3.1.0 && \
+      rvm use default \
+    "
 
 ENV RUBY_CC_VERSION 3.2.0:3.1.0:3.0.0:2.7.0:2.6.0:2.5.0:2.4.0
 
