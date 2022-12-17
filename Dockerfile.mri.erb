@@ -23,12 +23,12 @@ RUN rm -f /usr/local/bin/sudo && \
     echo "%sudo  ALL=(ALL)       ALL" >> /etc/sudoers
 <% else %>
 ENV DEBIAN_FRONTEND noninteractive
-COPY ./build/setup_dpkg_multiarch_for_target.sh /
-RUN /setup_dpkg_multiarch_for_target.sh <%= foreign_dpkg_arch %>;
+
+COPY ./build/apt_install_multiarch.sh /
+RUN /apt_install_multiarch.sh <%= foreign_dpkg_arch %> zlib1g-dev libreadline-dev libsqlite0-dev libssl-dev libyaml-dev libffi-dev
 
 RUN apt-get -y -qq update && \
     apt-get -y -qq install sudo wget autoconf cmake curl git-core pkg-config build-essential xz-utils unzip gnupg2 dirmngr && \
-    apt-get -y -qq install zlib1g-dev:<%= foreign_dpkg_arch %> libreadline-dev:<%= foreign_dpkg_arch %> libsqlite0-dev:<%= foreign_dpkg_arch %> libssl-dev:<%= foreign_dpkg_arch %> libyaml-dev:<%= foreign_dpkg_arch %> libffi-dev:<%= foreign_dpkg_arch %> && \
     rm -rf /var/lib/apt/lists/*;
 <% end %>
 
