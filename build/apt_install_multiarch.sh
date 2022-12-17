@@ -13,7 +13,7 @@ main() {
   cross_packages=()
   packages=("$@")
 
-  if [ "$deb_target_arch" != "$deb_host_arch" ] && [ "$deb_target_arch" = "arm64" ]; then
+  if [ "$deb_target_arch" != "$deb_host_arch" ] && [ "$deb_host_arch" = "arm64" ]; then
     echo "Setting up multiarch support for $deb_target_arch" >&2
     dpkg --add-architecture "$deb_target_arch"
     cross_packages=("${packages[@]/%/:$deb_target_arch}")
