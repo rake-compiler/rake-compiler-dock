@@ -33,16 +33,16 @@ namespace :build do
     # buildx `--platform` feature instead....
     #
     # See: https://github.com/pypa/manylinux/issues/1306
-    manylinux_cpu, dpkg_arch = case ENV["DOCKER_BUILD_PLATFORM"]
+    manylinux_cpu = case ENV["DOCKER_BUILD_PLATFORM"]
     when /arm64/
-      ["aarch64", "arm64"]
+      "aarch64"
     when /amd64/
-      ["x86_64", "amd64"]
+      "x86_64"
     else
       if ENV["CI"]
         raise "Couldnt infer manylinux CPU for #{ENV["DOCKER_BUILD_PLATFORM"].inspect}"
       else
-        ["x86_64", "amd64"]
+        "x86_64"
       end
     end
 
@@ -68,6 +68,7 @@ namespace :build do
   RakeCompilerDock::ParallelDockerBuild.new(platforms.map{|pl, _| "Dockerfile.mri.#{pl}" } + ["Dockerfile.jruby"], workdir: "tmp/docker", docker_build_cmd: docker_build_cmd)
 
   desc "Build images for all MRI platforms in parallel"
+  rry
   multitask :mri => platforms.map(&:first)
 
   desc "Build images for all platforms in parallel"

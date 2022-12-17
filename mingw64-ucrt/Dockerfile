@@ -34,7 +34,7 @@ RUN cd mingw-w64-* && \
 # Install UCRT enabled deb-packages
 RUN dpkg -i mingw-w64-common_7.0.0-2_all.deb \
     mingw-w64-tools_7.0.0-2_$(dpkg --print-architecture).deb \
-    mingw-w64-x86-64-dev_7.0.0-2_all.deb
+    mingw-w64-$(dpkg --print-architecture)-dev_7.0.0-2_all.deb
 
 # Download gcc-binutils sources for mingw
 RUN apt-get source binutils-mingw-w64 && \
