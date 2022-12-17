@@ -11,7 +11,7 @@ main() {
 
   packages=("$@")
 
-  if [ "$deb_target_arch" != "$deb_host_arch" ]; then
+  if [ "$deb_target_arch" != "$deb_host_arch" ] && [ "$deb_target_arch" != "amd64" ]; then
     echo "Setting up multiarch support for $deb_target_arch" >&2
     dpkg --add-architecture "$deb_target_arch"
     packages=("${packages[@]/%/:$deb_target_arch}")
