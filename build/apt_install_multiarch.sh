@@ -22,9 +22,9 @@ main() {
     sed -i "s/^deb http/deb [arch=$deb_host_arch] http/" /etc/apt/sources.list
 
     # Add sources for ported target libs
-    echo "deb [arch=$deb_target_arch] http://ports.ubuntu.com/ubuntu-ports $(lsb_release -cs) main universe restricted multiverse"
-    echo "deb [arch=$deb_target_arch] http://ports.ubuntu.com/ubuntu-ports $(lsb_release -cs)-updates main universe restricted multiverse"
-    echo "deb [arch=$deb_target_arch] http://ports.ubuntu.com/ubuntu-ports $(lsb_release -cs)-security main universe restricted multiverse"
+    echo "deb [arch=$deb_target_arch] http://ports.ubuntu.com/ubuntu-ports $lsb_release main universe restricted multiverse"
+    echo "deb [arch=$deb_target_arch] http://ports.ubuntu.com/ubuntu-ports $lsb_release-updates main universe restricted multiverse"
+    echo "deb [arch=$deb_target_arch] http://ports.ubuntu.com/ubuntu-ports $lsb_release-security main universe restricted multiverse"
   else
     echo "No need to set up multiarch support for $deb_target_arch"
   fi
