@@ -72,7 +72,7 @@ jobs:
           docker_build="docker buildx build --platform=$DOCKER_BUILD_PLATFORM --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new --load -t $extra_tag"
           bundle exec rake build:${PLATFORM} RCD_DOCKER_BUILD="$docker_build"
 
-          if [[ "$(git log -1 --pretty=format:"%s")" =~ *"$DOCKER_BUILD_PLATFORM"* ]]; then
+          if [[ "$(git log -1 --pretty=format:"%s")" =~ *"${{ matrix.docker-platform-cpu }}"* ]]; then
             echo "::info::Saving docker image $extra_tag"
             docker save -o "tmp/${extra_tag}.tar" $extra_tag
             echo "image-tarball=tmp/${extra_tag}.tar" >> $GITHUB_OUTPUT
