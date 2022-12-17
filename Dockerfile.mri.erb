@@ -23,8 +23,10 @@ RUN rm -f /usr/local/bin/sudo && \
     echo "%sudo  ALL=(ALL)       ALL" >> /etc/sudoers
 <% else %>
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get -y update && \
-    apt-get install -y sudo wget autoconf cmake curl git-core pkg-config build-essential xz-utils unzip gnupg2 dirmngr zlib1g-dev libreadline-dev libsqlite0-dev libssl-dev libyaml-dev libffi-dev && \
+RUN dpkg --add-architecture <%= foreign_dpkg_arch %> && \
+    apt-get -y update && \
+    apt-get install -y sudo wget autoconf cmake curl git-core pkg-config build-essential xz-utils unzip gnupg2 dirmngr && \
+    apt-get install -y zlib1g-dev:<%= foreign_dpkg_arch %> libreadline-dev:<%= foreign_dpkg_arch %> libsqlite0-dev:<%= foreign_dpkg_arch %> libssl-dev:<%= foreign_dpkg_arch %> libyaml-dev:<%= foreign_dpkg_arch %> libffi-dev:<%= foreign_dpkg_arch %> && \
     rm -rf /var/lib/apt/lists/*
 <% end %>
 
@@ -76,10 +78,10 @@ USER root
 
 <% if platform=~/x64-mingw-ucrt/ %>
 COPY --from=larskanis/mingw64-ucrt:20.04 \
-    /build/binutils-mingw-w64-x86-64_2.34-6ubuntu1.3+8.8_<%= dpkg_arch %>.deb \
-    /build/g++-mingw-w64-x86-64_9.3.0-17ubuntu1~20.04+22~exp1ubuntu4_<%= dpkg_arch %>.deb \
-    /build/gcc-mingw-w64-base_9.3.0-17ubuntu1~20.04+22~exp1ubuntu4_<%= dpkg_arch %>.deb \
-    /build/gcc-mingw-w64-x86-64_9.3.0-17ubuntu1~20.04+22~exp1ubuntu4_<%= dpkg_arch %>.deb \
+    /build/binutils-mingw-w64-x86-64_2.34-6ubuntu1.3+8.8_<%= host_dpkg_arch %>.deb \
+    /build/g++-mingw-w64-x86-64_9.3.0-17ubuntu1~20.04+22~exp1ubuntu4_<%= host_dpkg_arch %>.deb \
+    /build/gcc-mingw-w64-base_9.3.0-17ubuntu1~20.04+22~exp1ubuntu4_<%= host_dpkg_arch %>.deb \
+    /build/gcc-mingw-w64-x86-64_9.3.0-17ubuntu1~20.04+22~exp1ubuntu4_<%= host_dpkg_arch %>.deb \
     /build/mingw-w64-common_7.0.0-2_all.deb \
     /build/mingw-w64-x86-64-dev_7.0.0-2_all.deb \
     /debs/
@@ -90,6 +92,7 @@ RUN apt-get -y update && \
     apt-get install -y <%
 if platform=~/darwin/        %> clang python lzma-dev libxml2-dev libssl-dev libc++-10-dev <% end %><%
 if platform=~/aarch64-linux/ %> gcc-aarch64-linux-gnu g++-aarch64-linux-gnu <% end %><%
+if platform=~/x86_64-linux/        %> gcc-x86-64-linux-gnu g++-x86-64-linux-gnu <% end %><%
 if platform=~/arm-linux/     %> gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf <% end %><%
 if platform=~/x86-mingw32/   %> gcc-mingw-w64-i686 g++-mingw-w64-i686 <% end %><%
 if platform=~/x64-mingw32/   %> gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 <% end %> && \

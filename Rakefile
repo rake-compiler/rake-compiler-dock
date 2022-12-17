@@ -10,23 +10,23 @@ DOCKERHUB_USER = ENV['DOCKERHUB_USER'] || "larskanis"
 docker_build_cmd = Shellwords.split(ENV['RCD_DOCKER_BUILD'] || "docker build")
 
 platforms = [
-  ["x86-mingw32", "i686-w64-mingw32"],
-  ["x64-mingw32", "x86_64-w64-mingw32"],
-  ["x64-mingw-ucrt", "x86_64-w64-mingw32"],
-  ["x86-linux", "i686-redhat-linux"],
-  ["x86_64-linux", "x86_64-redhat-linux"],
-  ["x86_64-darwin", "x86_64-apple-darwin"],
-  ["arm64-darwin", "aarch64-apple-darwin"],
-  ["arm-linux", "arm-linux-gnueabihf"],
-  ["aarch64-linux", "aarch64-linux-gnu"],
+  ["x86-mingw32", "i686-w64-mingw32", "i386"],
+  ["x64-mingw32", "x86_64-w64-mingw32", "amd64"],
+  ["x64-mingw-ucrt", "x86_64-w64-mingw32", "amd64"],
+  ["x86-linux", "i686-redhat-linux", "i386"],
+  ["x86_64-linux", "x86_64-redhat-linux", "amd64"],
+  ["x86_64-darwin", "x86_64-apple-darwin", "amd64"],
+  ["arm64-darwin", "aarch64-apple-darwin", "arm64"],
+  ["arm-linux", "arm-linux-gnueabihf", "armhf"],
+  ["aarch64-linux", "aarch64-linux-gnu", "arm64"],
 ]
 
 namespace :build do
 
-  platforms.each do |platform, target|
+  platforms.each do |platform, target, foreign_dpkg_arch|
     sdf = "Dockerfile.mri.#{platform}"
 
-    dpkg_arch = case ENV["DOCKER_BUILD_PLATFORM"]
+    host_dpkg_arch = case ENV["DOCKER_BUILD_PLATFORM"]
     when /arm64/
       "arm64"
     when /amd64/
