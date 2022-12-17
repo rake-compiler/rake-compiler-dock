@@ -68,7 +68,7 @@ jobs:
         id: buildx
         run: |
           docker buildx create --driver docker-container --use
-          extra_tag="rcd-${PLATFORM}-${DOCKER_BUILD_PLATFORM}-${{ github.sha }}"
+          extra_tag="rcd-${PLATFORM}-${{ matrix.docker-platform-cpu }}-${{ github.sha }}"
           docker_build="docker buildx build --platform=$DOCKER_BUILD_PLATFORM --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new --load -t $extra_tag"
           bundle exec rake build:${PLATFORM} RCD_DOCKER_BUILD="$docker_build"
 
