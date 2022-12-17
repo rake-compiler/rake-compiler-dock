@@ -33,20 +33,20 @@ namespace :build do
     # buildx `--platform` feature instead....
     #
     # See: https://github.com/pypa/manylinux/issues/1306
-    cpu = case ENV["DOCKER_BUILD_PLATFORM"]
+    manylinux_cpu, dpkg_arch = case ENV["DOCKER_BUILD_PLATFORM"]
     when /arm64/
-      "aarch64"
+      ["aarch64", "arm64"]
     when /amd64/
-      "x86_64"
+      ["x86_64", "amd64"]
     else
       if ENV["CI"]
         raise "Couldnt infer manylinux CPU for #{ENV["DOCKER_BUILD_PLATFORM"].inspect}"
       else
-        "x86_64"
+        ["x86_64", "amd64"]
       end
     end
 
-    manylinux_image = "quay.io/pypa/manylinux2014_#{cpu}"
+    manylinux_image = "quay.io/pypa/manylinux2014_#{manylinux_cpu}"
 
     desc "Build image for platform #{platform}"
     task platform => sdf

@@ -1,3 +1,4 @@
+
 FROM ubuntu:20.04
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -32,7 +33,7 @@ RUN cd mingw-w64-* && \
 
 # Install UCRT enabled deb-packages
 RUN dpkg -i mingw-w64-common_7.0.0-2_all.deb \
-    mingw-w64-tools_7.0.0-2_amd64.deb \
+    mingw-w64-tools_7.0.0-2_$(dpkg --print-architecture).deb \
     mingw-w64-x86-64-dev_7.0.0-2_all.deb
 
 # Download gcc-binutils sources for mingw

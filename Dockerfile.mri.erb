@@ -80,10 +80,10 @@ USER root
 
 <% if platform=~/x64-mingw-ucrt/ %>
 COPY --from=larskanis/mingw64-ucrt:20.04 \
-    /build/binutils-mingw-w64-x86-64_2.34-6ubuntu1.3+8.8_amd64.deb \
-    /build/g++-mingw-w64-x86-64_9.3.0-17ubuntu1~20.04+22~exp1ubuntu4_amd64.deb \
-    /build/gcc-mingw-w64-base_9.3.0-17ubuntu1~20.04+22~exp1ubuntu4_amd64.deb \
-    /build/gcc-mingw-w64-x86-64_9.3.0-17ubuntu1~20.04+22~exp1ubuntu4_amd64.deb \
+    /build/binutils-mingw-w64-x86-64_2.34-6ubuntu1.3+8.8_<%= dpkg_arch %>.deb \
+    /build/g++-mingw-w64-x86-64_9.3.0-17ubuntu1~20.04+22~exp1ubuntu4_<%= dpkg_arch %>.deb \
+    /build/gcc-mingw-w64-base_9.3.0-17ubuntu1~20.04+22~exp1ubuntu4_<%= dpkg_arch %>.deb \
+    /build/gcc-mingw-w64-x86-64_9.3.0-17ubuntu1~20.04+22~exp1ubuntu4_<%= dpkg_arch %>.deb \
     /build/mingw-w64-common_7.0.0-2_all.deb \
     /build/mingw-w64-x86-64-dev_7.0.0-2_all.deb \
     /debs/
