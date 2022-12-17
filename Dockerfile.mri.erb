@@ -117,7 +117,7 @@ RUN git clone -q --depth=1 https://github.com/tpoechtrager/osxcross.git /opt/osx
     curl -L -o MacOSX11.1.sdk.tar.xz https://github.com/larskanis/MacOSX-SDKs/releases/download/11.1/MacOSX11.1.sdk.tar.xz && \
     tar -xf MacOSX11.1.sdk.tar.xz -C . && \
     cp -rf /usr/lib/llvm-10/include/c++ MacOSX11.1.sdk/usr/include/c++ && \
-    cp -rf /usr/include/<%= manylinux_cpu %>-linux-gnu/c++/9/bits/ MacOSX11.1.sdk/usr/include/c++/v1/bits && \
+    cp -rf /usr/include/"$(uname -m)"-linux-gnu/c++/9/bits/ MacOSX11.1.sdk/usr/include/c++/v1/bits && \
     tar -cJf MacOSX11.1.sdk.tar.xz MacOSX11.1.sdk && \
     cd /opt/osxcross && \
     UNATTENDED=1 SDK_VERSION=11.1 OSX_VERSION_MIN=10.13 USE_CLANG_AS=1 ./build.sh && \

@@ -67,9 +67,16 @@ jobs:
       - name: Build docker image
         id: buildx
         run: |
+          echo "::group::Preparing docker build"
           docker buildx create --driver docker-container --use
           extra_tag="rcd-${PLATFORM}-${{ matrix.docker-platform-cpu }}-${{ github.sha }}"
           docker_build="docker buildx build --platform=$DOCKER_BUILD_PLATFORM --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new --load -t $extra_tag"
+          if bundle exec rake -T | grep -q "prepare:${PLATFORM}"; then
+            echo "::info::Preparing docker image for ${PLATFORM}"
+            bundle exec rake prepare:${PLATFORM} RCD_DOCKER_BUILD="$docker_build"
+          fi
+          echo "::endgroup::"
+
           bundle exec rake build:${PLATFORM} RCD_DOCKER_BUILD="$docker_build"
 
           if [[ "${{ contains(github.event.head_commit.message, matrix.docker-platform-cpu) }}" == "true" ]]; then

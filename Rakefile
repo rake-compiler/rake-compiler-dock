@@ -26,27 +26,28 @@ namespace :build do
   platforms.each do |platform, target|
     sdf = "Dockerfile.mri.#{platform}"
 
-    # Native images to alleviate qemu slowness, and manylinux2014 provides per-arch
-    # images. But they are not yet conformant to the Docker platform spec (i.e.
-    # amd64/linux). We have to do some string manipulation to get the right for
-    # now, but you should be able to nuke this code soon, and rely on only the
-    # buildx `--platform` feature instead....
-    #
-    # See: https://github.com/pypa/manylinux/issues/1306
-    manylinux_cpu, dpkg_arch = case ENV["DOCKER_BUILD_PLATFORM"]
+    dpkg_arch = case ENV["DOCKER_BUILD_PLATFORM"]
     when /arm64/
-      ["aarch64", "arm64"]
+      "arm64"
     when /amd64/
-      ["x86_64", "amd64"]
+      "amd64"
     else
       if ENV["CI"]
-        raise "Couldnt infer manylinux CPU for #{ENV["DOCKER_BUILD_PLATFORM"].inspect}"
+        raise "Couldnt infer dpkg arch for #{ENV["DOCKER_BUILD_PLATFORM"].inspect}"
       else
-        ["x86_64", "amd64"]
+        "amd64"
       end
     end
 
-    manylinux_image = "quay.io/pypa/manylinux2014_#{manylinux_cpu}"
+    # Native images to alleviate qemu slowness, and manylinux2014 provides per-arch
+    # images. But they are not yet conformant to the Docker platform spec (i.e.
+    # amd64/linux). We generate our own platformed manifests now (using
+    # scrip/remanifest-manylinux-multiplatform.sh), but you should be able to
+    # nuke that code soon, and rely on only the buildx `--platform` feature once
+    # manylinux finishes the feature.
+    #
+    # See: https://github.com/pypa/manylinux/issues/1306
+    manylinux_image = "rbsys/manylinux2014:2022-12-11-145d107"
 
     desc "Build image for platform #{platform}"
     task platform => sdf
@@ -83,8 +84,6 @@ namespace :prepare do
        chdir: "mingw64-ucrt")
   end
 end
-
-task "build:mingw64-ucrt" => "prepare:mingw64-ucrt"
 
 desc "Run tests"
 task :test do
