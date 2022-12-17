@@ -44,7 +44,7 @@ jobs:
       PLATFORM: ${{ matrix.platform }}
       DOCKER_BUILD_PLATFORM: linux/${{ matrix.docker-platform-cpu }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Cache Docker layers
         uses: actions/cache@v3
@@ -72,11 +72,10 @@ jobs:
           docker_build="docker buildx build --platform=$DOCKER_BUILD_PLATFORM --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new --load -t $extra_tag"
           bundle exec rake build:${PLATFORM} RCD_DOCKER_BUILD="$docker_build"
 
-          # Save the image if the commit message contains the docker platform name (e.g. "[linux/arm64] ...")
-          if [[ "${{ github.event.head_commit.message }}" == *"[$DOCKER_BUILD_PLATFORM]"* ]]; then
+          if [[ "$(git log -1 --pretty=format:"%s")" =~ *"$DOCKER_BUILD_PLATFORM"* ]]; then
             echo "::info::Saving docker image $extra_tag"
             docker save -o "tmp/${extra_tag}.tar" $extra_tag
-            echo "image-tarball: tmp/${extra_tag}.tar" >> $GITHUB_OUTPUT
+            echo "image-tarball=tmp/${extra_tag}.tar" >> $GITHUB_OUTPUT
           fi
 
       - name: Upload Docker image tarball
@@ -170,7 +169,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
@@ -214,7 +213,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
@@ -256,7 +255,7 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Download gem-${{ matrix.platform }}-${{ matrix.docker-platform-cpu }}
         uses: actions/download-artifact@v2
         with:
