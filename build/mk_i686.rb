@@ -1,3 +1,5 @@
+#! /usr/bin/env ruby
+
 require "fileutils"
 
 Dir["/usr/bin/x86_64-linux-gnu-*"].each do |file|
