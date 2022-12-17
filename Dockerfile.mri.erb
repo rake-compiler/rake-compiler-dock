@@ -23,11 +23,13 @@ RUN rm -f /usr/local/bin/sudo && \
     echo "%sudo  ALL=(ALL)       ALL" >> /etc/sudoers
 <% else %>
 ENV DEBIAN_FRONTEND noninteractive
-RUN dpkg --add-architecture <%= foreign_dpkg_arch %> && \
-    apt-get -y update && \
-    apt-get install -y sudo wget autoconf cmake curl git-core pkg-config build-essential xz-utils unzip gnupg2 dirmngr && \
-    apt-get install -y zlib1g-dev:<%= foreign_dpkg_arch %> libreadline-dev:<%= foreign_dpkg_arch %> libsqlite0-dev:<%= foreign_dpkg_arch %> libssl-dev:<%= foreign_dpkg_arch %> libyaml-dev:<%= foreign_dpkg_arch %> libffi-dev:<%= foreign_dpkg_arch %> && \
-    rm -rf /var/lib/apt/lists/*
+COPY ./build/setup_dpkg_multiarch_for_target.sh /
+RUN /setup_dpkg_multiarch_for_target.sh <%= foreign_dpkg_arch %>;
+
+RUN apt-get -y -qq update && \
+    apt-get -y -qq install sudo wget autoconf cmake curl git-core pkg-config build-essential xz-utils unzip gnupg2 dirmngr && \
+    apt-get -y -qq install zlib1g-dev:<%= foreign_dpkg_arch %> libreadline-dev:<%= foreign_dpkg_arch %> libsqlite0-dev:<%= foreign_dpkg_arch %> libssl-dev:<%= foreign_dpkg_arch %> libyaml-dev:<%= foreign_dpkg_arch %> libffi-dev:<%= foreign_dpkg_arch %> && \
+    rm -rf /var/lib/apt/lists/*;
 <% end %>
 
 # Add "rvm" as system group, to avoid conflicts with host GIDs typically starting with 1000
@@ -92,7 +94,6 @@ RUN apt-get -y update && \
     apt-get install -y <%
 if platform=~/darwin/        %> clang python lzma-dev libxml2-dev libssl-dev libc++-10-dev <% end %><%
 if platform=~/aarch64-linux/ %> gcc-aarch64-linux-gnu g++-aarch64-linux-gnu <% end %><%
-if platform=~/x86_64-linux/        %> gcc-x86-64-linux-gnu g++-x86-64-linux-gnu <% end %><%
 if platform=~/arm-linux/     %> gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf <% end %><%
 if platform=~/x86-mingw32/   %> gcc-mingw-w64-i686 g++-mingw-w64-i686 <% end %><%
 if platform=~/x64-mingw32/   %> gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 <% end %> && \
