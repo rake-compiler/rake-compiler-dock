@@ -1,0 +1,11 @@
+name: Publish docker images to GHCR
+concurrency:
+  group: "${{github.workflow}}-${{github.ref}}"
+  cancel-in-progress: true
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    steps:
+      - run: echo "this is a stub pipeline so that I can ship a working version in #84"
