@@ -84,6 +84,8 @@ namespace :prepare do
   end
 end
 
+task "build:mingw64-ucrt" => "prepare:mingw64-ucrt"
+
 desc "Run tests"
 task :test do
   sh "ruby -w -W2 -I. -Ilib -e \"#{Dir["test/test_*.rb"].map{|f| "require '#{f}';"}.join}\" -- -v"
