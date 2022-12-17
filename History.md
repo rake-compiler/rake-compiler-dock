@@ -1,3 +1,14 @@
+1.3.0 / unreleased
+------------------
+
+* Add Ruby-3.2 cross-compilation support.
+* Update RVM installations to latest rubygems.
+* Update to rake-compiler 1.2.1.
+* Reduce pre-installed gems to only rake-compiler and bundler.
+* Install yaml and ffi development headers in the base images, for psych and ffi gem compilation.
+* Ensure autoconf is installed in the base iamges.
+
+
 1.2.2 / 2022-06-27
 ------------------
 
