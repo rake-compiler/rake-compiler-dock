@@ -4,8 +4,62 @@ concurrency:
   cancel-in-progress: true
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * 3" # At 03:00 on Wednesday # https://crontab.guru/#0_3_*_*_3
 
 jobs:
   build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - x86-mingw32
+          - x64-mingw-ucrt
+          - x64-mingw32
+          - x86-linux
+          - x86_64-linux
+          - x86_64-darwin
+          - arm64-darwin
+          - arm-linux
+          - aarch64-linux
+        include:
+          - platform: jruby
+            tag: jruby
+    runs-on: ubuntu-latest
     steps:
-      - run: echo "this is a stub pipeline so that I can ship a working version in #84"
+      - uses: actions/checkout@v3
+      - name: Use cache from primary pipeline
+        uses: actions/cache@v3
+        with:
+          path: tmp/build-cache
+          key: ${{runner.os}}-${{matrix.platform}}-buildx-${{github.sha}}
+          restore-keys: |
+            ${{runner.os}}-${{matrix.platform}}-buildx
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.1"
+          bundler-cache: true
+      - id: rcd_image_version
+        run: bundle exec ruby -e 'require "rake_compiler_dock"; puts "rcd_image_version=#{RakeCompilerDock::IMAGE_VERSION}"' >> $GITHUB_OUTPUT
+      - name: Build docker image
+        env:
+          DOCKERHUB_USER: rake-compiler
+          RCD_DOCKER_BUILD: docker buildx build --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new --load
+        run: |
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:${{matrix.platform}}
+          # move build cache and remove outdated layers
+          rm -rf tmp/build-cache
+          mv tmp/build-cache-new tmp/build-cache
+      - uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
+      - env:
+          OLD_TAG: rake-compiler/rake-compiler-dock-${{matrix.tag || format('mri-{0}', matrix.platform)}}:${{steps.rcd_image_version.outputs.rcd_image_version}}
+          NEW_TAG: ghcr.io/rake-compiler/rake-compiler-dock-snapshot:${{matrix.platform}}
+        run: |
+          docker images
+          docker tag ${OLD_TAG} ${NEW_TAG}
+          docker push ${NEW_TAG}

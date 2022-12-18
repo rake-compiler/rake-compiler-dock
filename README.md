@@ -218,6 +218,18 @@ end
 
 For an example of rake tasks that support this style of invocation, visit https://github.com/flavorjones/ruby-c-extensions-explained/tree/main/precompiled
 
+
+### Living on the edge: using weekly snapshots
+
+OCI images snapshotted from `master` are published weekly to Github Container Registry:
+
+> https://github.com/rake-compiler/rake-compiler-dock/pkgs/container/rake-compiler-dock-snapshot
+
+The images are named `ghcr.io/rake-compiler/rake-compiler-dock-snapshot` and are tagged with the platform name (e.g., `ghcr.io/rake-compiler/rake-compiler-dock-snapshot:x86_64-linux`.
+
+These images are intended for integration testing. They may not work properly and should not be considered production ready.
+
+
 ## Environment Variables
 
 Rake-compiler-dock makes use of several environment variables.

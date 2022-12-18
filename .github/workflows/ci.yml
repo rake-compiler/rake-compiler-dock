@@ -40,10 +40,10 @@ jobs:
     env:
       PLATFORM: ${{ matrix.platform }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: tmp/build-cache
           key: ${{ runner.os }}-${{ matrix.platform }}-buildx-${{ github.sha }}
@@ -75,14 +75,14 @@ jobs:
           bundle exec rake gem:${PLATFORM}
 
       - name: Upload binary gem
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: gem-${{ matrix.platform }}
           path: test/rcd_test/pkg/*-*-*.gem
 
       - if: matrix.platform == 'jruby'
         name: Upload source gem
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: gem-ruby
           path: test/rcd_test/pkg/*-?.?.?.gem
@@ -101,7 +101,7 @@ jobs:
 
       - if: contains(matrix.platform, 'x64-mingw')
         name: Upload static binary gem
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: gem-${{ matrix.platform }}-static
           path: test/rcd_test/pkg/*-*-*.gem
@@ -144,13 +144,13 @@ jobs:
 
     runs-on: ${{ matrix.os }}-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
       - run: ruby --version
       - name: Download gem-${{matrix.platform}}
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: gem-${{ matrix.platform }}
       - name: Install gem-${{matrix.platform}}
@@ -188,13 +188,13 @@ jobs:
 
     runs-on: ${{ matrix.os }}-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
       - run: ruby --version
       - name: Download gem-${{matrix.platform}}-static
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: gem-${{ matrix.platform }}-static
       - name: Install gem-${{matrix.platform}}-static
@@ -230,9 +230,9 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Download gem-${{matrix.platform}}
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: gem-${{ matrix.platform }}
       - name: Build image and Run tests
