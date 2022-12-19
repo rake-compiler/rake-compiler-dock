@@ -7,6 +7,8 @@
 * Reduce pre-installed gems to only rake-compiler and bundler.
 * Install yaml and ffi development headers in the base images, for psych and ffi gem compilation.
 * Ensure autoconf is installed in the base iamges.
+* Start publishing snapshots to ghcr.io
+* Bump JRuby to 9.4.0.0
 
 
 1.2.2 / 2022-06-27

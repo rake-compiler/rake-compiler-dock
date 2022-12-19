@@ -62,6 +62,7 @@ RUN bash -c " \
     "
 
 RUN bash -c " \
+      echo "gem: --no-ri --no-rdoc" >> ~/.gemrc && \
       rvm all do gem update --system --no-document && \
       rvm all do gem update --no-document && \
       rvm all do gem install bundler --no-document \
