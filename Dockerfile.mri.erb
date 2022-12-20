@@ -58,14 +58,16 @@ RUN bash -c " \
       for v in ${RVM_RUBIES} ; do \
         rvm install \$v --patch \$(echo ~/patches/ruby-\$v/* | tr ' ' ','); \
       done && \
-      rvm cleanup all \
+      rvm cleanup all && \
+      find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw \
     "
 
 RUN bash -c " \
       echo "gem: --no-ri --no-rdoc" >> ~/.gemrc && \
       rvm all do gem update --system --no-document && \
       rvm all do gem update --no-document && \
-      rvm all do gem install bundler --no-document \
+      rvm all do gem install bundler --no-document && \
+      find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw \
     "
 
 ##
@@ -166,7 +168,8 @@ RUN bash -c " \
       <%= "export CC=#{target}-clang &&" if platform =~ /darwin/ %> \
       export MAKE='make V=1 <%= "-j`nproc`" if parallel %>' && \
       rake-compiler cross-ruby VERSION=$XRUBIES HOST=<%= target %> && \
-      rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources \
+      rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources && \
+      find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw \
     "
 <% end %>
 
@@ -242,7 +245,6 @@ RUN echo "source /etc/profile.d/rcd-env.sh" >> /etc/rubybashrc
 # Install sudoers configuration
 COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 
-RUN find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw
 RUN bash -c " \
       rvm alias create default 3.1.0 && \
       rvm use default \

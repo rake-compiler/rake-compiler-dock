@@ -30,7 +30,8 @@ RUN bash -c " \
       for v in jruby-9.4.0.0 ; do \
           rvm install --binary \$v --patch \$(echo ~/patches/ruby-\$v/* | tr ' ' ','); \
       done && \
-      rvm cleanup all \
+      rvm cleanup all && \
+      find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw \
     "
 
 RUN bash -c " \
@@ -38,7 +39,8 @@ RUN bash -c " \
       rvm all do gem update --system --no-document && \
       rvm all do gem update --no-document && \
       rvm all do gem install bundler --no-document && \
-      rvm all do gem install --no-document rake-compiler:1.2.1 \
+      rvm all do gem install --no-document rake-compiler:1.2.1 && \
+      find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw \
     "
 
 # Install rake-compiler's cross rubies in global dir instead of /root
@@ -48,7 +50,6 @@ RUN sudo mkdir -p /usr/local/rake-compiler && \
 
 USER root
 
-RUN find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw
 RUN bash -c "rvm alias create default jruby-9.4.0.0"
 RUN echo "rvm use jruby-9.4.0.0 > /dev/null" >> /etc/rubybashrc
 
