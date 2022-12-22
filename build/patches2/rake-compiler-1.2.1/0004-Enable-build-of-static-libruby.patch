@@ -15,7 +15,7 @@ index 8317a2a..5a1b3ea 100644
 +      if mingw_host=~/darwin/
 +        options += [
 +          '--enable-static',
-+          '--disable-shared',
++          '--enable-shared',
 +        ]
 +      else
 +        options += [
