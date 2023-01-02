@@ -8,7 +8,9 @@ end
 
 class TestEnvironmentVariables
   module Common
-    IMAGE_NAME = "larskanis/rake-compiler-dock-mri-x86-mingw32:#{RakeCompilerDock::IMAGE_VERSION}"
+    TEST_PLATFORM = ENV["TEST_PLATFORM"] || "x64-mingw-ucrt"
+    DOCKERHUB_USER = ENV['DOCKERHUB_USER'] || "larskanis"
+    TEST_IMAGE_NAME = "#{DOCKERHUB_USER}/rake-compiler-dock-mri-#{TEST_PLATFORM}:#{RakeCompilerDock::IMAGE_VERSION}"
 
     def rcd_env
       self.class.instance_variable_get("@rcd_env") || begin
@@ -49,7 +51,7 @@ class TestEnvironmentVariables
 
     def invocation(command)
       idir = File.join(File.dirname(__FILE__), '../lib')
-      "#{RbConfig::CONFIG['RUBY_INSTALL_NAME']} -I#{idir.inspect} bin/rake-compiler-dock bash -c '#{command}'"
+      "RCD_PLATFORM=#{TEST_PLATFORM} #{RbConfig::CONFIG['RUBY_INSTALL_NAME']} -I#{idir.inspect} bin/rake-compiler-dock bash -c '#{command}'"
     end
 
     def test_HOST_RUBY_PLATFORM
@@ -61,7 +63,7 @@ class TestEnvironmentVariables
     end
 
     def test_IMAGE
-      assert_equal IMAGE_NAME, rcd_env['RCD_IMAGE']
+      assert_equal TEST_IMAGE_NAME, rcd_env['RCD_IMAGE']
     end
 
     def test_PWD
@@ -73,7 +75,7 @@ class TestEnvironmentVariables
     include Common
 
     def invocation(command)
-      "docker run -it #{IMAGE_NAME} bash -c '#{command}'"
+      "docker run -it #{TEST_IMAGE_NAME} bash -c '#{command}'"
     end
   end
 end

@@ -74,6 +74,12 @@ jobs:
           bundle exec rake clean clobber
           bundle exec rake gem:${PLATFORM}
 
+      - name: Basic tests on the generated image
+        env:
+          TEST_PLATFORM: ${{ matrix.platform }}
+        run: |
+          bundle exec rake test
+
       - name: Upload binary gem
         uses: actions/upload-artifact@v3
         with:

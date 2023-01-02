@@ -65,6 +65,6 @@ class TestParallelDockerBuild < Test::Unit::TestCase
   end
 
   def read_df(fn)
-    File.read("tmp/docker/#{fn}").each_line.map(&:lstrip).join
+    File.read(File.join(@tmpdir, "/tmp/docker", fn)).each_line.map(&:lstrip).join
   end
 end
