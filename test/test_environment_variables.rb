@@ -10,7 +10,10 @@ class TestEnvironmentVariables
   module Common
     TEST_PLATFORM = ENV["TEST_PLATFORM"] || "x64-mingw-ucrt"
     DOCKERHUB_USER = ENV['DOCKERHUB_USER'] || "larskanis"
-    TEST_IMAGE_NAME = "#{DOCKERHUB_USER}/rake-compiler-dock-mri-#{TEST_PLATFORM}:#{RakeCompilerDock::IMAGE_VERSION}"
+
+    IS_JRUBY = TEST_PLATFORM.to_s == "jruby"
+    platform = IS_JRUBY ? "jruby" : "mri-#{TEST_PLATFORM}"
+    TEST_IMAGE_NAME = "#{DOCKERHUB_USER}/rake-compiler-dock-#{platform}:#{RakeCompilerDock::IMAGE_VERSION}"
 
     def rcd_env
       self.class.instance_variable_get("@rcd_env") || begin
@@ -25,24 +28,26 @@ class TestEnvironmentVariables
       end
     end
 
-    def test_RUBY_CC_VERSION
-      df = File.read(File.expand_path("../../Dockerfile.mri.erb", __FILE__))
-      df =~ /^ENV RUBY_CC_VERSION\s+(.*)\s+$/
-      assert_equal $1, rcd_env['RUBY_CC_VERSION']
-    end
+    unless IS_JRUBY
+      def test_RUBY_CC_VERSION
+        df = File.read(File.expand_path("../../Dockerfile.mri.erb", __FILE__))
+        df =~ /^ENV RUBY_CC_VERSION\s+(.*)\s+$/
+        assert_equal $1, rcd_env['RUBY_CC_VERSION']
+      end
 
-    def test_RAKE_EXTENSION_TASK_NO_NATIVE
-      assert_equal "true", rcd_env['RAKE_EXTENSION_TASK_NO_NATIVE']
-    end
+      def test_RAKE_EXTENSION_TASK_NO_NATIVE
+        assert_equal "true", rcd_env['RAKE_EXTENSION_TASK_NO_NATIVE']
+      end
 
-    def test_symlink_rake_compiler
-      cmd = invocation("if test -h $HOME/.rake-compiler ; then echo yes ; else echo no ; fi")
-      assert_equal("yes", %x(#{cmd}).strip)
-    end
+      def test_symlink_rake_compiler
+        cmd = invocation("if test -h $HOME/.rake-compiler ; then echo yes ; else echo no ; fi")
+        assert_equal("yes", %x(#{cmd}).strip)
+      end
 
-    def test_gem_directory
-      cmd = invocation("if test -d $HOME/.gem ; then echo yes ; else echo no ; fi")
-      assert_equal("yes", %x(#{cmd}).strip)
+      def test_gem_directory
+        cmd = invocation("if test -d $HOME/.gem ; then echo yes ; else echo no ; fi")
+        assert_equal("yes", %x(#{cmd}).strip)
+      end
     end
   end
 
@@ -51,7 +56,7 @@ class TestEnvironmentVariables
 
     def invocation(command)
       idir = File.join(File.dirname(__FILE__), '../lib')
-      "RCD_PLATFORM=#{TEST_PLATFORM} #{RbConfig::CONFIG['RUBY_INSTALL_NAME']} -I#{idir.inspect} bin/rake-compiler-dock bash -c '#{command}'"
+      "RCD_PLATFORM=#{TEST_PLATFORM} RCD_RUBYVM=#{IS_JRUBY ? 'jruby' : 'mri'} #{RbConfig::CONFIG['RUBY_INSTALL_NAME']} -I#{idir.inspect} bin/rake-compiler-dock bash -c '#{command}'"
     end
 
     def test_HOST_RUBY_PLATFORM
