@@ -75,7 +75,7 @@ class TestEnvironmentVariables
     include Common
 
     def invocation(command)
-      "docker run -it #{TEST_IMAGE_NAME} bash -c '#{command}'"
+      "docker run --rm #{TEST_IMAGE_NAME} bash -c '#{command}'"
     end
   end
 end
