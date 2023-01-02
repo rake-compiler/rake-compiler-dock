@@ -46,7 +46,7 @@ namespace "gem" do
         RakeCompilerDock.sh <<-EOT, platform: plat, mountdir: Dir.pwd + "/../.."
           (cp tmp/gem/gem-*.pem ~/.gem/ || true) &&
           bundle --local &&
-          rake native:#{plat} pkg/#{exttask.gem_spec.full_name}-#{plat}.gem #{config}
+          rake native:#{plat} pkg/#{exttask.gem_spec.full_name}-#{plat}.gem "MAKE=make V=1" #{config}
         EOT
       end
     end

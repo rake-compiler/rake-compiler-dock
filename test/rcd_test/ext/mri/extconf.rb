@@ -11,9 +11,11 @@ else
   puts "-"*70
   puts "CONFIG['arch']: #{CONFIG['arch'].inspect}"
   puts "CONFIG['sitearch']: #{CONFIG['sitearch'].inspect}"
+  puts "CONFIG['host']: #{CONFIG['host'].inspect}"
   puts "CONFIG['RUBY_SO_NAME']: #{CONFIG['RUBY_SO_NAME'].inspect}"
   puts "RUBY_PLATFORM: #{RUBY_PLATFORM.inspect}"
   puts "Gem::Platform.local.to_s: #{Gem::Platform.local.to_s.inspect}"
+  puts "cc --version: #{ %x[#{CONFIG['CC']} --version].lines.first}"
   puts "-"*70
 
   have_func('rb_thread_call_without_gvl', 'ruby/thread.h') ||
