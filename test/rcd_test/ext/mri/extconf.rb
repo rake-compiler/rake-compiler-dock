@@ -79,13 +79,15 @@ else
       ##
       ## This returns us to the symbol resolution we had in previous Rubies. It feels gross but may
       ## be a workaround for gem maintainers until we all figure out a better way to deal with this.
-      extdldflags = RbConfig::MAKEFILE_CONFIG["EXTDLDFLAGS"].split
-      if found = extdldflags.index("-bundle_loader")
-        removed_1 = extdldflags.delete_at(found) # flag
-        removed_2 = extdldflags.delete_at(found) # and its argument
-        puts "Removing '#{removed_1} #{removed_2}' from EXTDLDFLAGS"
-      end
-      RbConfig::MAKEFILE_CONFIG["EXTDLDFLAGS"] = extdldflags.join(" ")
+      #
+      # extdldflags = RbConfig::MAKEFILE_CONFIG["EXTDLDFLAGS"].split
+      # if found = extdldflags.index("-bundle_loader")
+      #   removed_1 = extdldflags.delete_at(found) # flag
+      #   removed_2 = extdldflags.delete_at(found) # and its argument
+      #   puts "Removing '#{removed_1} #{removed_2}' from EXTDLDFLAGS"
+      # end
+      # RbConfig::MAKEFILE_CONFIG["EXTDLDFLAGS"] = extdldflags.join(" ")
+      #
     end
   end
 

@@ -190,6 +190,15 @@ RUN find /usr/local/rake-compiler/ruby -name rbconfig.rb | while read f ; do sed
 RUN find /usr/local/rake-compiler/ruby -name lib*-ruby*.dll.a | while read f ; do n=`echo $f | sed s/.dll//` ; mv $f $n ; done
 <% end %>
 
+# ruby-2.5 links to libcrypt, which isn't necessary for extensions
+RUN find /usr/local/rake-compiler/ruby -name rbconfig.rb | while read f ; do sed -i 's/-lcrypt//' $f ; done
+
+<% if platform=~/darwin/ %>
+# ruby-3.2 on darwin links with `-bundle_loader`, see https://github.com/rake-compiler/rake-compiler-dock/issues/87
+RUN find /usr/local/rake-compiler/ruby/*/*/lib/ruby/3.2.0 -name rbconfig.rb | \
+    while read f ; do sed -i 's/\["EXTDLDFLAGS"\] = "/&-Wl,-flat_namespace /' $f ; done
+<% end %>
+
 ##
 ##  Final adjustments
 ##
@@ -217,9 +226,6 @@ RUN echo "export PATH=\$DEVTOOLSET_ROOTPATH/usr/bin:\$PATH" >> /etc/rubybashrc
 
 # Add prefixed versions of compiler tools
 RUN for f in addr2line gcc gcov-tool ranlib ar dwp gcc-ranlib nm readelf as elfedit gcc-ar gprof objcopy size c++filt g++ gcov ld objdump strings cpp gcc-nm pkg-config strip ; do ln -sf $DEVTOOLSET_ROOTPATH/usr/bin/$f $DEVTOOLSET_ROOTPATH/usr/bin/<%= target %>-$f ; done
-
-# ruby-2.5 links to libcrypt, which isn't necessary for extensions
-RUN find /usr/local/rake-compiler/ruby -name rbconfig.rb | while read f ; do sed -i 's/-lcrypt//' $f ; done
 
 # Use builtin functions of newer gcc to avoid linker issues on Musl based Linux
 COPY build/math_h.patch /root/
