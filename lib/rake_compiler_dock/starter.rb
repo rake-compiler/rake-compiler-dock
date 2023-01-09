@@ -166,7 +166,7 @@ module RakeCompilerDock
 
           "%s/rake-compiler-dock-image:%s-%s%s" % [
             container_registry,
-            IMAGE_VERSION,
+            options.fetch(:version) { IMAGE_VERSION },
             container_rubyvm(options),
             container_jrubyvm?(options) ? "" : "-#{options.fetch(:platform)}",
           ]

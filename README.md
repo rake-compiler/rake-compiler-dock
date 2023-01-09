@@ -221,11 +221,9 @@ For an example of rake tasks that support this style of invocation, visit https:
 
 ### Living on the edge: using weekly snapshots
 
-OCI images snapshotted from `master` are published weekly to Github Container Registry:
+OCI images snapshotted from `master` are published weekly to Github Container Registry with the string "snapshot" in place of the version number in the tag name, e.g.:
 
-> https://github.com/rake-compiler/rake-compiler-dock/pkgs/container/rake-compiler-dock-snapshot
-
-The images are named `ghcr.io/rake-compiler/rake-compiler-dock-snapshot` and are tagged with the platform name (e.g., `ghcr.io/rake-compiler/rake-compiler-dock-snapshot:x86_64-linux`.
+- `ghcr.io/rake-compiler/rake-compiler-dock-image:snapshot-mri-x86_64-linux`
 
 These images are intended for integration testing. They may not work properly and should not be considered production ready.
 

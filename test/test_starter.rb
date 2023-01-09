@@ -66,6 +66,12 @@ class TestStarter < Test::Unit::TestCase
         Starter.container_image_name({:platform => "x86_64-darwin"}),
       )
     end
+
+    # snapshots
+    assert_equal(
+      "ghcr.io/rake-compiler/rake-compiler-dock-image:snapshot-mri-x86_64-darwin",
+      Starter.container_image_name({:platform =>"x86_64-darwin", :version => "snapshot"}),
+    )
   end
 
   def test_container_registry
