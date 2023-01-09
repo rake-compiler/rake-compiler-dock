@@ -65,7 +65,7 @@ end
 
 desc "Run tests"
 task :test do
-  sh "ruby -w -W2 -I. -Ilib -e \"#{Dir["test/test_*.rb"].map{|f| "require '#{f}';"}.join}\" -- -v"
+  sh %Q{ruby -w -W2 -I. -Ilib -e "#{Dir["test/test_*.rb"].map{|f| "require '#{f}';"}.join}" -- -v #{ENV['TESTOPTS']}}
 end
 
 desc "Update predefined_user_group.rb"
