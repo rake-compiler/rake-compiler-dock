@@ -43,7 +43,7 @@ jobs:
         run: bundle exec ruby -e 'require "rake_compiler_dock"; puts "rcd_image_version=#{RakeCompilerDock::IMAGE_VERSION}"' >> $GITHUB_OUTPUT
       - name: Build docker image
         env:
-          DOCKERHUB_USER: rake-compiler
+          CONTAINER_REGISTRY: phony-registry
           RCD_DOCKER_BUILD: docker buildx build --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new --load
         run: |
           docker buildx create --driver docker-container --use
@@ -57,7 +57,7 @@ jobs:
           username: ${{github.actor}}
           password: ${{secrets.GITHUB_TOKEN}}
       - env:
-          OLD_TAG: rake-compiler/rake-compiler-dock-${{matrix.tag || format('mri-{0}', matrix.platform)}}:${{steps.rcd_image_version.outputs.rcd_image_version}}
+          OLD_TAG: phony-registry/rake-compiler-dock-${{matrix.tag || format('mri-{0}', matrix.platform)}}:${{steps.rcd_image_version.outputs.rcd_image_version}}
           NEW_TAG: ghcr.io/rake-compiler/rake-compiler-dock-snapshot:${{matrix.platform}}
         run: |
           docker images

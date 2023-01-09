@@ -6,7 +6,6 @@ require_relative "build/parallel_docker_build"
 
 RakeCompilerDock::GemHelper.install_tasks
 
-DOCKERHUB_USER = ENV['DOCKERHUB_USER'] || "larskanis"
 docker_build_cmd = Shellwords.split(ENV['RCD_DOCKER_BUILD'] || "docker build")
 
 platforms = [
@@ -29,7 +28,8 @@ namespace :build do
     desc "Build image for platform #{platform}"
     task platform => sdf
     task sdf do
-      sh(*docker_build_cmd, "-t", "#{DOCKERHUB_USER}/rake-compiler-dock-mri-#{platform}:#{RakeCompilerDock::IMAGE_VERSION}", "-f", "Dockerfile.mri.#{platform}", ".")
+      image_name = RakeCompilerDock::Starter.container_image_name(platform: platform)
+      sh(*docker_build_cmd, "-t", image_name, "-f", "Dockerfile.mri.#{platform}", ".")
     end
 
     df = ERB.new(File.read("Dockerfile.mri.erb"), trim_mode: ">").result(binding)
@@ -40,7 +40,8 @@ namespace :build do
   desc "Build image for JRuby"
   task :jruby => "Dockerfile.jruby"
   task "Dockerfile.jruby" do
-    sh(*docker_build_cmd, "-t", "#{DOCKERHUB_USER}/rake-compiler-dock-jruby:#{RakeCompilerDock::IMAGE_VERSION}", "-f", "Dockerfile.jruby", ".")
+    image_name = RakeCompilerDock::Starter.container_image_name(rubyvm: "jruby")
+    sh(*docker_build_cmd, "-t", image_name, "-f", "Dockerfile.jruby", ".")
   end
 
   RakeCompilerDock::ParallelDockerBuild.new(platforms.map{|pl, _| "Dockerfile.mri.#{pl}" } + ["Dockerfile.jruby"], workdir: "tmp/docker", docker_build_cmd: docker_build_cmd)
@@ -57,7 +58,7 @@ task :build => "build:all"
 namespace :prepare do
   desc "Build cross compiler for x64-mingw-ucrt aka RubyInstaller-3.1+"
   task "mingw64-ucrt" do
-    sh(*docker_build_cmd, "-t", "#{DOCKERHUB_USER}/mingw64-ucrt:20.04", ".",
+    sh(*docker_build_cmd, "-t", "larskanis/mingw64-ucrt:20.04", ".",
        chdir: "mingw64-ucrt")
   end
 end
@@ -92,12 +93,12 @@ end
 namespace :release do
   desc "push all docker images"
   task :images do
-    jimg = "#{DOCKERHUB_USER}/rake-compiler-dock-jruby:#{RakeCompilerDock::IMAGE_VERSION}"
-    sh "docker", "push", jimg
+    image_name = RakeCompilerDock::Starter.container_image_name(rubyvm: "jruby")
+    sh("docker", "push", image_name)
 
     platforms.each do |platform, _|
-      img = "#{DOCKERHUB_USER}/rake-compiler-dock-mri-#{platform}:#{RakeCompilerDock::IMAGE_VERSION}"
-      sh "docker", "push", img
+      image_name = RakeCompilerDock::Starter.container_image_name(platform: platform)
+      sh("docker", "push", image_name)
     end
   end
 end

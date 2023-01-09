@@ -9,11 +9,12 @@ end
 class TestEnvironmentVariables
   module Common
     TEST_PLATFORM = ENV["TEST_PLATFORM"] || "x64-mingw-ucrt"
-    DOCKERHUB_USER = ENV['DOCKERHUB_USER'] || "larskanis"
-
     IS_JRUBY = TEST_PLATFORM.to_s == "jruby"
-    platform = IS_JRUBY ? "jruby" : "mri-#{TEST_PLATFORM}"
-    TEST_IMAGE_NAME = "#{DOCKERHUB_USER}/rake-compiler-dock-#{platform}:#{RakeCompilerDock::IMAGE_VERSION}"
+    TEST_IMAGE_NAME = if IS_JRUBY
+      RakeCompilerDock::Starter.container_image_name(rubyvm: "jruby")
+    else
+      RakeCompilerDock::Starter.container_image_name(platform: TEST_PLATFORM)
+    end
 
     def rcd_env
       self.class.instance_variable_get("@rcd_env") || begin

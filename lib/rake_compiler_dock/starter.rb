@@ -40,17 +40,9 @@ module RakeCompilerDock
         end
         user = options.fetch(:username){ current_user }
         group = options.fetch(:groupname){ current_group }
-        rubyvm = options.fetch(:rubyvm){ ENV['RCD_RUBYVM'] } || "mri"
-        jrubyvm = rubyvm.to_s == "jruby"
 
-        platforms = options.fetch(:platform){ ENV['RCD_PLATFORM'] } || (jrubyvm ? "jruby" : "x86-mingw32 x64-mingw32")
-        platforms.split(" ").each do |platform|
-          image_name = options.fetch(:image) do
-            platform_postfix = jrubyvm ? "" : "-#{platform}"
-            ENV['RCD_IMAGE'] ||
-                ENV['RAKE_COMPILER_DOCK_IMAGE'] ||
-                "larskanis/rake-compiler-dock-#{rubyvm}#{platform_postfix}:#{IMAGE_VERSION}"
-          end
+        platforms(options).split(" ").each do |platform|
+          image_name = container_image_name(options.merge(platform: platform))
 
           check = check_docker(mountdir) if options.fetch(:check_docker){ true }
           docker_opts = options.fetch(:options) do
@@ -165,6 +157,37 @@ module RakeCompilerDock
       # Change Path from "C:\Path" to "/c/Path" as used by boot2docker
       def sanitize_windows_path(path)
         path.gsub(/^([a-z]):/i){ "/#{$1.downcase}" }
+      end
+
+      def container_image_name(options={})
+        options.fetch(:image) do
+          image_name = ENV['RCD_IMAGE'] || ENV['RAKE_COMPILER_DOCK_IMAGE']
+          return image_name unless image_name.nil?
+
+          "%s/rake-compiler-dock-%s%s:%s" % [
+            container_registry,
+            container_rubyvm(options),
+            container_jrubyvm?(options) ? "" : "-#{options.fetch(:platform)}",
+            IMAGE_VERSION,
+          ]
+        end
+      end
+
+      def container_registry
+        ENV['CONTAINER_REGISTRY'] || "larskanis"
+      end
+
+      def container_rubyvm(options={})
+        options.fetch(:rubyvm) { ENV['RCD_RUBYVM'] } || "mri"
+      end
+
+      def container_jrubyvm?(options={})
+        container_rubyvm(options).to_s == "jruby"
+      end
+
+      def platforms(options={})
+        options.fetch(:platform) { ENV['RCD_PLATFORM'] } ||
+          (container_jrubyvm?(options) ? "jruby" : "x86-mingw32 x64-mingw32")
       end
     end
   end

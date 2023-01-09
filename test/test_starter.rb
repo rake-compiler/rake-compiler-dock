@@ -30,4 +30,106 @@ class TestStarter < Test::Unit::TestCase
     assert_equal "_", Starter.make_valid_group_name(nil)
   end
 
+  def test_container_image_name
+    # with env vars
+    with_env({"RCD_IMAGE" => "env-var-value"}) do
+      assert_equal("env-var-value", Starter.container_image_name)
+    end
+    with_env({"RAKE_COMPILER_DOCK_IMAGE" => "env-var-value"}) do
+      assert_equal("env-var-value", Starter.container_image_name)
+    end
+
+    # with image option
+    assert_equal("option-value", Starter.container_image_name({:image => "option-value"}))
+
+    # with env var and image option, image option wins
+    with_env({"RCD_IMAGE" => "env-var-value"}) do
+      assert_equal("option-value", Starter.container_image_name({:image => "option-value"}))
+    end
+
+    # mri platform arg
+    assert_equal(
+      "larskanis/rake-compiler-dock-mri-platform-option-value:#{IMAGE_VERSION}",
+      Starter.container_image_name({:platform => "platform-option-value"}),
+    )
+
+    # jruby rubyvm arg
+    assert_equal(
+      "larskanis/rake-compiler-dock-jruby:#{IMAGE_VERSION}",
+      Starter.container_image_name({:rubyvm => "jruby"}),
+    )
+
+    # container registry env var
+    with_env({"CONTAINER_REGISTRY" => "registry-value"}) do
+      assert_equal(
+        "registry-value/rake-compiler-dock-mri-x86_64-darwin:#{IMAGE_VERSION}",
+        Starter.container_image_name({:platform => "x86_64-darwin"}),
+      )
+    end
+  end
+
+  def test_container_registry
+    assert_equal("larskanis", Starter.container_registry)
+
+    with_env({"CONTAINER_REGISTRY" => "env-var-value"}) do
+      assert_equal("env-var-value", Starter.container_registry)
+    end
+  end
+
+  def test_container_rubyvm
+    # no args
+    assert_equal("mri", Starter.container_rubyvm)
+
+    # with env var
+    with_env({"RCD_RUBYVM" => "env-var-value"}) do
+      assert_equal("env-var-value", Starter.container_rubyvm)
+    end
+
+    # with rubyvm option
+    assert_equal("option-value", Starter.container_rubyvm({:rubyvm => "option-value"}))
+
+    # with rubyvm option and env var, rubyvm option wins
+    with_env({"RCD_RUBYVM" => "env-var-value"}) do
+      assert_equal("option-value", Starter.container_rubyvm({:rubyvm => "option-value"}))
+    end
+  end
+
+  def test_container_jrubyvm?
+    assert(Starter.container_jrubyvm?({:rubyvm => "jruby"}))
+    refute(Starter.container_jrubyvm?({:rubyvm => "mri"}))
+  end
+
+  def test_platforms
+    # no args
+    assert_equal("x86-mingw32 x64-mingw32", Starter.platforms)
+
+    # with env var
+    with_env({"RCD_PLATFORM" => "env-var-value"}) do
+      assert_equal("env-var-value", Starter.platforms)
+    end
+
+    # with platform option
+    assert_equal("option-value", Starter.platforms({:platform => "option-value"}))
+
+    # with platform option and env var, platform option wins
+    with_env({"RCD_PLATFORM" => "arm64-darwin"}) do
+      assert_equal("option-value", Starter.platforms({:platform => "option-value"}))
+    end
+
+    # when options rubyvm is set to jruby
+    assert_equal("jruby", Starter.platforms({:rubyvm => "jruby"}))
+  end
+
+  def with_env(env = {})
+    original_env = {}
+    env.each do |k, v|
+      original_env[k] = ENV[k]
+      ENV[k] = v
+    end
+    yield
+  ensure
+    original_env.each do |k, v|
+      ENV[k] = v
+    end
+  end
 end
