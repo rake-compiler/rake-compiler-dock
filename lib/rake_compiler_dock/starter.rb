@@ -164,11 +164,11 @@ module RakeCompilerDock
           image_name = ENV['RCD_IMAGE'] || ENV['RAKE_COMPILER_DOCK_IMAGE']
           return image_name unless image_name.nil?
 
-          "%s/rake-compiler-dock-%s%s:%s" % [
+          "%s/rake-compiler-dock-image:%s-%s%s" % [
             container_registry,
+            IMAGE_VERSION,
             container_rubyvm(options),
             container_jrubyvm?(options) ? "" : "-#{options.fetch(:platform)}",
-            IMAGE_VERSION,
           ]
         end
       end

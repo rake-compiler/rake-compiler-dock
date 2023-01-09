@@ -49,20 +49,20 @@ class TestStarter < Test::Unit::TestCase
 
     # mri platform arg
     assert_equal(
-      "ghcr.io/rake-compiler/rake-compiler-dock-mri-platform-option-value:#{IMAGE_VERSION}",
+      "ghcr.io/rake-compiler/rake-compiler-dock-image:#{IMAGE_VERSION}-mri-platform-option-value",
       Starter.container_image_name({:platform => "platform-option-value"}),
     )
 
     # jruby rubyvm arg
     assert_equal(
-      "ghcr.io/rake-compiler/rake-compiler-dock-jruby:#{IMAGE_VERSION}",
+      "ghcr.io/rake-compiler/rake-compiler-dock-image:#{IMAGE_VERSION}-jruby",
       Starter.container_image_name({:rubyvm => "jruby"}),
     )
 
     # container registry env var
     with_env({"CONTAINER_REGISTRY" => "registry-value"}) do
       assert_equal(
-        "registry-value/rake-compiler-dock-mri-x86_64-darwin:#{IMAGE_VERSION}",
+        "registry-value/rake-compiler-dock-image:#{IMAGE_VERSION}-mri-x86_64-darwin",
         Starter.container_image_name({:platform => "x86_64-darwin"}),
       )
     end
