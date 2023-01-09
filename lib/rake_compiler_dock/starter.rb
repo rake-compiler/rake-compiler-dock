@@ -174,7 +174,7 @@ module RakeCompilerDock
       end
 
       def container_registry
-        ENV['CONTAINER_REGISTRY'] || "larskanis"
+        ENV['CONTAINER_REGISTRY'] || "ghcr.io/rake-compiler"
       end
 
       def container_rubyvm(options={})
