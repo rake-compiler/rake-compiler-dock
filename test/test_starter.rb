@@ -59,6 +59,12 @@ class TestStarter < Test::Unit::TestCase
       Starter.container_image_name({:rubyvm => "jruby"}),
     )
 
+    # jruby platform arg
+    assert_equal(
+      "ghcr.io/rake-compiler/rake-compiler-dock-image:#{IMAGE_VERSION}-jruby",
+      Starter.container_image_name({:platform => "jruby"}),
+    )
+
     # container registry env var
     with_env({"CONTAINER_REGISTRY" => "registry-value"}) do
       assert_equal(
@@ -98,11 +104,16 @@ class TestStarter < Test::Unit::TestCase
     with_env({"RCD_RUBYVM" => "env-var-value"}) do
       assert_equal("option-value", Starter.container_rubyvm({:rubyvm => "option-value"}))
     end
+
+    # with jruby platform option
+    assert_equal("jruby", Starter.container_rubyvm({:platform => "jruby"}))
   end
 
   def test_container_jrubyvm?
     assert(Starter.container_jrubyvm?({:rubyvm => "jruby"}))
+    assert(Starter.container_jrubyvm?({:platform => "jruby"}))
     refute(Starter.container_jrubyvm?({:rubyvm => "mri"}))
+    refute(Starter.container_jrubyvm?({:platform => "x86_64-linux"}))
   end
 
   def test_platforms

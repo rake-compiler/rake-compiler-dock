@@ -178,6 +178,7 @@ module RakeCompilerDock
       end
 
       def container_rubyvm(options={})
+        return "jruby" if options[:platform] == "jruby"
         options.fetch(:rubyvm) { ENV['RCD_RUBYVM'] } || "mri"
       end
 

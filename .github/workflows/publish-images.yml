@@ -22,9 +22,7 @@ jobs:
           - arm64-darwin
           - arm-linux
           - aarch64-linux
-        include:
-          - platform: jruby
-            tag: jruby
+          - jruby
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
