@@ -74,8 +74,6 @@ jobs:
 
       - name: Build rcd_test.gem
         run: |
-          gem build rake-compiler-dock.gemspec
-          gem install -l rake-compiler-dock-*.gem
           cd test/rcd_test/
           bundle install
           bundle exec rake clean clobber
