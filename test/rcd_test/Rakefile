@@ -27,7 +27,7 @@ namespace "gem" do
     task 'prepare' do
       require 'rake_compiler_dock'
       require 'io/console'
-      sh "bundle package --all"
+      sh "bundle package"
       sh "mkdir -p tmp/gem"
       sh "cp ~/.gem/gem-*.pem tmp/gem/ || true"
       unless ENV['CI']
@@ -42,8 +42,10 @@ namespace "gem" do
       desc "Build the native gem for #{plat}"
       task plat => 'prepare' do
         config = "-- #{ENV['RCD_TEST_CONFIG']}"
-        # Set mountdir of the directory where .git resides, so that git ls-files in the gemspec works
-        RakeCompilerDock.sh <<-EOT, platform: plat, mountdir: Dir.pwd + "/../.."
+        # Set mountdir of the directory where .git resides,
+        # - so that git ls-files in the gemspec works
+        # - and to bundle the rake-compiler-dock under test
+        RakeCompilerDock.sh <<-EOT, platform: plat, mountdir: Dir.pwd + "/../..", verbose: true
           (cp tmp/gem/gem-*.pem ~/.gem/ || true) &&
           bundle --local &&
           rake native:#{plat} pkg/#{exttask.gem_spec.full_name}-#{plat}.gem "MAKE=make V=1" #{config}
@@ -55,8 +57,8 @@ namespace "gem" do
   desc "Build a jruby gem"
   task "jruby" do
     require 'rake_compiler_dock'
-    sh "bundle package --all"
-    RakeCompilerDock.sh <<-EOT, rubyvm: "jruby", platform: "jruby", mountdir: Dir.pwd + "/../.."
+    sh "bundle package"
+    RakeCompilerDock.sh <<-EOT, rubyvm: "jruby", platform: "jruby", mountdir: Dir.pwd + "/../..", verbose: true
       mvn archetype:generate -DartifactId=test -DarchetypeVersion=1.4 -DinteractiveMode=false -DgroupId=test -Dpackage=test &&
       bundle --local &&
       bundle exec rake java gem
