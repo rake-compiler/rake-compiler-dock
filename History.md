@@ -1,13 +1,12 @@
-1.3.0 / unreleased
+1.3.0 / 2022-01-11
 ------------------
 
-* Add Ruby-3.2 cross-compilation support.
+* Add Ruby 3.2 cross-compilation support.
 * Update RVM installations to latest rubygems.
 * Update to rake-compiler 1.2.1.
 * Reduce pre-installed gems to only rake-compiler and bundler.
 * Install yaml and ffi development headers in the base images, for psych and ffi gem compilation.
 * Ensure autoconf is installed in the base iamges.
-* Start publishing snapshots to ghcr.io
 * Bump JRuby to 9.4.0.0
 * Move docker images to ghcr.io/rake-compiler:
   * `ghcr.io/rake-compiler/rake-compiler-dock-image:1.3.0-jruby`
@@ -20,6 +19,7 @@
   * `ghcr.io/rake-compiler/rake-compiler-dock-image:1.3.0-mri-x86-mingw32`
   * `ghcr.io/rake-compiler/rake-compiler-dock-image:1.3.0-mri-x86_64-darwin`
   * `ghcr.io/rake-compiler/rake-compiler-dock-image:1.3.0-mri-x86_64-linux`
+* Start publishing weekly image snapshots.
 
 
 1.2.2 / 2022-06-27
