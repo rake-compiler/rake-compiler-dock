@@ -9,6 +9,17 @@
 * Ensure autoconf is installed in the base iamges.
 * Start publishing snapshots to ghcr.io
 * Bump JRuby to 9.4.0.0
+* Move docker images to ghcr.io/rake-compiler:
+  * `ghcr.io/rake-compiler/rake-compiler-dock-image:1.3.0-jruby`
+  * `ghcr.io/rake-compiler/rake-compiler-dock-image:1.3.0-mri-aarch64-linux`
+  * `ghcr.io/rake-compiler/rake-compiler-dock-image:1.3.0-mri-arm-linux`
+  * `ghcr.io/rake-compiler/rake-compiler-dock-image:1.3.0-mri-arm64-darwin`
+  * `ghcr.io/rake-compiler/rake-compiler-dock-image:1.3.0-mri-x64-mingw-ucrt`
+  * `ghcr.io/rake-compiler/rake-compiler-dock-image:1.3.0-mri-x64-mingw32`
+  * `ghcr.io/rake-compiler/rake-compiler-dock-image:1.3.0-mri-x86-linux`
+  * `ghcr.io/rake-compiler/rake-compiler-dock-image:1.3.0-mri-x86-mingw32`
+  * `ghcr.io/rake-compiler/rake-compiler-dock-image:1.3.0-mri-x86_64-darwin`
+  * `ghcr.io/rake-compiler/rake-compiler-dock-image:1.3.0-mri-x86_64-linux`
 
 
 1.2.2 / 2022-06-27

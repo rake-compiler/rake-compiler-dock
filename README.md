@@ -187,7 +187,7 @@ jobs:
     name: "native-gem"
     runs-on: ubuntu-latest
     container:
-      image: "larskanis/rake-compiler-dock-mri-x86_64-linux:1.2.1"
+      image: "ghcr.io/rake-compiler/rake-compiler-dock-image:1.2.2-mri-x86_64-linux"
     steps:
       - uses: actions/checkout@v2
       - run: bundle install && bundle exec rake gem:x86_64-linux:rcd
@@ -221,11 +221,9 @@ For an example of rake tasks that support this style of invocation, visit https:
 
 ### Living on the edge: using weekly snapshots
 
-OCI images snapshotted from `master` are published weekly to Github Container Registry:
+OCI images snapshotted from `master` are published weekly to Github Container Registry with the string "snapshot" in place of the version number in the tag name, e.g.:
 
-> https://github.com/rake-compiler/rake-compiler-dock/pkgs/container/rake-compiler-dock-snapshot
-
-The images are named `ghcr.io/rake-compiler/rake-compiler-dock-snapshot` and are tagged with the platform name (e.g., `ghcr.io/rake-compiler/rake-compiler-dock-snapshot:x86_64-linux`.
+- `ghcr.io/rake-compiler/rake-compiler-dock-image:snapshot-mri-x86_64-linux`
 
 These images are intended for integration testing. They may not work properly and should not be considered production ready.
 
@@ -242,7 +240,7 @@ The following variables are recognized by rake-compiler-dock:
     Must be a space separated list out of `x86-mingw32`, `x64-mingw-ucrt`, `x64-mingw32`, `x86-linux`, `x86_64-linux`, `arm-linux`, `aarch64-linux`, `x86_64-darwin` and `arm64-darwin`.
     It is ignored when `rubyvm` is set to `:jruby`.
 * `RCD_IMAGE` - The docker image that is downloaded and started.
-    Defaults to "larskanis/rake-compiler-dock:IMAGE_VERSION" with an image version that is determined by the gem version.
+    Defaults to "ghcr.io/rake-compiler/rake-compiler-dock-image:IMAGE_VERSION-PLATFORM" with an image version that is determined by the gem version.
 
 The following variables are passed through to the docker container without modification:
 

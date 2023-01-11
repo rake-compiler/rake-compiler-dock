@@ -22,9 +22,7 @@ jobs:
           - arm64-darwin
           - arm-linux
           - aarch64-linux
-        include:
-          - platform: jruby
-            tag: jruby
+          - jruby
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -39,11 +37,18 @@ jobs:
         with:
           ruby-version: "3.1"
           bundler-cache: true
-      - id: rcd_image_version
-        run: bundle exec ruby -e 'require "rake_compiler_dock"; puts "rcd_image_version=#{RakeCompilerDock::IMAGE_VERSION}"' >> $GITHUB_OUTPUT
+      - id: rcd_config
+        run: |
+          bundle exec ruby -e ' \
+            require "rake_compiler_dock"; \
+            print "image_name="; \
+            puts RakeCompilerDock::Starter.container_image_name(:platform => %q(${{matrix.platform}})); \
+            print "snapshot_name="; \
+            puts RakeCompilerDock::Starter.container_image_name(:platform => %q(${{matrix.platform}}), :version => %q(snapshot)); \
+          ' | tee -a $GITHUB_OUTPUT
+
       - name: Build docker image
         env:
-          DOCKERHUB_USER: rake-compiler
           RCD_DOCKER_BUILD: docker buildx build --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new --load
         run: |
           docker buildx create --driver docker-container --use
@@ -56,10 +61,7 @@ jobs:
           registry: ghcr.io
           username: ${{github.actor}}
           password: ${{secrets.GITHUB_TOKEN}}
-      - env:
-          OLD_TAG: rake-compiler/rake-compiler-dock-${{matrix.tag || format('mri-{0}', matrix.platform)}}:${{steps.rcd_image_version.outputs.rcd_image_version}}
-          NEW_TAG: ghcr.io/rake-compiler/rake-compiler-dock-snapshot:${{matrix.platform}}
-        run: |
+      - run: |
           docker images
-          docker tag ${OLD_TAG} ${NEW_TAG}
-          docker push ${NEW_TAG}
+          docker tag ${{steps.rcd_config.outputs.image_name}} ${{steps.rcd_config.outputs.snapshot_name}}
+          docker push ${{steps.rcd_config.outputs.snapshot_name}}
