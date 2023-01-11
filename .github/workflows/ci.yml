@@ -1,4 +1,4 @@
-name: Build docker images
+name: CI
 concurrency:
   group: "${{github.workflow}}-${{github.ref}}"
   cancel-in-progress: true
@@ -19,7 +19,7 @@ on:
 jobs:
   # These jobs use Buildx layer caching
   docker_build:
-    name: Build
+    name: build image
 
     strategy:
       fail-fast: false
@@ -114,7 +114,7 @@ jobs:
           path: test/rcd_test/pkg/*-*-*.gem
 
   job_test_native:
-    name: Test (${{matrix.ruby}}, ${{matrix.platform}})
+    name: native
     needs: docker_build
     strategy:
       fail-fast: false
@@ -175,7 +175,7 @@ jobs:
           ruby -rrcd_test -S rake test
 
   job_test_native_static:
-    name: Test static (${{matrix.ruby}}, ${{matrix.platform}})
+    name: native static
     needs: docker_build
     strategy:
       fail-fast: false
@@ -225,7 +225,7 @@ jobs:
           ruby -rrcd_test -S rake test
 
   job_test_multiarch:
-    name: Test ${{matrix.platform}} on ${{matrix.from_image}}
+    name: multiarch (${{matrix.platform}} on ${{matrix.from_image}})
     needs: docker_build
     strategy:
       fail-fast: false
