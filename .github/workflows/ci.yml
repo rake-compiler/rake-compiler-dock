@@ -66,6 +66,12 @@ jobs:
           rm -rf tmp/build-cache
           mv tmp/build-cache-new tmp/build-cache
 
+      - name: Basic tests on the generated image
+        env:
+          TEST_PLATFORM: ${{ matrix.platform }}
+        run: |
+          bundle exec rake test
+
       - name: Build rcd_test.gem
         run: |
           gem build rake-compiler-dock.gemspec
@@ -74,12 +80,6 @@ jobs:
           bundle install
           bundle exec rake clean clobber
           bundle exec rake gem:${PLATFORM}
-
-      - name: Basic tests on the generated image
-        env:
-          TEST_PLATFORM: ${{ matrix.platform }}
-        run: |
-          bundle exec rake test
 
       - name: Upload binary gem
         uses: actions/upload-artifact@v3
@@ -95,7 +95,7 @@ jobs:
           path: test/rcd_test/pkg/*-?.?.?.gem
 
       - if: contains(matrix.platform, 'x64-mingw')
-        name: Build static rcd_test.gem
+        name: Build static rcd_test.gem for windows
         env:
           RCD_TEST_CONFIG: "--link-static"
         run: |
@@ -107,11 +107,45 @@ jobs:
           bundle exec rake gem:${PLATFORM}
 
       - if: contains(matrix.platform, 'x64-mingw')
-        name: Upload static binary gem
+        name: Upload static rcd_test.gem
         uses: actions/upload-artifact@v3
         with:
           name: gem-${{ matrix.platform }}-static
           path: test/rcd_test/pkg/*-*-*.gem
+
+  job_test_source:
+    name: source gem
+    needs: docker_build
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu
+        ruby:
+          - "3.2"
+          - "3.1"
+          - "3.0"
+          - "2.7"
+          - "2.6"
+          - "2.5"
+          - "2.4"
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+      - name: Download gem-ruby
+        uses: actions/download-artifact@v3
+        with:
+          name: gem-ruby
+      - name: Install gem-ruby
+        run: gem install --local *.gem --verbose
+      - name: Run tests
+        run: |
+          cd test/rcd_test/
+          bundle install
+          ruby -rrcd_test -S rake test
 
   job_test_native:
     name: native
@@ -138,8 +172,6 @@ jobs:
             platform: x86_64-darwin
           - os: ubuntu
             platform: x86_64-linux
-          - os: ubuntu
-            platform: ruby
           - os: ubuntu
             ruby: jruby-head
             platform: jruby
