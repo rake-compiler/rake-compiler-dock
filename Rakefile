@@ -6,8 +6,6 @@ require_relative "build/parallel_docker_build"
 
 RakeCompilerDock::GemHelper.install_tasks
 
-docker_build_cmd = Shellwords.split(ENV['RCD_DOCKER_BUILD'] || "docker build")
-
 platforms = [
   ["x86-mingw32", "i686-w64-mingw32"],
   ["x64-mingw32", "x86_64-w64-mingw32"],
@@ -29,7 +27,7 @@ namespace :build do
     task platform => sdf
     task sdf do
       image_name = RakeCompilerDock::Starter.container_image_name(platform: platform)
-      sh(*docker_build_cmd, "-t", image_name, "-f", "Dockerfile.mri.#{platform}", ".")
+      sh(*RakeCompilerDock.docker_build_cmd(platform), "-t", image_name, "-f", "Dockerfile.mri.#{platform}", ".")
     end
 
     df = ERB.new(File.read("Dockerfile.mri.erb"), trim_mode: ">").result(binding)
@@ -41,16 +39,24 @@ namespace :build do
   task :jruby => "Dockerfile.jruby"
   task "Dockerfile.jruby" do
     image_name = RakeCompilerDock::Starter.container_image_name(rubyvm: "jruby")
-    sh(*docker_build_cmd, "-t", image_name, "-f", "Dockerfile.jruby", ".")
+    sh(*RakeCompilerDock.docker_build_cmd("jruby"), "-t", image_name, "-f", "Dockerfile.jruby", ".")
   end
 
-  RakeCompilerDock::ParallelDockerBuild.new(platforms.map{|pl, _| "Dockerfile.mri.#{pl}" } + ["Dockerfile.jruby"], workdir: "tmp/docker", docker_build_cmd: docker_build_cmd)
+  RakeCompilerDock::ParallelDockerBuild.new(platforms.map{|pl, _| "Dockerfile.mri.#{pl}" } + ["Dockerfile.jruby"], workdir: "tmp/docker")
 
   desc "Build images for all MRI platforms in parallel"
-  multitask :mri => platforms.map(&:first)
+  if ENV['RCD_USE_BUILDX_CACHE']
+    task :mri => platforms.map(&:first)
+  else
+    multitask :mri => platforms.map(&:first)
+  end
 
   desc "Build images for all platforms in parallel"
-  multitask :all => platforms.map(&:first) + ["jruby"]
+  if ENV['RCD_USE_BUILDX_CACHE']
+    task :all => platforms.map(&:first) + ["jruby"]
+  else
+    multitask :all => platforms.map(&:first) + ["jruby"]
+  end
 end
 
 task :build => "build:all"
@@ -58,7 +64,7 @@ task :build => "build:all"
 namespace :prepare do
   desc "Build cross compiler for x64-mingw-ucrt aka RubyInstaller-3.1+"
   task "mingw64-ucrt" do
-    sh(*docker_build_cmd, "-t", "larskanis/mingw64-ucrt:20.04", ".",
+    sh(*RakeCompilerDock.docker_build_cmd, "-t", "larskanis/mingw64-ucrt:20.04", ".",
        chdir: "mingw64-ucrt")
   end
 end

@@ -2,15 +2,28 @@ require "fileutils"
 require "rake"
 
 module RakeCompilerDock
+  class << self
+    def docker_build_cmd(platform=nil)
+      cmd = if ENV['RCD_USE_BUILDX_CACHE']
+        if platform
+          cache_version = RakeCompilerDock::IMAGE_VERSION.split(".").take(2).join(".")
+          cache = File.join("cache", cache_version, platform)
+          "docker buildx build --cache-to=type=local,dest=#{cache},mode=max --cache-from=type=local,src=#{cache} --load"
+        else
+          return nil
+        end
+      else
+        ENV['RCD_DOCKER_BUILD'] || "docker build"
+      end
+      Shellwords.split(cmd)
+    end
+  end
+
   # Run docker builds in parallel, but ensure that common docker layers are reused
   class ParallelDockerBuild
     include Rake::DSL
 
-    attr_reader :docker_build_cmd
-
-    def initialize(dockerfiles, workdir: "tmp/docker", inputdir: ".", task_prefix: "common-",
-                   docker_build_cmd: %w["docker", "build"])
-      @docker_build_cmd = docker_build_cmd
+    def initialize(dockerfiles, workdir: "tmp/docker", inputdir: ".", task_prefix: "common-")
       FileUtils.mkdir_p(workdir)
 
       files = parse_dockerfiles(dockerfiles, inputdir)
@@ -100,7 +113,9 @@ module RakeCompilerDock
     #
     # The layers will be reused in subsequent builds, even if they run in parallel.
     def docker_build(filename, workdir)
-      sh(*docker_build_cmd, "-f", File.join(workdir, filename), ".")
+      cmd = RakeCompilerDock.docker_build_cmd
+      return if cmd.nil?
+      sh(*RakeCompilerDock.docker_build_cmd, "-f", File.join(workdir, filename), ".")
     end
   end
 end
