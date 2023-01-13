@@ -4,6 +4,8 @@ require "rake_compiler_dock"
 require_relative "build/gem_helper"
 require_relative "build/parallel_docker_build"
 
+CLEAN.include("tmp")
+
 RakeCompilerDock::GemHelper.install_tasks
 
 platforms = [
