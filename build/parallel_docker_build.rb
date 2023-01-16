@@ -7,7 +7,7 @@ module RakeCompilerDock
       cmd = if ENV['RCD_USE_BUILDX_CACHE']
         if platform
           cache_version = RakeCompilerDock::IMAGE_VERSION.split(".").take(2).join(".")
-          cache = File.join("cache", cache_version, platform)
+          cache = File.join("..", "rake-compiler-dock-cache", "cache", cache_version, platform)
           "docker buildx build --cache-to=type=local,dest=#{cache},mode=max --cache-from=type=local,src=#{cache} --load"
         else
           return nil

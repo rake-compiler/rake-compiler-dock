@@ -36,3 +36,4 @@ docker buildx create --use --driver=docker-container
 bundle exec rake build
 ```
 
+The cache will be generated in a sibling directory ("../rake-compiler-dock-cache") to avoid including the cache in the build context.

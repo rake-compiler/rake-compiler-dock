@@ -12,7 +12,6 @@
 /Dockerfile.mri.x86_64-linux
 /Gemfile.lock
 /_yardoc/
-/cache/
 /coverage/
 /doc/
 /pkg/
