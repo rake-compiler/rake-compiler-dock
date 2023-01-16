@@ -38,19 +38,23 @@ class TestParallelDockerBuild < Test::Unit::TestCase
     FileUtils.rm_rf @tmpdir
   end
 
+  private def hd(str)
+    "y" + Digest::SHA1.hexdigest(str)
+  end
+
   def test_tasks
     Dir.chdir(@tmpdir) do
       RakeCompilerDock::ParallelDockerBuild.new(%w[ File0 File1 File2 File3 ], task_prefix: "y")
     end
 
-    assert_operator Rake::Task["File0"].prerequisites, :include?, "yFile0File1"
-    assert_operator Rake::Task["File1"].prerequisites, :include?, "yFile1"
-    assert_operator Rake::Task["yFile1"].prerequisites, :include?, "yFile0File1"
-    assert_operator Rake::Task["yFile0File1"].prerequisites, :include?, "yFile0File1File2File3"
+    assert_operator Rake::Task["File0"].prerequisites, :include?, hd("File0File1")
+    assert_operator Rake::Task["File1"].prerequisites, :include?, hd("File1")
+    assert_operator Rake::Task[hd "File1"].prerequisites, :include?, hd("File0File1")
+    assert_operator Rake::Task[hd "File0File1"].prerequisites, :include?, hd("File0File1File2File3")
 
-    assert_operator Rake::Task["File2"].prerequisites, :include?, "yFile2File3"
-    assert_operator Rake::Task["File3"].prerequisites, :include?, "yFile2File3"
-    assert_operator Rake::Task["yFile2File3"].prerequisites, :include?, "yFile0File1File2File3"
+    assert_operator Rake::Task["File2"].prerequisites, :include?, hd("File2File3")
+    assert_operator Rake::Task["File3"].prerequisites, :include?, hd("File2File3")
+    assert_operator Rake::Task[hd "File2File3"].prerequisites, :include?, hd("File0File1File2File3")
   end
 
   def test_common_files
@@ -58,10 +62,10 @@ class TestParallelDockerBuild < Test::Unit::TestCase
       RakeCompilerDock::ParallelDockerBuild.new(%w[ File0 File1 File2 File3 ], task_prefix: "y")
     end
 
-    assert_equal "FROM a\nRUN a\nRUN d\nRUN f \\\ng\n", read_df("yFile1")
-    assert_equal "FROM a\nRUN a\nRUN d\n", read_df("yFile0File1")
-    assert_equal "FROM a\nRUN b\nRUN c\nRUN d\n", read_df("yFile2File3")
-    assert_equal "FROM a\n", read_df("yFile0File1File2File3")
+    assert_equal "FROM a\nRUN a\nRUN d\nRUN f \\\ng\n", read_df(hd "File1")
+    assert_equal "FROM a\nRUN a\nRUN d\n", read_df(hd "File0File1")
+    assert_equal "FROM a\nRUN b\nRUN c\nRUN d\n", read_df(hd "File2File3")
+    assert_equal "FROM a\n", read_df(hd "File0File1File2File3")
   end
 
   def read_df(fn)

@@ -1,5 +1,6 @@
 require "fileutils"
 require "rake"
+require "digest/sha1"
 
 module RakeCompilerDock
   class << self
@@ -92,7 +93,7 @@ module RakeCompilerDock
     # This also adds dependant intermediate tasks as prerequisites.
     def define_common_tasks(vcs, workdir, task_prefix, plines=[])
       vcs.map do |files, (lines, nvcs)|
-        fn = "#{task_prefix}#{files.join}"
+        fn = "#{task_prefix}#{Digest::SHA1.hexdigest(files.join)}"
         File.write(File.join(workdir, fn), (plines + lines).join)
         task fn do
           docker_build(fn, workdir)
