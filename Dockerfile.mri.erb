@@ -114,7 +114,7 @@ RUN /home/rvm/mk_osxcross.sh
 ##
 USER rvm
 
-RUN bash -c "rvm all do gem install --no-document rake-compiler:1.2.1"
+RUN bash -c "rvm all do gem install --no-document rake-compiler:1.2.2"
 
 # Install rake-compiler's cross rubies in global dir instead of /root
 RUN sudo mkdir -p /usr/local/rake-compiler && \
@@ -125,9 +125,9 @@ RUN sudo mkdir -p /usr/local/rake-compiler && \
 COPY build/patches2 /home/rvm/patches/
 RUN bash -c " \
       for v in ${RVM_RUBIES} ; do \
-        cd /usr/local/rvm/gems/ruby-\$v/gems/rake-compiler-1.2.1 && \
-        echo applying patches to ruby-\$v /home/rvm/patches/rake-compiler-1.2.1/*.patch && \
-        ( git apply /home/rvm/patches/rake-compiler-1.2.1/*.patch || true ) \
+        cd /usr/local/rvm/gems/ruby-\$v/gems/rake-compiler-1.2.2 && \
+        echo applying patches to ruby-\$v /home/rvm/patches/rake-compiler-1.2.2/*.patch && \
+        ( git apply /home/rvm/patches/rake-compiler-1.2.2/*.patch || true ) \
       done \
     "
 
