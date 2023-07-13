@@ -120,6 +120,8 @@ jobs:
         os:
           - ubuntu
         ruby:
+          - "head"
+          - "3.3.0-preview1"
           - "3.2"
           - "3.1"
           - "3.0"
@@ -156,6 +158,8 @@ jobs:
           - macos
           - ubuntu
         ruby:
+          - "head"
+          - "3.3.0-preview1"
           - "3.2"
           - "3.1"
           - "3.0"
@@ -179,11 +183,21 @@ jobs:
           - os: windows
             ruby: "3.2"
             platform: x64-mingw-ucrt
+          - os: windows
+            ruby: "3.3.0-preview1"
+            platform: x64-mingw-ucrt
+          - os: windows
+            ruby: "head"
+            platform: x64-mingw-ucrt
         exclude:
           - os: windows
             ruby: "3.1"
           - os: windows
             ruby: "3.2"
+          - os: windows
+            ruby: "3.3.0-preview1"
+          - os: windows
+            ruby: "head"
 
     runs-on: ${{ matrix.os }}-latest
     steps:
@@ -213,6 +227,8 @@ jobs:
         os:
           - windows
         ruby:
+          - "head"
+          - "3.3.0-preview1"
           - "3.2"
           - "3.1"
           - "3.0"
@@ -229,11 +245,21 @@ jobs:
           - os: windows
             ruby: "3.2"
             platform: x64-mingw-ucrt
+          - os: windows
+            ruby: "3.3.0-preview1"
+            platform: x64-mingw-ucrt
+          - os: windows
+            ruby: "head"
+            platform: x64-mingw-ucrt
         exclude:
           - os: windows
             ruby: "3.1"
           - os: windows
             ruby: "3.2"
+          - os: windows
+            ruby: "3.3.0-preview1"
+          - os: windows
+            ruby: "head"
 
     runs-on: ${{ matrix.os }}-latest
     steps:

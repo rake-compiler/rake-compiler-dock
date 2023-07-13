@@ -1,6 +1,7 @@
 next / unreleased
 ------------------
 
+* Add Ruby 3.3.0-preview1 cross-compilation support.
 * Update to rake-compiler 1.2.2.
 
 
