@@ -1,3 +1,9 @@
+next / unreleased
+-----------------
+
+* Add Ruby 3.3.0-preview3 cross-compilation support.
+
+
 1.3.1 / 2023-10-14
 ------------------
 
