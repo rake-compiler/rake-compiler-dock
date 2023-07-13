@@ -209,15 +209,22 @@ RUN sed -i -- "s:/root/.rake-compiler:/usr/local/rake-compiler:g" /usr/local/rak
 
 <% if platform=~/mingw/ %>
 # Install wrappers for strip commands as a workaround for "Protocol error" in boot2docker.
-COPY build/strip_wrapper /root/
+COPY build/strip_wrapper_vbox /root/
 RUN mv /usr/bin/<%= target %>-strip /usr/bin/<%= target %>-strip.bin && \
-    ln /root/strip_wrapper /usr/bin/<%= target %>-strip
+    ln /root/strip_wrapper_vbox /usr/bin/<%= target %>-strip
 
 # Use posix pthread for mingw so that C++ standard library for thread could be
 # available such as std::thread, std::mutex, so on.
 # https://sourceware.org/pthreads-win32/
 RUN printf "1\n" | update-alternatives --config <%= target %>-gcc && \
     printf "1\n" | update-alternatives --config <%= target %>-g++
+<% end %>
+
+<% if platform =~ /darwin/ %>
+# Install wrapper around strip to re-sign binaries (ad-hoc signature)
+COPY build/strip_wrapper_codesign /root/
+RUN mv /opt/osxcross/target/bin/<%= target %>-strip /opt/osxcross/target/bin/<%= target %>-strip.bin && \
+    ln /root/strip_wrapper_codesign /opt/osxcross/target/bin/<%= target %>-strip
 <% end %>
 
 <% if manylinux %>
