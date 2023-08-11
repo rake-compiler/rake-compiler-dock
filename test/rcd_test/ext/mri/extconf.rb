@@ -92,4 +92,18 @@ else
   end
 
   create_makefile("rcd_test/rcd_test_ext")
+
+  # exercise the strip command - this approach borrowed from grpc
+  strip_tool = RbConfig::CONFIG['STRIP']
+  strip_tool += ' -x' if RUBY_PLATFORM =~ /darwin/
+  File.open('Makefile.new', 'w') do |o|
+    o.puts 'hijack: all strip'
+    o.puts
+    o.write(File.read('Makefile'))
+    o.puts
+    o.puts 'strip: $(DLLIB)'
+    o.puts "\t$(ECHO) Stripping $(DLLIB)"
+    o.puts "\t$(Q) #{strip_tool} $(DLLIB)"
+  end
+  File.rename('Makefile.new', 'Makefile')
 end
