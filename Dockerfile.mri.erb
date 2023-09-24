@@ -135,7 +135,7 @@ RUN bash -c " \
 axrubies = if platform =~ /x64-mingw-ucrt/
   [
     # Rubyinstaller-3.1.0+ is platform x64-mingw-ucrt
-    ["3.3.0-preview1:3.2.0:3.1.0", "3.1.3", true],
+    ["3.3.0-preview2:3.2.0:3.1.0", "3.1.3", true],
   ]
 elsif platform =~ /x64-mingw32/
   [
@@ -148,7 +148,7 @@ else
     # Build xruby versions prior ruby2_keywords in parallel using ruby-2.5
     ["2.6.0:2.5.0:2.4.0", "2.5.9", false],
     # Build xruby versions with ruby2_keywords in parallel using ruby-3.x
-    ["3.3.0-preview1:3.2.0:3.1.0:3.0.0:2.7.0", "3.1.3", true],
+    ["3.3.0-preview2:3.2.0:3.1.0:3.0.0:2.7.0", "3.1.3", true],
   ]
 end
 
