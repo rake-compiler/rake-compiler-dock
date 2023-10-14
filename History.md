@@ -1,10 +1,11 @@
-next / unreleased
+1.3.1 / 2023-10-14
 ------------------
 
-* Update to rake-compiler 1.2.2.
+* In the container, `strip` will re-codesign binaries on darwin. #104 (@flavorjones)
+* Update to rake-compiler 1.2.2. #101 (@flavorjones)
 
 
-1.3.0 / 2022-01-11
+1.3.0 / 2023-01-11
 ------------------
 
 * Add Ruby 3.2 cross-compilation support.
