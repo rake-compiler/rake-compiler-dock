@@ -39,7 +39,7 @@ RUN bash -c " \
       rvm all do gem update --system --no-document && \
       rvm all do gem update --no-document && \
       rvm all do gem install bundler --no-document && \
-      rvm all do gem install --no-document rake-compiler:1.2.2 && \
+      rvm all do gem install --no-document rake-compiler:1.2.5 && \
       find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw \
     "
 
