@@ -132,32 +132,36 @@ RUN bash -c " \
     "
 
 <%
+#
+# Build ruby versions prior to ruby2_keywords using ruby-2.5
+# Build ruby versions with ruby2_keywords using ruby-3.x
+#
+# Note that parallel builds of ruby with make flag `-j` are often flaky, see
+# https://bugs.ruby-lang.org/issues/18506
+#
 axrubies = if platform =~ /x64-mingw-ucrt/
   [
     # Rubyinstaller-3.1.0+ is platform x64-mingw-ucrt
-    ["3.2.0:3.1.0", "3.1.3", true],
+    ["3.3.0-preview3:3.2.0:3.1.0", "3.1.3"],
   ]
 elsif platform =~ /x64-mingw32/
   [
     # Rubyinstaller prior to 3.1.0 is platform x64-mingw32
-    ["2.6.0:2.5.0:2.4.0", "2.5.9", false],
-    ["3.0.0:2.7.0", "3.1.3", true],
+    ["2.6.0:2.5.0:2.4.0", "2.5.9"],
+    ["3.0.0:2.7.0", "3.1.3"],
   ]
 else
   [
-    # Build xruby versions prior ruby2_keywords in parallel using ruby-2.5
-    ["2.6.0:2.5.0:2.4.0", "2.5.9", false],
-    # Build xruby versions with ruby2_keywords in parallel using ruby-3.x
-    ["3.2.0:3.1.0:3.0.0:2.7.0", "3.1.3", true],
+    ["2.6.0:2.5.0:2.4.0", "2.5.9"],
+    ["3.3.0-preview3:3.2.0:3.1.0:3.0.0:2.7.0", "3.1.3"],
   ]
 end
 
-axrubies.each do |xrubies, rvm, parallel| %>
+axrubies.each do |xrubies, rvm| %>
 ENV XRUBIES <%= xrubies %>
 
 <% strip = '-s' if platform !~ /darwin/ %>
-# Build xruby versions in parallel
-# Then cleanup all build artifacts
+# Build xruby versions, then cleanup all build artifacts
 RUN bash -c " \
       rvm use <%= rvm %> && \
       export CPPFLAGS='<%= "-D__USE_MINGW_ANSI_STDIO=1" if platform=~/x64-mingw-ucrt/ %>' && \
@@ -165,7 +169,7 @@ RUN bash -c " \
       export LDFLAGS='-pipe <%= strip %>' && \
       <%= "export LIBS='-l:libssp.a' &&" if platform =~ /mingw/ %> \
       <%= "export CC=#{target}-clang &&" if platform =~ /darwin/ %> \
-      export MAKE='make V=1 <%= "-j`nproc`" if parallel %>' && \
+      export MAKE='make V=1' && \
       rake-compiler cross-ruby VERSION=$XRUBIES HOST=<%= target %> && \
       rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources && \
       find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw \
@@ -194,8 +198,11 @@ RUN find /usr/local/rake-compiler/ruby -name lib*-ruby*.dll.a | while read f ; d
 RUN find /usr/local/rake-compiler/ruby -name rbconfig.rb | while read f ; do sed -i 's/-lcrypt//' $f ; done
 
 <% if platform=~/darwin/ %>
-# ruby-3.2 on darwin links with `-bundle_loader`, see https://github.com/rake-compiler/rake-compiler-dock/issues/87
-RUN find /usr/local/rake-compiler/ruby/*/*/lib/ruby/3.2.0 -name rbconfig.rb | \
+# ruby-3.2+ on darwin links with `-bundle_loader`,
+# - see https://github.com/rake-compiler/rake-compiler-dock/issues/87
+# - note that we do this for "3.[2-9].0" to match rubies 3.2 and later
+# - and we add a "*" on the end for "3.[2-9].0*" to match prereleases like "3.3.0+0"
+RUN find /usr/local/rake-compiler/ruby/*/*/lib/ruby/3.[2-9].0* -name rbconfig.rb | \
     while read f ; do sed -i 's/\["EXTDLDFLAGS"\] = "/&-Wl,-flat_namespace /' $f ; done
 <% end %>
 
@@ -262,6 +269,6 @@ RUN bash -c " \
       rvm use default \
     "
 
-ENV RUBY_CC_VERSION 3.2.0:3.1.0:3.0.0:2.7.0:2.6.0:2.5.0:2.4.0
+ENV RUBY_CC_VERSION 3.3.0:3.2.0:3.1.0:3.0.0:2.7.0:2.6.0:2.5.0:2.4.0
 
 CMD bash
