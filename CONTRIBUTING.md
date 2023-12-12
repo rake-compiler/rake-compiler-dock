@@ -2,6 +2,23 @@
 
 This document is intended for the rake-compiler-dock contributors.
 
+## Cutting a release
+
+- prep
+  - [ ] make sure CI is green!
+  - [ ] update `History.md` and `lib/rake_compiler_dock/version.rb`
+- build
+  - [ ] run the steps below to generate the images locally
+  - [ ] run `gem build rake-compiler-dock`
+  - [ ] create a git tag
+- push
+  - [ ] run `bundle exec rake release:images`
+  - [ ] run `gem push pkg/rake-compiler-dock*gem`
+  - [ ] run `git push && git push --tags`
+- announce
+  - [ ] create a release at https://github.com/rake-compiler/rake-compiler-dock/releases
+
+
 ## Building a versioned image
 
 We want to preserve the cache if we can, so patch releases don't change _all_ the layers. There are a few ways to do this.
