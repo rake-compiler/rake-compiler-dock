@@ -1,4 +1,4 @@
-1.4.next / unreleased
+1.4.0.rc2 / 2023-12-12
 ---------------------
 
 * Add Ruby 3.3.0-rc1 cross-compilation support. (@flavorjones)
