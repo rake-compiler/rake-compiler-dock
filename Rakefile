@@ -81,11 +81,11 @@ task :update_lists do
 
   users = `rake-compiler-dock bash -c "getent passwd"`.each_line.map do |line|
     line.chomp.split(":")[0]
-  end.compact.reject(&:empty?) - [RakeCompilerDock::Starter.make_valid_user_name(`id -nu`.chomp)]
+  end.compact.reject(&:empty?).sort - [RakeCompilerDock::Starter.make_valid_user_name(`id -nu`.chomp)]
 
   groups = `rake-compiler-dock bash -c "getent group"`.each_line.map do |line|
     line.chomp.split(":")[0]
-  end.compact.reject(&:empty?) - [RakeCompilerDock::Starter.make_valid_group_name(`id -ng`.chomp)]
+  end.compact.reject(&:empty?).sort - [RakeCompilerDock::Starter.make_valid_group_name(`id -ng`.chomp)]
 
   File.open("lib/rake_compiler_dock/predefined_user_group.rb", "w") do |fd|
     fd.puts <<-EOT
