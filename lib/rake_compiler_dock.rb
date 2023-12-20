@@ -26,7 +26,8 @@ module RakeCompilerDock
   #
   # Option +:platform+ can be set to a list of space separated values.
   # It selects the docker image(s) with an appropriate toolchain.
-  # Allowed values are +:x86-mingw32+, +x64-mingw32+, +x86-linux+ or +x86_64-linux+.
+  # Allowed values are +aarch64-linux-gnu+, +arm-linux-gnu+, +arm64-darwin+, +x64-mingw-ucrt+,
+  # +x64-mingw32+, +x86-linux-gnu+, +x86-mingw32+, +x86_64-darwin+, +x86_64-linux-gnu+.
   # If the list contains multiple values, +cmd+ is consecutively executed in each of the docker images,
   # Option +:platform+ is ignored when +:rubyvm+ is set to +:jruby+.
   # Default is "x86-mingw32 x64-mingw32" .

@@ -9,15 +9,16 @@ CLEAN.include("tmp")
 RakeCompilerDock::GemHelper.install_tasks
 
 platforms = [
-  ["x86-mingw32", "i686-w64-mingw32"],
-  ["x64-mingw32", "x86_64-w64-mingw32"],
-  ["x64-mingw-ucrt", "x86_64-w64-mingw32"],
-  ["x86-linux", "i686-redhat-linux"],
-  ["x86_64-linux", "x86_64-redhat-linux"],
-  ["x86_64-darwin", "x86_64-apple-darwin"],
+  # tuple is [platform, target]
+  ["aarch64-linux-gnu", "aarch64-linux-gnu"],
+  ["arm-linux-gnu", "arm-linux-gnueabihf"],
   ["arm64-darwin", "aarch64-apple-darwin"],
-  ["arm-linux", "arm-linux-gnueabihf"],
-  ["aarch64-linux", "aarch64-linux-gnu"],
+  ["x64-mingw-ucrt", "x86_64-w64-mingw32"],
+  ["x64-mingw32", "x86_64-w64-mingw32"],
+  ["x86-linux-gnu", "i686-redhat-linux-gnu"],
+  ["x86-mingw32", "i686-w64-mingw32"],
+  ["x86_64-darwin", "x86_64-apple-darwin"],
+  ["x86_64-linux-gnu", "x86_64-redhat-linux-gnu"],
 ]
 
 namespace :build do
@@ -30,6 +31,9 @@ namespace :build do
     task sdf do
       image_name = RakeCompilerDock::Starter.container_image_name(platform: platform)
       sh(*RakeCompilerDock.docker_build_cmd(platform), "-t", image_name, "-f", "Dockerfile.mri.#{platform}", ".")
+      if image_name.include?("linux-gnu")
+        sh("docker", "tag", image_name, image_name.sub("linux-gnu", "linux"))
+      end
     end
 
     df = ERB.new(File.read("Dockerfile.mri.erb"), trim_mode: ">").result(binding)

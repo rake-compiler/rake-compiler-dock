@@ -45,18 +45,22 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: aarch64-linux
-          - platform: arm-linux
+          - platform: aarch64-linux-gnu
+            alias:    aarch64-linux
+          - platform: arm-linux-gnu
+            alias:    arm-linux
           - platform: arm64-darwin
           - platform: jruby
           - platform: x64-mingw-ucrt
             static: true
           - platform: x64-mingw32
             static: true
-          - platform: x86-linux
+          - platform: x86-linux-gnu
+            alias:    x86-linux
           - platform: x86-mingw32
           - platform: x86_64-darwin
-          - platform: x86_64-linux
+          - platform: x86_64-linux-gnu
+            alias:    x86_64-linux
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -112,6 +116,21 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: gem-${{ matrix.platform }}-static
+          path: test/rcd_test/pkg/*-*-*.gem
+
+      - if: matrix.alias
+        name: Build native gem ${{ matrix.alias }}
+        run: |
+          cd test/rcd_test/
+          bundle install
+          bundle exec rake clean clobber
+          bundle exec rake gem:${{ matrix.alias }}
+
+      - if: matrix.alias
+        name: Upload native gem ${{ matrix.alias }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: gem-${{ matrix.alias }}
           path: test/rcd_test/pkg/*-*-*.gem
 
   test_source_gem:
@@ -172,6 +191,15 @@ jobs:
             platform: x86_64-darwin
           - os: ubuntu
             platform: x86_64-linux
+          - os: ubuntu # ruby 3.0 and earlier ship rubygems < 3.2.33, so can't recognize the -gnu suffix
+            ruby: "3.1"
+            platform: x86_64-linux-gnu
+          - os: ubuntu
+            ruby: "3.2"
+            platform: x86_64-linux-gnu
+          - os: ubuntu
+            ruby: "3.3"
+            platform: x86_64-linux-gnu
           - os: ubuntu
             ruby: jruby
             platform: jruby
@@ -282,22 +310,22 @@ jobs:
       matrix:
         include:
           - from_image: amd64/centos
-            platform: x86_64-linux
+            platform: x86_64-linux # centos-8 ships ruby 2.5, rubygems won't recognize -gnu suffix
             dockerfile: centos
           - from_image: navikey/raspbian-bullseye
-            platform: arm-linux
+            platform: arm-linux # bullseye ships ruby 2.7, rubygems won't recognize -gnu suffix
             dockerfile: debian
           - from_image: arm64v8/ubuntu
-            platform: aarch64-linux
+            platform: aarch64-linux # arm64v8 ships ruby 3.0, rubygems won't recognize -gnu suffix
             dockerfile: debian
           - from_image: i386/alpine
-            platform: x86-linux
+            platform: x86-linux-gnu
             dockerfile: alpine
           - from_image: arm32v6/alpine
-            platform: arm-linux
+            platform: arm-linux-gnu
             dockerfile: alpine
           - from_image: alpine
-            platform: x86_64-linux
+            platform: x86_64-linux-gnu
             dockerfile: alpine
     runs-on: ubuntu-latest
     steps:
