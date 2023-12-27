@@ -1,8 +1,7 @@
-1.4.0 / 2023-12-26
+1.4.0 / 2023-12-27
 ------------------
 
 * Add Ruby 3.3.0-rc1 cross-compilation support. #109, #105 (@flavorjones)
-* Add Ruby 3.3.0-preview3 cross-compilation support. #105 (@flavorjones)
 * Update to rake-compiler 1.2.5. #108 (@flavorjones)
 
 
