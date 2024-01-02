@@ -78,14 +78,22 @@ end
 
 desc "Update predefined_user_group.rb"
 task :update_lists do
+  def get_user_list(platform)
+    puts "getting user list from #{platform} ..."
+    `RCD_PLATFORM=#{platform} rake-compiler-dock bash -c "getent passwd"`.each_line.map do |line|
+      line.chomp.split(":")[0]
+    end.compact.reject(&:empty?) - [RakeCompilerDock::Starter.make_valid_user_name(`id -nu`.chomp)]
+  end
 
-  users = `rake-compiler-dock bash -c "getent passwd"`.each_line.map do |line|
-    line.chomp.split(":")[0]
-  end.compact.reject(&:empty?) - [RakeCompilerDock::Starter.make_valid_user_name(`id -nu`.chomp)]
+  def get_group_list(platform)
+    puts "getting group list from #{platform} ..."
+    `RCD_PLATFORM=#{platform} rake-compiler-dock bash -c "getent group"`.each_line.map do |line|
+      line.chomp.split(":")[0]
+    end.compact.reject(&:empty?) - [RakeCompilerDock::Starter.make_valid_group_name(`id -ng`.chomp)]
+  end
 
-  groups = `rake-compiler-dock bash -c "getent group"`.each_line.map do |line|
-    line.chomp.split(":")[0]
-  end.compact.reject(&:empty?) - [RakeCompilerDock::Starter.make_valid_group_name(`id -ng`.chomp)]
+  users = platforms.flat_map { |platform, _| get_user_list(platform) }.uniq.sort
+  groups = platforms.flat_map { |platform, _| get_group_list(platform) }.uniq.sort
 
   File.open("lib/rake_compiler_dock/predefined_user_group.rb", "w") do |fd|
     fd.puts <<-EOT

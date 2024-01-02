@@ -2,59 +2,65 @@ FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -y update && \
-    apt-get install -y curl git-core xz-utils wget unzip sudo gpg dirmngr openjdk-11-jdk-headless maven && \
+    apt-get install -y sudo wget curl git-core build-essential xz-utils unzip dirmngr && \
+    apt-get install -y openjdk-11-jdk-headless maven && \
     rm -rf /var/lib/apt/lists/*
 
-# Add "rvm" as system group, to avoid conflicts with host GIDs typically starting with 1000
-RUN groupadd -r rvm && useradd -r -g rvm -G sudo -p "" --create-home rvm && \
-    echo "source /etc/profile.d/rvm.sh" >> /etc/rubybashrc
-USER rvm
+##
+##  install rbenv and ruby-build
+##
+RUN groupadd -r rubyuser && useradd -r -g rubyuser -G sudo -p "" --create-home rubyuser
 
-RUN mkdir ~/.gnupg && \
-    echo "disable-ipv6" >> ~/.gnupg/dirmngr.conf
+ENV RBENV_ROOT=/usr/local/rbenv RBENV_RUBIES="jruby-9.4.0.0"
 
-# install rvm, RVM 1.26.0+ has signed releases, source rvm for usage outside of package scripts
-RUN gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB && \
-    (curl -L http://get.rvm.io | sudo bash) && \
-    bash -c " \
-        source /etc/rubybashrc && \
-        rvmsudo rvm cleanup all "
+# chown after running `rbenv init` because that command creates some subdirectories
+RUN git clone https://github.com/rbenv/rbenv.git      ${RBENV_ROOT} && \
+    git clone https://github.com/rbenv/ruby-build.git ${RBENV_ROOT}/plugins/ruby-build && \
+    \
+    echo "export RBENV_ROOT=/usr/local/rbenv" >> /etc/rubybashrc && \
+    echo "export PATH=$RBENV_ROOT/bin:\$PATH" >> /etc/rubybashrc && \
+    $RBENV_ROOT/bin/rbenv init - --no-rehash bash >> /etc/rubybashrc && \
+    echo "source /etc/rubybashrc" >> /etc/bashrc && \
+    echo "source /etc/rubybashrc" >> /etc/bash.bashrc && \
+    \
+    chown -R rubyuser:rubyuser ${RBENV_ROOT} && \
+    find ${RBENV_ROOT} -type d -print0 | sudo xargs -0 chmod g+sw
+ENV BASH_ENV=/etc/rubybashrc
 
-# Import patch files for ruby and gems
-COPY build/patches /home/rvm/patches/
-ENV BASH_ENV /etc/rubybashrc
 
-# install rubies and fix permissions on
+##
+##  set up rake-compiler and install bootstrap rubies
+##
+USER rubyuser
+
+# Install the bootstrap rubies
 RUN bash -c " \
+      echo 'gem: --no-ri --no-rdoc --no-document' >> ~/.gemrc && \
       export CFLAGS='-s -O3 -fno-fast-math -fPIC' && \
-      for v in jruby-9.4.0.0 ; do \
-          rvm install --binary \$v --patch \$(echo ~/patches/ruby-\$v/* | tr ' ' ','); \
+      for v in ${RBENV_RUBIES} ; do \
+        rbenv install \$v -- --disable-install-doc ; \
       done && \
-      rvm cleanup all && \
-      find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw \
+      find ${RBENV_ROOT} -type d -print0 | sudo xargs -0 chmod g+w \
     "
 
+# Install rake-compiler and patch it to build and install static libraries for Linux rubies
+COPY build/patches2 /home/rubyuser/patches
 RUN bash -c " \
-      echo "gem: --no-ri --no-rdoc" >> ~/.gemrc && \
-      rvm all do gem update --system --no-document && \
-      rvm all do gem update --no-document && \
-      rvm all do gem install bundler --no-document && \
-      rvm all do gem install --no-document rake-compiler:1.2.5 && \
-      find /usr/local/rvm -type d -print0 | sudo xargs -0 chmod g+sw \
+      for v in ${RBENV_RUBIES} ; do \
+        rbenv shell \$v && \
+        gem install rake-compiler -v1.2.5 && \
+        cd ${RBENV_ROOT}/versions/\$v/lib/ruby/gems/*/gems/rake-compiler-1.2.5 && \
+        patch -p1 < /home/rubyuser/patches/rake-compiler-1.2.5/*.patch ; \
+      done \
     "
 
 # Install rake-compiler's cross rubies in global dir instead of /root
 RUN sudo mkdir -p /usr/local/rake-compiler && \
-    sudo chown rvm.rvm /usr/local/rake-compiler && \
+    sudo chown rubyuser.rubyuser /usr/local/rake-compiler && \
     ln -s /usr/local/rake-compiler ~/.rake-compiler
 
+
 USER root
-
-RUN bash -c "rvm alias create default jruby-9.4.0.0"
-RUN echo "rvm use jruby-9.4.0.0 > /dev/null" >> /etc/rubybashrc
-
-# Add rvm to the global bashrc
-RUN echo "source /etc/profile.d/rvm.sh" >> /etc/bash.bashrc
 
 # Install SIGINT forwarder
 COPY build/sigfw.c /root/
@@ -65,5 +71,7 @@ COPY build/runas /usr/local/bin/
 
 # Install sudoers configuration
 COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
+
+RUN bash -c "rbenv global jruby-9.4.0.0"
 
 CMD bash

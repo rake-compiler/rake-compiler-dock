@@ -92,7 +92,7 @@ For Linux:
 
     sudo yum install your-package
 
-You can also choose between different executable ruby versions by `rvm use <version>` .
+You can also choose between different executable ruby versions by `rbenv shell <version>` .
 The current default is 3.1.
 
 ### JRuby support

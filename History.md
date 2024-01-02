@@ -1,3 +1,14 @@
+next / unreleased
+-----------------
+
+* Replace `rvm` with `rbenv` and `ruby-build`
+  - `rvm` has been replaced by `rbenv` and `ruby-build`
+    - no longer applying sendfile patches to bootstrap rubies
+    - no longer updating gems belonging to the bootstrap rubies
+  - user `rvm` no longer exists, replaced by `rubyuser`
+* Predefined user and group list is more complete, and represents the union of users and groups
+  across all RCD images.
+
 1.4.0 / 2023-12-27
 ------------------
 
