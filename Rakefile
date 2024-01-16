@@ -16,6 +16,7 @@ platforms = [
   ["x64-mingw-ucrt", "x86_64-w64-mingw32"],
   ["x64-mingw32", "x86_64-w64-mingw32"],
   ["x86-linux-gnu", "i686-redhat-linux-gnu"],
+  ["x86-linux-musl", "i686-unknown-linux-musl"],
   ["x86-mingw32", "i686-w64-mingw32"],
   ["x86_64-darwin", "x86_64-apple-darwin"],
   ["x86_64-linux-gnu", "x86_64-redhat-linux-gnu"],

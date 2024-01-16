@@ -28,6 +28,7 @@ else
       x64-mingw32
       x86-linux
       x86-linux-gnu
+      x86-linux-musl
       x86-mingw32
       x86_64-darwin
       x86_64-linux

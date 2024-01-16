@@ -6,6 +6,7 @@
 /Dockerfile.mri.x64-mingw-ucrt
 /Dockerfile.mri.x64-mingw32
 /Dockerfile.mri.x86-linux-gnu
+/Dockerfile.mri.x86-linux-musl
 /Dockerfile.mri.x86-mingw32
 /Dockerfile.mri.x86_64-darwin
 /Dockerfile.mri.x86_64-linux-gnu
