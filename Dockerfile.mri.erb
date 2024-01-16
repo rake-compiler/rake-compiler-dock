@@ -64,6 +64,10 @@ COPY --from=larskanis/mingw64-ucrt:20.04 \
     /debs/
 RUN dpkg -i /debs/*.deb
 
+<% elsif platform =~ /linux-musl/ %>
+COPY build/mk_musl_cross.sh /tmp
+RUN /tmp/mk_musl_cross.sh <%= target %>
+
 <% elsif !manylinux %>
 RUN apt-get -y update && \
     apt-get install -y <%

@@ -19,6 +19,7 @@ platforms = [
   ["x86-mingw32", "i686-w64-mingw32"],
   ["x86_64-darwin", "x86_64-apple-darwin"],
   ["x86_64-linux-gnu", "x86_64-redhat-linux-gnu"],
+  ["x86_64-linux-musl", "x86_64-unknown-linux-musl"],
 ]
 
 namespace :build do

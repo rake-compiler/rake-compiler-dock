@@ -17,7 +17,13 @@ Use rake-compiler-dock to enter an interactive shell session or add a task to yo
 #  However we do the version check at runtime.
 #  spec.required_ruby_version = '>= 1.9.2'
 
-  spec.files         = `git ls-files -z`.split("\x0")
+  spec.files = begin
+    `git ls-files -z`.split("\x0")
+  rescue StandardError => e
+    warn "WARNING: Could not discover files for gemspec: #{e}"
+    []
+  end
+
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
