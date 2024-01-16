@@ -23,6 +23,7 @@ else
       aarch64-linux-gnu
       arm-linux
       arm-linux-gnu
+      arm-linux-musl
       arm64-darwin
       x64-mingw-ucrt
       x64-mingw32

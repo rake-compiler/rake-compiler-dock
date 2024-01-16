@@ -12,6 +12,7 @@ platforms = [
   # tuple is [platform, target]
   ["aarch64-linux-gnu", "aarch64-linux-gnu"],
   ["arm-linux-gnu", "arm-linux-gnueabihf"],
+  ["arm-linux-musl", "arm-linux-musleabihf"],
   ["arm64-darwin", "aarch64-apple-darwin"],
   ["x64-mingw-ucrt", "x86_64-w64-mingw32"],
   ["x64-mingw32", "x86_64-w64-mingw32"],

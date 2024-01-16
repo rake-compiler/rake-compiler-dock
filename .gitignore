@@ -2,6 +2,7 @@
 /.yardoc
 /Dockerfile.mri.aarch64-linux-gnu
 /Dockerfile.mri.arm-linux-gnu
+/Dockerfile.mri.arm-linux-musl
 /Dockerfile.mri.arm64-darwin
 /Dockerfile.mri.x64-mingw-ucrt
 /Dockerfile.mri.x64-mingw32

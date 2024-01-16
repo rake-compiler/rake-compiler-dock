@@ -148,11 +148,9 @@ else
   ]
 end
 
-xrubies_build_plan.each do |xrubies, bootstrap_ruby_version| %>
-ENV XRUBIES <%= xrubies %>
+strip = '-s' if platform !~ /darwin/
 
-<% strip = '-s' if platform !~ /darwin/ %>
-# Build xruby versions, then cleanup all build artifacts
+xrubies_build_plan.each do |xrubies, bootstrap_ruby_version| %>
 RUN bash -c " \
       rbenv shell <%= bootstrap_ruby_version %> && \
       export CPPFLAGS='<%= "-D__USE_MINGW_ANSI_STDIO=1" if platform =~ /x64-mingw-ucrt/ %>' && \
@@ -161,7 +159,7 @@ RUN bash -c " \
       <%= "export LIBS='-l:libssp.a' &&" if platform =~ /mingw/ %> \
       <%= "export CC=#{target}-clang &&" if platform =~ /darwin/ %> \
       export MAKE='make V=1' && \
-      rake-compiler cross-ruby VERSION=$XRUBIES HOST=<%= target %> && \
+      rake-compiler cross-ruby VERSION=<%= xrubies %> HOST=<%= target %> && \
       rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources \
     "
 <% end %>
