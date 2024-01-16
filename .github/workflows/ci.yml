@@ -296,6 +296,9 @@ jobs:
           - from_image: arm32v6/alpine
             platform: arm-linux
             dockerfile: alpine
+          - from_image: alpine
+            platform: x86_64-linux
+            dockerfile: alpine
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
