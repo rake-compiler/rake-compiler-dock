@@ -11,6 +11,7 @@ RakeCompilerDock::GemHelper.install_tasks
 platforms = [
   # tuple is [platform, target]
   ["aarch64-linux-gnu", "aarch64-linux-gnu"],
+  ["aarch64-linux-musl", "aarch64-linux-musl"],
   ["arm-linux-gnu", "arm-linux-gnueabihf"],
   ["arm-linux-musl", "arm-linux-musleabihf"],
   ["arm64-darwin", "aarch64-apple-darwin"],

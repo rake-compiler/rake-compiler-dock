@@ -1,6 +1,7 @@
 /.bundle/
 /.yardoc
 /Dockerfile.mri.aarch64-linux-gnu
+/Dockerfile.mri.aarch64-linux-musl
 /Dockerfile.mri.arm-linux-gnu
 /Dockerfile.mri.arm-linux-musl
 /Dockerfile.mri.arm64-darwin
