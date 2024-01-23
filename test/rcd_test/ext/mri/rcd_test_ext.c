@@ -40,6 +40,19 @@ rcdt_darwin_builtin_available_eh(VALUE self)
 #endif
 }
 
+static VALUE
+rcdt_largefile_op_removed_from_musl(VALUE self)
+{
+  // Reference a symbol that was removed in Musl 1.24 🙄
+  // https://github.com/sparklemotion/sqlite3-ruby/issues/434
+#ifdef __linux__
+  posix_fallocate(STDERR_FILENO, 0, 0);
+  return Qtrue;
+#else
+  return Qfalse;
+#endif
+}
+
 void
 Init_rcd_test_ext(void)
 {
@@ -48,4 +61,5 @@ Init_rcd_test_ext(void)
   rb_define_singleton_method(rb_mRcdTest, "darwin_builtin_available?", rcdt_darwin_builtin_available_eh, 0);
   rb_define_singleton_method(rb_mRcdTest, "isinf?", rcdt_isinf_eh, 1);
   rb_define_singleton_method(rb_mRcdTest, "isnan?", rcdt_isnan_eh, 1);
+  rb_define_singleton_method(rb_mRcdTest, "largefile_op_removed_from_musl", rcdt_largefile_op_removed_from_musl, 0);
 }

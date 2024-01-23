@@ -22,10 +22,17 @@ class TestBasic < Minitest::Test
 
   def test_floating_point_classification_macros
     skip("jruby should not run libc-specific tests") if RUBY_ENGINE == "jruby"
+
     refute(RcdTest.isinf?(42.0))
     assert(RcdTest.isinf?(Float::INFINITY))
     refute(RcdTest.isnan?(42.0))
     assert(RcdTest.isnan?(Float::NAN))
   end
 
+  def test_largefile_op_removed_from_musl
+    skip("jruby should not run libc-specific tests") if RUBY_ENGINE == "jruby"
+
+    is_linux = RUBY_PLATFORM.include?("linux")
+    assert_equal(is_linux, RcdTest.largefile_op_removed_from_musl)
+  end
 end

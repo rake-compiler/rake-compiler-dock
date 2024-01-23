@@ -13,15 +13,15 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-          - x86-mingw32
+          - aarch64-linux-gnu
+          - arm-linux-gnu
+          - arm64-darwin
           - x64-mingw-ucrt
           - x64-mingw32
-          - x86-linux
-          - x86_64-linux
+          - x86-linux-gnu
+          - x86-mingw32
           - x86_64-darwin
-          - arm64-darwin
-          - arm-linux
-          - aarch64-linux
+          - x86_64-linux-gnu
           - jruby
     runs-on: ubuntu-latest
     steps:

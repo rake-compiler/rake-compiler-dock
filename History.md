@@ -1,6 +1,9 @@
 next / unreleased
 -----------------
 
+* Linux builds and their images are now fully qualified with the libc flavor. So, `x86_64-linux`
+  should now be referred to as `x86_64-linux-gnu`, and the generated files are also named with the
+  libc name.
 * Replace `rvm` with `rbenv` and `ruby-build`
   - `rvm` has been replaced by `rbenv` and `ruby-build`
     - no longer applying sendfile patches to bootstrap rubies

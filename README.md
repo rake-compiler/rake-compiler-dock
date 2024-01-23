@@ -10,6 +10,43 @@ This is kind of successor of [rake-compiler-dev-box](https://github.com/tjschuck
 It is wrapped as a gem for easier setup, usage and integration and is based on lightweight Docker containers.
 It is also more reliable, since the underlying docker images are versioned and immutable.
 
+## Supported platforms
+
+The following platforms are supported for cross-compilation by rake-compiler-dock:
+
+- `aarch64-linux` and `aarch64-linux-gnu`
+- `aarch64-linux-musl`
+- `arm-linux` and `arm-linux-gnu`
+- `arm-linux-musl`
+- `arm64-darwin`
+- `jruby`
+- `x64-mingw-ucrt`
+- `x64-mingw32`
+- `x86-linux` and `x86-linux-gnu`
+- `x86-linux-musl`
+- `x86-mingw32`
+- `x86_64-darwin`
+- `x86_64-linux` and `x86_64-linux-gnu`
+- `x86_64-linux-musl`
+
+### Windows
+
+`x64-mingw-ucrt` should be used for Ruby 3.1 and later on windows. `x64-mingw32` should be used for Ruby 3.0 and earlier. This is to match the [changed platform of RubyInstaller-3.1](https://rubyinstaller.org/2021/12/31/rubyinstaller-3.1.0-1-released.html).
+
+### GNU and Musl
+
+Platform names with a `*-linux` suffix are aliases for `*-linux-gnu`, since the Rubygems default is to assume `gnu` if no libc is specified.
+
+Some C extensions may not require separate GNU and Musl builds, in which case it's acceptable to ship a single `*-linux` gem to cover both platforms.
+
+The `*-linux-gnu` and `*-linux-musl` platform name suffixes require Rubygems 3.3.22 or later (or Bundler 2.3.21 or later) at installation time. Ruby version 3.0 and later ship with a sufficient Rubygems version, but versions compatible with earlier Rubies are:
+
+- ruby: "2.7", rubygems: "3.4.22"
+- ruby: "2.6", rubygems: "3.4.22"
+- ruby: "2.5", rubygems: "3.3.26"
+- ruby: "2.4", rubygems: "3.3.26"
+
+
 ## Installation
 
 Install docker [following the instructions on the docker website](https://docs.docker.com/engine/install/) ... or install [docker-toolbox for Windows and OSX](https://github.com/docker/toolbox/releases) or boot2docker on [Windows](https://github.com/boot2docker/windows-installer/releases) or [OS X](https://github.com/boot2docker/osx-installer/releases) .
@@ -37,6 +74,8 @@ exttask = Rake::ExtensionTask.new('my_extension', my_gem_spec) do |ext|
 end
 ```
 
+where you should choose your platforms from the list in the "Supported platforms" section.
+
 See below, how to invoke cross builds in your Rakefile.
 
 Additionally it may also be used to build ffi based binary gems like [libusb](https://github.com/larskanis/libusb), but currently doesn't provide any additional build helpers for this use case, beyond docker invocation and cross compilers.
@@ -44,9 +83,6 @@ Additionally it may also be used to build ffi based binary gems like [libusb](ht
 ### Interactive Usage
 
 Rake-compiler-dock offers the shell command `rake-compiler-dock` and a [ruby API](http://www.rubydoc.info/gems/rake-compiler-dock/RakeCompilerDock) for issuing commands within the docker image, described below.
-There are dedicated images for `x86-mingw32`, `x64-mingw-ucrt`, `x64-mingw32`, `x86-linux`, `x86_64-linux`, `x86_64-darwin`, `arm64-darwin` and `jruby` targets.
-The images contain all supported cross ruby versions, with the exception of `x64-mingw32`, which has versions before 3.1 only, and `x64-mingw-ucrt`, which has only ruby-3.1+.
-This is to match the [changed platform of RubyInstaller-3.1](https://rubyinstaller.org/2021/12/31/rubyinstaller-3.1.0-1-released.html).
 
 `rake-compiler-dock` without arguments starts an interactive shell session.
 This is best suited to try out and debug a build.
@@ -68,12 +104,12 @@ To build x86 Windows and x86_64 Linux binary gems interactively, it can be calle
     user@host:$ ls pkg/*.gem
     your-gem-1.0.0.gem  your-gem-1.0.0-x86-mingw32.gem
 
-    user@host:$ RCD_PLATFORM=x86_64-linux rake-compiler-dock   # this enters a container for amd64 Linux target
+    user@host:$ RCD_PLATFORM=x86_64-linux-gnu rake-compiler-dock   # this enters a container for amd64 Linux GNU target
     user@adc55b2b92a9:$ bundle
     user@adc55b2b92a9:$ rake cross native gem
     user@adc55b2b92a9:$ exit
     user@host:$ ls pkg/*.gem
-    your-gem-1.0.0.gem  your-gem-1.0.0-x86_64-linux.gem
+    your-gem-1.0.0.gem  your-gem-1.0.0-x86_64-linux-gnu.gem
 
 Or non-interactive:
 
@@ -118,10 +154,25 @@ To make the build process reproducible for other parties, it is recommended to a
 This can be done like this:
 
 ```ruby
+PLATFORMS = %w[
+  aarch64-linux-gnu
+  aarch64-linux-musl
+  arm-linux-gnu
+  arm-linux-musl
+  arm64-darwin
+  x64-mingw-ucrt
+  x64-mingw32
+  x86-linux-gnu
+  x86-linux-musl
+  x86-mingw32
+  x86_64-darwin
+  x86_64-linux-gnu
+  x86_64-linux-musl
+]
 task 'gem:native' do
   require 'rake_compiler_dock'
   sh "bundle package --all"   # Avoid repeated downloads of gems by using gem files from the host.
-  %w[ x86-mingw32 x64-mingw-ucrt x64-mingw32 x86-linux x86_64-linux arm-linux aarch64-linux x86_64-darwin arm64-darwin ].each do |plat|
+  PLATFORMS.each do |plat|
     RakeCompilerDock.sh "bundle --local && rake native:#{plat} gem", platform: plat
   end
   RakeCompilerDock.sh "bundle --local && rake java gem", rubyvm: :jruby
@@ -187,10 +238,10 @@ jobs:
     name: "native-gem"
     runs-on: ubuntu-latest
     container:
-      image: "ghcr.io/rake-compiler/rake-compiler-dock-image:1.2.2-mri-x86_64-linux"
+      image: "ghcr.io/rake-compiler/rake-compiler-dock-image:1.2.2-mri-x86_64-linux-gnu"
     steps:
       - uses: actions/checkout@v2
-      - run: bundle install && bundle exec rake gem:x86_64-linux:rcd
+      - run: bundle install && bundle exec rake gem:x86_64-linux-gnu:rcd
       - uses: actions/upload-artifact@v2
         with:
           name: native-gem
@@ -198,7 +249,7 @@ jobs:
           retention-days: 1
 ```
 
-Where the referenced rake task might be defined by:
+Where the referenced rake task might be defined by something like:
 
 ``` ruby
 cross_platforms = ["x64-mingw32", "x86_64-linux", "x86_64-darwin", "arm64-darwin"]
@@ -223,7 +274,7 @@ For an example of rake tasks that support this style of invocation, visit https:
 
 OCI images snapshotted from `main` are published weekly to Github Container Registry with the string "snapshot" in place of the version number in the tag name, e.g.:
 
-- `ghcr.io/rake-compiler/rake-compiler-dock-image:snapshot-mri-x86_64-linux`
+- `ghcr.io/rake-compiler/rake-compiler-dock-image:snapshot-mri-x86_64-linux-gnu`
 
 These images are intended for integration testing. They may not work properly and should not be considered production ready.
 
@@ -237,7 +288,7 @@ The following variables are recognized by rake-compiler-dock:
 * `RCD_RUBYVM` - The ruby VM and toolchain to be used.
     Must be one of `mri`, `jruby`.
 * `RCD_PLATFORM` - The target rubygems platform.
-    Must be a space separated list out of `x86-mingw32`, `x64-mingw-ucrt`, `x64-mingw32`, `x86-linux`, `x86_64-linux`, `arm-linux`, `aarch64-linux`, `x86_64-darwin` and `arm64-darwin`.
+    Must be a space separated list out of the platforms listed under "Supported platforms" above.
     It is ignored when `rubyvm` is set to `:jruby`.
 * `RCD_IMAGE` - The docker image that is downloaded and started.
     Defaults to "ghcr.io/rake-compiler/rake-compiler-dock-image:IMAGE_VERSION-PLATFORM" with an image version that is determined by the gem version.

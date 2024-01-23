@@ -1,7 +1,7 @@
 <%
 image = case platform
-  when /x86_64-linux/ then "quay.io/pypa/manylinux2014_x86_64"
-  when /x86-linux/ then "quay.io/pypa/manylinux2014_i686"
+  when /x86_64-linux-gnu/ then "quay.io/pypa/manylinux2014_x86_64"
+  when /x86-linux-gnu/ then "quay.io/pypa/manylinux2014_i686"
   else "ubuntu:20.04"
 end
 manylinux = !!(image =~ /manylinux/)
@@ -64,12 +64,16 @@ COPY --from=larskanis/mingw64-ucrt:20.04 \
     /debs/
 RUN dpkg -i /debs/*.deb
 
+<% elsif platform =~ /linux-musl/ %>
+COPY build/mk_musl_cross.sh /tmp
+RUN /tmp/mk_musl_cross.sh <%= target %>
+
 <% elsif !manylinux %>
 RUN apt-get -y update && \
     apt-get install -y <%
 if platform =~ /darwin/        %> clang python lzma-dev libxml2-dev libssl-dev libc++-10-dev <% end %><%
-if platform =~ /aarch64-linux/ %> gcc-aarch64-linux-gnu g++-aarch64-linux-gnu <% end %><%
-if platform =~ /arm-linux/     %> gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf <% end %><%
+if platform =~ /aarch64-linux-gnu/ %> gcc-aarch64-linux-gnu g++-aarch64-linux-gnu <% end %><%
+if platform =~ /arm-linux-gnu/     %> gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf <% end %><%
 if platform =~ /x86-mingw32/   %> gcc-mingw-w64-i686 g++-mingw-w64-i686 <% end %><%
 if platform =~ /x64-mingw32/   %> gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 <% end %> && \
     rm -rf /var/lib/apt/lists/*
@@ -144,11 +148,9 @@ else
   ]
 end
 
-xrubies_build_plan.each do |xrubies, bootstrap_ruby_version| %>
-ENV XRUBIES <%= xrubies %>
+strip = '-s' if platform !~ /darwin/
 
-<% strip = '-s' if platform !~ /darwin/ %>
-# Build xruby versions, then cleanup all build artifacts
+xrubies_build_plan.each do |xrubies, bootstrap_ruby_version| %>
 RUN bash -c " \
       rbenv shell <%= bootstrap_ruby_version %> && \
       export CPPFLAGS='<%= "-D__USE_MINGW_ANSI_STDIO=1" if platform =~ /x64-mingw-ucrt/ %>' && \
@@ -157,7 +159,7 @@ RUN bash -c " \
       <%= "export LIBS='-l:libssp.a' &&" if platform =~ /mingw/ %> \
       <%= "export CC=#{target}-clang &&" if platform =~ /darwin/ %> \
       export MAKE='make V=1' && \
-      rake-compiler cross-ruby VERSION=$XRUBIES HOST=<%= target %> && \
+      rake-compiler cross-ruby VERSION=<%= xrubies %> HOST=<%= target %> && \
       rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources \
     "
 <% end %>

@@ -113,7 +113,7 @@ class TestStarter < Test::Unit::TestCase
     assert(Starter.container_jrubyvm?({:rubyvm => "jruby"}))
     assert(Starter.container_jrubyvm?({:platform => "jruby"}))
     refute(Starter.container_jrubyvm?({:rubyvm => "mri"}))
-    refute(Starter.container_jrubyvm?({:platform => "x86_64-linux"}))
+    refute(Starter.container_jrubyvm?({:platform => "x86_64-linux-gnu"}))
   end
 
   def test_platforms
