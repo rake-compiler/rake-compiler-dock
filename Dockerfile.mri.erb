@@ -229,6 +229,7 @@ RUN echo "export PATH=\$DEVTOOLSET_ROOTPATH/usr/bin:\$PATH" >> /etc/rubybashrc
 RUN for f in addr2line gcc gcov-tool ranlib ar dwp gcc-ranlib nm readelf as elfedit gcc-ar gprof objcopy size c++filt g++ gcov ld objdump strings cpp gcc-nm pkg-config strip ; do ln -sf $DEVTOOLSET_ROOTPATH/usr/bin/$f $DEVTOOLSET_ROOTPATH/usr/bin/<%= target %>-$f ; done
 
 # Use builtin functions of newer gcc to avoid linker issues on Musl based Linux
+# TODO: remove in v1.6.0 once musl builds have been out for full minor release cycle, see 864be5b2
 COPY build/math_h.patch /root/
 RUN cd /usr/include/ && \
     patch -p1 < /root/math_h.patch

@@ -1,16 +1,30 @@
-next / unreleased
------------------
+# v1.5.0.rc1 / prerelease 2024-01-26
 
-* Linux builds and their images are now fully qualified with the libc flavor. So, `x86_64-linux`
-  should now be referred to as `x86_64-linux-gnu`, and the generated files are also named with the
-  libc name.
-* Replace `rvm` with `rbenv` and `ruby-build`
+## Notable changes
+
+### First-class Linux `musl` libc support
+
+* Add Linux musl cross build targets `aarch64-linux-musl`, `arm-linux-musl`, `x86-linux-musl`, and `x86_64-linux-musl`. #75, #111 (@flavorjones)
+* Add Linux cross build targets `aarch64-linux-gnu`, `arm-linux-gnu`, `x86-linux-gnu`, and `x86_64-linux-gnu`. #111 (@flavorjones)
+* The cross build targets `aarch64-linux`, `arm-linux`, `x86-linux`, and `x86_64-linux` are now aliases for the `*-linux-gnu` targets. #111 (@flavorjones)
+
+Please read the README for more details.
+
+
+## Improvements
+
+* Predefined user and group list is more complete, and represents the union of users and groups
+  across all RCD images.
+
+
+## Changes
+
+* Replace `rvm` with `rbenv` and `ruby-build` in the build containers.
   - `rvm` has been replaced by `rbenv` and `ruby-build`
     - no longer applying sendfile patches to bootstrap rubies
     - no longer updating gems belonging to the bootstrap rubies
   - user `rvm` no longer exists, replaced by `rubyuser`
-* Predefined user and group list is more complete, and represents the union of users and groups
-  across all RCD images.
+
 
 1.4.0 / 2023-12-27
 ------------------
@@ -62,7 +76,7 @@ next / unreleased
 * Fix testing for ruby C-API functions in mkmf. #65, #67
 * Use openjdk 11 to make maven work on ubuntu 20.04. #64
 * Remove x86_64-w64-mingw32-pkg-config from the x64-mingw-ucrt image. #63
-* Add a patch for math.h to use gcc builtins and to improve compat with musl based systems. #42
+* Add a patch for math.h to use gcc builtins and to improve compat with `musl` libc-based systems. #42
 
 
 1.2.0 / 2022-01-04
