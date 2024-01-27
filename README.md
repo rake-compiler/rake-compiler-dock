@@ -39,8 +39,9 @@ Platform names with a `*-linux` suffix are aliases for `*-linux-gnu`, since the 
 
 Some C extensions may not require separate GNU and Musl builds, in which case it's acceptable to ship a single `*-linux` gem to cover both platforms.
 
-The `*-linux-gnu` and `*-linux-musl` platform name suffixes require Rubygems 3.3.22 or later (or Bundler 2.3.21 or later) at installation time. Ruby version 3.0 and later ship with a sufficient Rubygems version, but versions compatible with earlier Rubies are:
+The `*-linux-gnu` and `*-linux-musl` platform name suffixes require Rubygems 3.3.22 or later (or Bundler 2.3.21 or later) at installation time. Ruby version 3.1 and later ship with a sufficient Rubygems version, but versions compatible with earlier Rubies are:
 
+- ruby: "3.0", rubygems: "3.5.5" # or possibly higher
 - ruby: "2.7", rubygems: "3.4.22"
 - ruby: "2.6", rubygems: "3.4.22"
 - ruby: "2.5", rubygems: "3.3.26"
