@@ -123,6 +123,10 @@ namespace :release do
     platforms.each do |platform, _|
       image_name = RakeCompilerDock::Starter.container_image_name(platform: platform)
       sh("docker", "push", image_name)
+
+      if image_name.include?("linux-gnu")
+        sh("docker", "push", image_name.sub("linux-gnu", "linux"))
+      end
     end
   end
 end
