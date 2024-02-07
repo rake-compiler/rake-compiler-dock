@@ -8,7 +8,7 @@
 * Add Linux cross build targets `aarch64-linux-gnu`, `arm-linux-gnu`, `x86-linux-gnu`, and `x86_64-linux-gnu`. #111 (@flavorjones)
 * The cross build targets `aarch64-linux`, `arm-linux`, `x86-linux`, and `x86_64-linux` are now aliases for the `*-linux-gnu` targets. #111 (@flavorjones)
 
-Please read the README for more details.
+Please read the README for details and caveats.
 
 
 ## Improvements

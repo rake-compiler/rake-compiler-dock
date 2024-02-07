@@ -47,6 +47,10 @@ The `*-linux-gnu` and `*-linux-musl` platform name suffixes require Rubygems 3.3
 - ruby: "2.5", rubygems: "3.3.26"
 - ruby: "2.4", rubygems: "3.3.26"
 
+**It's strongly suggested that you use rake-compiler v1.2.7 or later to build `linux-musl` and/or `linux-gnu` native gems.** That version of rake-compiler sets `required_rubygems_version` appropriately in the native platform gems' gemspecs.
+
+Finally, there is a known bug in bundler before v2.5.6 that may make it difficult for users on musl systems to resolve their `linux-musl` dependencies correctly. You can read a description of this problem at https://github.com/rubygems/rubygems/issues/7432, but in summary **you should recommend your users have bundler v2.5.6 or later**.
+
 
 ## Installation
 
