@@ -21,7 +21,7 @@ jobs:
     name: build source
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.3"
@@ -34,7 +34,7 @@ jobs:
           bundle exec rake gem
 
       - name: Upload source gem
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: gem-ruby
           path: test/rcd_test/pkg/rcd_test-?.?.?.gem # e.g. rcd_test-1.0.0.gem
@@ -67,14 +67,14 @@ jobs:
           - platform: x86_64-linux-musl
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.3"
           bundler-cache: true
 
       - name: Fetch docker buildx layer cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: tmp/build-cache
           key: ${{ runner.os }}-${{ matrix.platform }}-buildx-${{ github.sha }}
@@ -100,7 +100,7 @@ jobs:
           bundle exec rake gem:${{ matrix.platform }}
 
       - name: Upload native gem
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: gem-${{ matrix.platform }}
           path: test/rcd_test/pkg/*-*-*.gem
@@ -117,7 +117,7 @@ jobs:
 
       - if: matrix.static
         name: Upload static native gem
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: gem-${{ matrix.platform }}-static
           path: test/rcd_test/pkg/*-*-*.gem
@@ -132,7 +132,7 @@ jobs:
 
       - if: matrix.alias
         name: Upload native gem ${{ matrix.alias }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: gem-${{ matrix.alias }}
           path: test/rcd_test/pkg/*-*-*.gem
@@ -147,12 +147,12 @@ jobs:
         ruby: ["3.3", "3.2", "3.1", "3.0", "2.7", "2.6", "2.5", "2.4"]
     runs-on: ${{ matrix.os }}-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
       - name: Download source gem
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: gem-ruby
       - name: Test source gem
@@ -178,12 +178,12 @@ jobs:
           - { ruby: "2.4", rubygems: "3.3.26" }
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
       - name: Download gem-${{ matrix.platform }}
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: gem-${{ matrix.platform }}
       - name: Test gem-${{ matrix.platform }}
@@ -237,9 +237,9 @@ jobs:
           - { platform: x86-linux-musl, docker_platform: "--platform=linux/386" }
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Download gem-${{ matrix.platform }}
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: gem-${{ matrix.platform }}
       - name: Run tests
@@ -295,7 +295,7 @@ jobs:
             platform: x64-mingw-ucrt
     runs-on: ${{ matrix.os }}-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
@@ -304,7 +304,7 @@ jobs:
           ruby --version
           gem env
       - name: Download gem-${{ matrix.platform }}
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: gem-${{ matrix.platform }}
       - name: Test gem-${{ matrix.platform }}
@@ -347,7 +347,7 @@ jobs:
             platform: x64-mingw-ucrt
     runs-on: ${{ matrix.os }}-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
@@ -356,7 +356,7 @@ jobs:
           ruby --version
           gem env
       - name: Download gem-${{ matrix.platform }}-static
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: gem-${{ matrix.platform }}-static
       - name: Test gem-${{ matrix.platform }}-static
@@ -393,9 +393,9 @@ jobs:
             dockerfile: alpine
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Download gem-${{ matrix.platform }}
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: gem-${{ matrix.platform }}
       - name: Build ${{ matrix.from_image }} image
