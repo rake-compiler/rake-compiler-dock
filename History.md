@@ -1,4 +1,4 @@
-# v1.5.0.rc1 / prerelease 2024-01-26
+# v1.5.0 / 2024-02-25
 
 ## Notable changes
 
@@ -8,7 +8,7 @@
 * Add Linux cross build targets `aarch64-linux-gnu`, `arm-linux-gnu`, `x86-linux-gnu`, and `x86_64-linux-gnu`. #111 (@flavorjones)
 * The cross build targets `aarch64-linux`, `arm-linux`, `x86-linux`, and `x86_64-linux` are now aliases for the `*-linux-gnu` targets. #111 (@flavorjones)
 
-Please read the README for details and caveats.
+**Please read the README for details and caveats!**
 
 
 ## Improvements
@@ -17,13 +17,15 @@ Please read the README for details and caveats.
   across all RCD images.
 
 
-## Changes
+## Changes to build containers
 
 * Replace `rvm` with `rbenv` and `ruby-build` in the build containers.
   - `rvm` has been replaced by `rbenv` and `ruby-build`
     - no longer applying sendfile patches to bootstrap rubies
     - no longer updating gems belonging to the bootstrap rubies
   - user `rvm` no longer exists, replaced by `rubyuser`
+
+Users of the `rake-compiler-dock` gem should not be affected by this change. However, users of the raw containers may be affected if there are assumptions about `rvm`.
 
 
 1.4.0 / 2023-12-27
