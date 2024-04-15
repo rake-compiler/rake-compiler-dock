@@ -33,13 +33,41 @@ The following platforms are supported for cross-compilation by rake-compiler-doc
 
 `x64-mingw-ucrt` should be used for Ruby 3.1 and later on windows. `x64-mingw32` should be used for Ruby 3.0 and earlier. This is to match the [changed platform of RubyInstaller-3.1](https://rubyinstaller.org/2021/12/31/rubyinstaller-3.1.0-1-released.html).
 
-### GNU and Musl
+### Linux GNU and Musl
 
 Platform names with a `*-linux` suffix are aliases for `*-linux-gnu`, since the Rubygems default is to assume `gnu` if no libc is specified.
 
-Some C extensions may not require separate GNU and Musl builds, in which case it's acceptable to ship a single `*-linux` gem to cover both platforms.
+Some C extensions may not require separate GNU and Musl builds, in which case it's acceptable to ship a single `*-linux` gem to cover both platforms. We recommend you set up automated testing for both GNU and Musl to determine whether you need to ship distinct native gems for these platforms (see [`flavorjones/ruby-c-extensions-explained`](https://github.com/flavorjones/ruby-c-extensions-explained/blob/main/.github/workflows/precompiled.yml) for an example of how to set up testing pipelines on Github Actions).
 
-The `*-linux-gnu` and `*-linux-musl` platform name suffixes require Rubygems 3.3.22 or later (or Bundler 2.3.21 or later) at installation time. Ruby version 3.1 and later ship with a sufficient Rubygems version, but versions compatible with earlier Rubies are:
+
+## Linux GNU and Musl: important details
+
+### Summary
+
+If you ship `-linux-gnu` and `-linux-musl` gems:
+
+- Use rake-compiler `>= 1.2.7` to build your gems
+- Recommend your musl users have bundler `>= 2.5.6`
+- Require your linux users to have rubygems `>= 3.3.22` and bundler `>= 2.3.21`
+
+⚠ DO NOT ship a `-linux-musl` gem with a `-linux` gem. See https://github.com/rake-compiler/rake-compiler-dock/issues/117 for more context.
+
+
+### Warning about combining `-linux-musl` with other linux native platforms
+
+After [evaluating many ruby, rubygems, and bundler versions](https://github.com/rake-compiler/rake-compiler-dock/issues/117), we strongly recommend that gem maintainers choose one of the following two options:
+
+- ship a `-linux` platform gem that works for both gnu and musl systems if you can,
+- or ship both `-linux-gnu` and `-linux-musl` platform gems
+
+Do NOT ship `-linux` and `-linux-musl` gems together, some versions of bundler or rubygems will not work properly for your users.
+
+
+### Warning about required versions of rubygems
+
+The `*-linux-gnu` and `*-linux-musl` platform gems require Rubygems 3.3.22 or later (or Bundler 2.3.21 or later) at installation time.
+
+Ruby version 3.1 and later ship with a sufficient Rubygems version. For earlier versions of Ruby, here are the versions of Rubygems you should recommend to your users:
 
 - ruby: "3.0", rubygems: "3.5.5" # or possibly higher
 - ruby: "2.7", rubygems: "3.4.22"
@@ -47,9 +75,12 @@ The `*-linux-gnu` and `*-linux-musl` platform name suffixes require Rubygems 3.3
 - ruby: "2.5", rubygems: "3.3.26"
 - ruby: "2.4", rubygems: "3.3.26"
 
-**It's strongly suggested that you use rake-compiler v1.2.7 or later to build `linux-musl` and/or `linux-gnu` native gems.** That version of rake-compiler sets `required_rubygems_version` appropriately in the native platform gems' gemspecs.
+**It's strongly suggested that you use rake-compiler v1.2.7 or later to build `linux-musl` and/or `linux-gnu` native gems.** That version of rake-compiler sets `required_rubygems_version` automatically in the native platform gems' gemspecs.
 
-Finally, there is a known bug in bundler before v2.5.6 that may make it difficult for users on musl systems to resolve their `linux-musl` dependencies correctly. You can read a description of this problem at https://github.com/rubygems/rubygems/issues/7432, but in summary **you should recommend your users have bundler v2.5.6 or later**.
+
+### Warning about required versions of bundler
+
+Finally, there is a known bug in bundler `< 2.5.6` that may make it difficult for users on musl systems to resolve their `linux-musl` dependencies correctly. You can read a description of this problem at https://github.com/rubygems/rubygems/issues/7432, but in summary **you should recommend your musl users have bundler v2.5.6 or later**.
 
 
 ## Installation
