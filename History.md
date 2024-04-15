@@ -1,8 +1,10 @@
-# v1.5.0 / 2024-02-25
+# `rake-compiler/rake-compiler-dock` Changelog
 
-## Notable changes
+## 1.5.0 / 2024-02-25
 
-### First-class Linux `musl` libc support
+### Notable changes
+
+#### First-class Linux `musl` libc support
 
 * Add Linux musl cross build targets `aarch64-linux-musl`, `arm-linux-musl`, `x86-linux-musl`, and `x86_64-linux-musl`. #75, #111 (@flavorjones)
 * Add Linux cross build targets `aarch64-linux-gnu`, `arm-linux-gnu`, `x86-linux-gnu`, and `x86_64-linux-gnu`. #111 (@flavorjones)
@@ -11,13 +13,12 @@
 **Please read the README for details and caveats!**
 
 
-## Improvements
+### Improvements
 
-* Predefined user and group list is more complete, and represents the union of users and groups
-  across all RCD images.
+* Predefined user and group list is more complete, and represents the union of users and groups across all RCD images.
 
 
-## Changes to build containers
+### Changes to build containers
 
 * Replace `rvm` with `rbenv` and `ruby-build` in the build containers.
   - `rvm` has been replaced by `rbenv` and `ruby-build`
