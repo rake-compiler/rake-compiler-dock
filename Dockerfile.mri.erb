@@ -233,6 +233,10 @@ RUN for f in addr2line gcc gcov-tool ranlib ar dwp gcc-ranlib nm readelf as elfe
 COPY build/math_h.patch /root/
 RUN cd /usr/include/ && \
     patch -p1 < /root/math_h.patch
+
+# Update pkg-config because the distro ships 0.27.1 which is old and has bugs and performance issues.
+COPY build/mk_pkg_config.sh /root/
+RUN /root/mk_pkg_config.sh
 <% end %>
 
 <% if platform =~ /arm64-darwin/ %>
