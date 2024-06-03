@@ -1,5 +1,12 @@
 # `rake-compiler/rake-compiler-dock` Changelog
 
+## 1.5.1 / 2024-06-03
+
+### Improvements
+
+The `x86_64-linux-gnu` and `x86-linux-gnu` containers (based on `manylinux_2014`) now have a modern version of `pkg-config`, v0.29.2, installed on them in `/usr/local/bin/pkg-config`. The distro's version (v0.27.1) is still in `/usr/bin/pkg-config` if you need to fall back for some reason, but the newer version will be used by default and should be backwards-compatible. (#121, #123 by @flavorjones)
+
+
 ## 1.5.0 / 2024-02-25
 
 ### Notable changes
