@@ -1,5 +1,16 @@
 # `rake-compiler/rake-compiler-dock` Changelog
 
+## next / unreleased
+
+### Notable changes
+
+#### Standardizing linux build images around the pypa project
+
+See https://github.com/rake-compiler/rake-compiler-dock/issues/122
+
+- Dropping support for 32-bit linux
+
+
 ## 1.5.1 / 2024-06-03
 
 ### Improvements

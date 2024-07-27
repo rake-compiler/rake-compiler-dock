@@ -1,7 +1,6 @@
 <%
 image = case platform
   when /x86_64-linux-gnu/ then "quay.io/pypa/manylinux2014_x86_64"
-  when /x86-linux-gnu/ then "quay.io/pypa/manylinux2014_i686"
   else "ubuntu:20.04"
 end
 manylinux = !!(image =~ /manylinux/)
@@ -77,12 +76,6 @@ if platform =~ /arm-linux-gnu/     %> gcc-arm-linux-gnueabihf g++-arm-linux-gnue
 if platform =~ /x86-mingw32/   %> gcc-mingw-w64-i686 g++-mingw-w64-i686 <% end %><%
 if platform =~ /x64-mingw32/   %> gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 <% end %> && \
     rm -rf /var/lib/apt/lists/*
-<% end %>
-
-<% if manylinux %>
-# Create dev tools x86-linux-*
-COPY build/mk_i686.rb /root/
-RUN /root/mk_i686.rb
 <% end %>
 
 <% if platform =~ /darwin/ %>

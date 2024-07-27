@@ -22,8 +22,6 @@ The following platforms are supported for cross-compilation by rake-compiler-doc
 - `jruby`
 - `x64-mingw-ucrt`
 - `x64-mingw32`
-- `x86-linux` and `x86-linux-gnu`
-- `x86-linux-musl`
 - `x86-mingw32`
 - `x86_64-darwin`
 - `x86_64-linux` and `x86_64-linux-gnu`
@@ -106,7 +104,7 @@ Your Rakefile should enable cross compilation like so:
 ```ruby
 exttask = Rake::ExtensionTask.new('my_extension', my_gem_spec) do |ext|
   ext.cross_compile = true
-  ext.cross_platform = %w[x86-mingw32 x64-mingw-ucrt x64-mingw32 x86-linux x86_64-linux x86_64-darwin arm64-darwin]
+  ext.cross_platform = %w[x86-mingw32 x64-mingw-ucrt x64-mingw32 x86_64-linux x86_64-darwin arm64-darwin]
 end
 ```
 
@@ -198,8 +196,6 @@ PLATFORMS = %w[
   arm64-darwin
   x64-mingw-ucrt
   x64-mingw32
-  x86-linux-gnu
-  x86-linux-musl
   x86-mingw32
   x86_64-darwin
   x86_64-linux-gnu
