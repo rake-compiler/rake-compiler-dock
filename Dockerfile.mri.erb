@@ -1,6 +1,6 @@
 <%
 image = case platform
-  when /x86_64-linux-gnu/ then "quay.io/pypa/manylinux2014_x86_64"
+  when /x86_64-linux-gnu/ then "quay.io/pypa/manylinux_2_28_x86_64"
   else "ubuntu:20.04"
 end
 manylinux = !!(image =~ /manylinux/)
