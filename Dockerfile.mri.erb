@@ -164,7 +164,7 @@ RUN bash -c " \
 RUN find /usr/local/rake-compiler/ruby/*linux*/ -name libruby.so | xargs rm
 RUN find /usr/local/rake-compiler/ruby/*linux*/ -name libruby-static.a | while read f ; do cp $f `echo $f | sed s/-static//` ; done
 RUN find /usr/local/rake-compiler/ruby/*linux*/ -name libruby.a | while read f ; do ar t $f | xargs ar d $f ; done
-RUN find /usr/local/rake-compiler/ruby/*linux*/ -name mkmf.rb | while read f ; do sed -i ':a;N;$!ba;s/TRY_LINK = [^\n]*\n[^\n]*\n[^\n]*LOCAL_LIBS)/& -lruby-static -lpthread -lrt -ldl <% if platform =~ /x86/ %> -lcrypt <% end %>/' $f ; done
+RUN find /usr/local/rake-compiler/ruby/*linux*/ -name mkmf.rb | while read f ; do sed -i ':a;N;$!ba;s/TRY_LINK = [^\n]*\n[^\n]*\n[^\n]*LOCAL_LIBS)/& -lruby-static -lpthread -lrt -ldl <% if manylinux %> -lz <% end %> <% if platform =~ /x86/ %> -lcrypt <% end %>/' $f ; done
 <% end %>
 
 <% if platform =~ /mingw/ %>
