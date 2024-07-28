@@ -9,9 +9,14 @@
 Changed the base image of `x86_64-linux-gnu` and `x86-linux-gnu` images from `manylinux2014` to `ubuntu:20.04`, unifying all the builds are the same base image. See https://github.com/rake-compiler/rake-compiler-dock/issues/122 for more context.
 
 
-### Features
+### Added
 
 - Add support for the `SOURCE_DATE_EPOCH` environment variable, which can be used to create reproducible builds. #128 by @segiddins)
+
+
+### Changed
+
+- Move Ruby 3.3 support from 3.3.0-rc1 to 3.3.5. Note that the 3.3.x releases are not usable until 3.3.5 because of https://bugs.ruby-lang.org/issues/20088.
 
 
 ## 1.5.2 / 2024-07-30
