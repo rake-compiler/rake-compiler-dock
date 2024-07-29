@@ -1,5 +1,14 @@
 # `rake-compiler/rake-compiler-dock` Changelog
 
+## next / unreleased
+
+### Notable changes
+
+#### Standardizing Linux build images on Ubuntu base
+
+Changed the base image of `x86_64-linux-gnu` and `x86-linux-gnu` images from `manylinux2014` to `ubuntu:20.04`, unifying all the builds are the same base image. See https://github.com/rake-compiler/rake-compiler-dock/issues/122 for more context.
+
+
 ## 1.5.1 / 2024-06-03
 
 ### Improvements
