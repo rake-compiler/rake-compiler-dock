@@ -1,8 +1,8 @@
 <%
 image = case platform
-  when /x86_64-linux-gnu/ then "quay.io/pypa/manylinux2014_x86_64"
-  when /x86-linux-gnu/ then "quay.io/pypa/manylinux2014_i686"
-  else "ubuntu:20.04"
+  when /x86_64-linux-gnu/ then "quay.io/pypa/manylinux2014_x86_64:latest@sha256:04bffb03cd21d7945c327f67745897adddeb1d6635d79ba98811e7526460f2e0"
+  when /x86-linux-gnu/ then "quay.io/pypa/manylinux2014_i686:latest@sha256:516a28921cf4d2544be8278764e3e5d33da0a4b4e26bbbb523a5702b96b329b0"
+  else "docker.io/library/ubuntu:20.04@sha256:80ef4a44043dec4490506e6cc4289eeda2d106a70148b74b5ae91ee670e9c35d"
 end
 manylinux = !!(image =~ /manylinux/)
 %>
