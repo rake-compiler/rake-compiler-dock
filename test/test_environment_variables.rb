@@ -32,7 +32,7 @@ class TestEnvironmentVariables
     unless IS_JRUBY
       def test_RUBY_CC_VERSION
         df = File.read(File.expand_path("../../Dockerfile.mri.erb", __FILE__))
-        df =~ /^ENV RUBY_CC_VERSION\s+(.*)\s+$/
+        df =~ /^ENV RUBY_CC_VERSION=(.*)$/
         assert_equal $1, rcd_env['RUBY_CC_VERSION']
       end
 

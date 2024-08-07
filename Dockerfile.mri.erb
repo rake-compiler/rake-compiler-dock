@@ -4,7 +4,7 @@ FROM <%= image %>
 ##
 ## Install required base packages for compiling ruby
 ##
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -y update && \
     apt-get install -y sudo wget curl git-core build-essential xz-utils unzip dirmngr && \
     apt-get install -y autoconf cmake pkg-config zlib1g-dev libreadline-dev libsqlite0-dev libssl-dev libyaml-dev libffi-dev && \
@@ -216,6 +216,6 @@ COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 
 RUN bash -c "rbenv global 3.1.3"
 
-ENV RUBY_CC_VERSION 3.3.0:3.2.0:3.1.0:3.0.0:2.7.0:2.6.0:2.5.0:2.4.0
+ENV RUBY_CC_VERSION=3.3.0:3.2.0:3.1.0:3.0.0:2.7.0:2.6.0:2.5.0:2.4.0
 
 CMD bash
