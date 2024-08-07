@@ -53,11 +53,12 @@ RUN /tmp/mk_musl_cross.sh <%= target %>
 <% else %>
 RUN apt-get -y update && \
     apt-get install -y <%
-if platform =~ /darwin/        %> clang python lzma-dev libxml2-dev libssl-dev libc++-10-dev <% end %><%
+if platform =~ /darwin/            %> clang python lzma-dev libxml2-dev libssl-dev libc++-10-dev <% end %><%
 if platform =~ /aarch64-linux-gnu/ %> gcc-aarch64-linux-gnu g++-aarch64-linux-gnu <% end %><%
 if platform =~ /arm-linux-gnu/     %> gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf <% end %><%
-if platform =~ /x86-mingw32/   %> gcc-mingw-w64-i686 g++-mingw-w64-i686 <% end %><%
-if platform =~ /x64-mingw32/   %> gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 <% end %> && \
+if platform =~ /x86-linux-gnu/     %> gcc-i686-linux-gnu g++-i686-linux-gnu <% end %><%
+if platform =~ /x86-mingw32/       %> gcc-mingw-w64-i686 g++-mingw-w64-i686 <% end %><%
+if platform =~ /x64-mingw32/       %> gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 <% end %> && \
     rm -rf /var/lib/apt/lists/*
 <% end %>
 
@@ -147,7 +148,7 @@ RUN bash -c " \
 RUN find /usr/local/rake-compiler/ruby/*linux*/ -name libruby.so | xargs rm
 RUN find /usr/local/rake-compiler/ruby/*linux*/ -name libruby-static.a | while read f ; do cp $f `echo $f | sed s/-static//` ; done
 RUN find /usr/local/rake-compiler/ruby/*linux*/ -name libruby.a | while read f ; do ar t $f | xargs ar d $f ; done
-RUN find /usr/local/rake-compiler/ruby/*linux*/ -name mkmf.rb | while read f ; do sed -i ':a;N;$!ba;s/TRY_LINK = [^\n]*\n[^\n]*\n[^\n]*LOCAL_LIBS)/& -lruby-static -lpthread -lrt -ldl <% if platform =~ /x86/ %> -lcrypt <% if platform !~ /musl/ %> -lz <% end %> <% end %>/' $f ; done
+RUN find /usr/local/rake-compiler/ruby/*linux*/ -name mkmf.rb | while read f ; do sed -i ':a;N;$!ba;s/TRY_LINK = [^\n]*\n[^\n]*\n[^\n]*LOCAL_LIBS)/& -lruby-static -lpthread -lrt -ldl <% if platform =~ /x86_64/ %> -lcrypt <% if platform !~ /musl/ %> -lz <% end %> <% end %>/' $f ; done
 <% end %>
 
 <% if platform =~ /mingw/ %>
