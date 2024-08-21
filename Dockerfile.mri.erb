@@ -1,32 +1,14 @@
-<%
-image = case platform
-  when /x86_64-linux-gnu/ then "quay.io/pypa/manylinux2014_x86_64"
-  when /x86-linux-gnu/ then "quay.io/pypa/manylinux2014_i686"
-  else "ubuntu:20.04"
-end
-manylinux = !!(image =~ /manylinux/)
-%>
+<% image = "ubuntu:20.04" %>
 FROM <%= image %>
 
 ##
 ## Install required base packages for compiling ruby
 ##
-<% if manylinux %>
-RUN yum install -y sudo ruby less git wget curl autoconf libtool cmake gcc-c++ xz readline-devel sqlite-devel openssl-devel libffi-devel libyaml-devel
-
-## Prepare sudo
-RUN rm -f /usr/local/bin/sudo && \
-    groupadd -r sudo && \
-    echo "%sudo  ALL=(ALL)       ALL" >> /etc/sudoers
-
-<% else %>
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -y update && \
     apt-get install -y sudo wget curl git-core build-essential xz-utils unzip dirmngr && \
     apt-get install -y autoconf cmake pkg-config zlib1g-dev libreadline-dev libsqlite0-dev libssl-dev libyaml-dev libffi-dev && \
     rm -rf /var/lib/apt/lists/*
-<% end %>
-
 
 ##
 ##  install rbenv and ruby-build
@@ -68,21 +50,16 @@ RUN dpkg -i /debs/*.deb
 COPY build/mk_musl_cross.sh /tmp
 RUN /tmp/mk_musl_cross.sh <%= target %>
 
-<% elsif !manylinux %>
+<% else %>
 RUN apt-get -y update && \
     apt-get install -y <%
-if platform =~ /darwin/        %> clang python lzma-dev libxml2-dev libssl-dev libc++-10-dev <% end %><%
+if platform =~ /darwin/            %> clang python lzma-dev libxml2-dev libssl-dev libc++-10-dev <% end %><%
 if platform =~ /aarch64-linux-gnu/ %> gcc-aarch64-linux-gnu g++-aarch64-linux-gnu <% end %><%
 if platform =~ /arm-linux-gnu/     %> gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf <% end %><%
-if platform =~ /x86-mingw32/   %> gcc-mingw-w64-i686 g++-mingw-w64-i686 <% end %><%
-if platform =~ /x64-mingw32/   %> gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 <% end %> && \
+if platform =~ /x86-linux-gnu/     %> gcc-i686-linux-gnu g++-i686-linux-gnu <% end %><%
+if platform =~ /x86-mingw32/       %> gcc-mingw-w64-i686 g++-mingw-w64-i686 <% end %><%
+if platform =~ /x64-mingw32/       %> gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 <% end %> && \
     rm -rf /var/lib/apt/lists/*
-<% end %>
-
-<% if manylinux %>
-# Create dev tools x86-linux-*
-COPY build/mk_i686.rb /root/
-RUN /root/mk_i686.rb
 <% end %>
 
 <% if platform =~ /darwin/ %>
@@ -171,7 +148,7 @@ RUN bash -c " \
 RUN find /usr/local/rake-compiler/ruby/*linux*/ -name libruby.so | xargs rm
 RUN find /usr/local/rake-compiler/ruby/*linux*/ -name libruby-static.a | while read f ; do cp $f `echo $f | sed s/-static//` ; done
 RUN find /usr/local/rake-compiler/ruby/*linux*/ -name libruby.a | while read f ; do ar t $f | xargs ar d $f ; done
-RUN find /usr/local/rake-compiler/ruby/*linux*/ -name mkmf.rb | while read f ; do sed -i ':a;N;$!ba;s/TRY_LINK = [^\n]*\n[^\n]*\n[^\n]*LOCAL_LIBS)/& -lruby-static -lpthread -lrt -ldl <% if platform =~ /x86/ %> -lcrypt <% end %>/' $f ; done
+RUN find /usr/local/rake-compiler/ruby/*linux*/ -name mkmf.rb | while read f ; do sed -i ':a;N;$!ba;s/TRY_LINK = [^\n]*\n[^\n]*\n[^\n]*LOCAL_LIBS)/& -lruby-static -lpthread -lrt -ldl <% if platform =~ /x86_64/ %> -lcrypt <% if platform !~ /musl/ %> -lz <% end %> <% end %>/' $f ; done
 <% end %>
 
 <% if platform =~ /mingw/ %>
@@ -221,24 +198,6 @@ RUN mv /opt/osxcross/target/bin/<%= target %>-strip /opt/osxcross/target/bin/<%=
     ln /root/strip_wrapper_codesign /opt/osxcross/target/bin/<%= target %>-strip
 <% end %>
 
-<% if manylinux %>
-# Enable modern compiler toolset of manylinux image
-RUN echo "export PATH=\$DEVTOOLSET_ROOTPATH/usr/bin:\$PATH" >> /etc/rubybashrc
-
-# Add prefixed versions of compiler tools
-RUN for f in addr2line gcc gcov-tool ranlib ar dwp gcc-ranlib nm readelf as elfedit gcc-ar gprof objcopy size c++filt g++ gcov ld objdump strings cpp gcc-nm strip ; do ln -sf $DEVTOOLSET_ROOTPATH/usr/bin/$f $DEVTOOLSET_ROOTPATH/usr/bin/<%= target %>-$f ; done
-
-# Use builtin functions of newer gcc to avoid linker issues on Musl based Linux
-# TODO: remove in v1.6.0 once musl builds have been out for full minor release cycle, see 864be5b2
-COPY build/math_h.patch /root/
-RUN cd /usr/include/ && \
-    patch -p1 < /root/math_h.patch
-
-# Update pkg-config because the distro ships 0.27.1 which is old and has bugs and performance issues.
-COPY build/mk_pkg_config.sh /root/
-RUN /root/mk_pkg_config.sh
-<% end %>
-
 <% if platform =~ /arm64-darwin/ %>
 # Add a arm64 darwin target as alternative to aarch64
 RUN grep -E 'rbconfig-aarch64-darwin' /usr/local/rake-compiler/config.yml | sed 's/rbconfig-[a-z0-9_]*-darwin/rbconfig-<%= platform %>/' >> /usr/local/rake-compiler/config.yml
@@ -258,6 +217,6 @@ COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 
 RUN bash -c "rbenv global 3.1.3"
 
-ENV RUBY_CC_VERSION 3.3.0:3.2.0:3.1.0:3.0.0:2.7.0:2.6.0:2.5.0:2.4.0
+ENV RUBY_CC_VERSION=3.3.0:3.2.0:3.1.0:3.0.0:2.7.0:2.6.0:2.5.0:2.4.0
 
 CMD bash
