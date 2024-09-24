@@ -75,6 +75,12 @@ class TestEnvironmentVariables
     def test_PWD
       assert_equal Dir.pwd, rcd_env['PWD']
     end
+
+    def test_SOURCE_DATE_EPOCH
+      cmd = "SOURCE_DATE_EPOCH=1234567890 " + invocation("echo \$SOURCE_DATE_EPOCH")
+      sde = %x(#{cmd}).strip
+      assert_equal "1234567890", sde
+    end
   end
 
   class AsIfContinuousIntegration < Test::Unit::TestCase
