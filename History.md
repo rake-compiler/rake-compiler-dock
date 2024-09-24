@@ -14,6 +14,16 @@ Changed the base image of `x86_64-linux-gnu` and `x86-linux-gnu` images from `ma
 - Add support for the `SOURCE_DATE_EPOCH` environment variable, which can be used to create reproducible builds. #128 by @segiddins)
 
 
+## 1.5.2 / 2024-07-30
+
+With CentOS 7 becoming EOL as of 2024-06-30, `yum` will no longer work in the `x86_64-linux-gnu` and
+`x86-linux-gnu` images shipped with v1.5.1 and earlier.
+
+In this release, we've updated the `manylinux2014` base image for the `x86_64-linux-gnu` and
+`x86-linux-gnu` images to point at a version patched by `pypa` to use valid yum mirrors. See
+https://github.com/pypa/manylinux/pull/1628 for more information.
+
+
 ## 1.5.1 / 2024-06-03
 
 ### Improvements
