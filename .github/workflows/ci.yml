@@ -382,21 +382,27 @@ jobs:
       matrix:
         include:
           - from_image: amd64/centos
+            image_platform: linux/amd64
             platform: x86_64-linux # centos-8 ships ruby 2.5, rubygems won't recognize -gnu suffix
             dockerfile: centos
           - from_image: navikey/raspbian-bullseye
+            image_platform: linux/arm/v7
             platform: arm-linux # bullseye ships ruby 2.7, rubygems won't recognize -gnu suffix
             dockerfile: debian
           - from_image: arm64v8/ubuntu
+            image_platform: linux/aarch64
             platform: aarch64-linux # arm64v8 ships ruby 3.0, rubygems won't recognize -gnu suffix
             dockerfile: debian
           - from_image: i386/alpine
+            image_platform: linux/386
             platform: x86-linux-musl
             dockerfile: alpine
           - from_image: arm32v6/alpine
+            image_platform: linux/arm/v6
             platform: arm-linux-musl
             dockerfile: alpine
           - from_image: alpine
+            image_platform: linux/amd64
             platform: x86_64-linux-musl
             dockerfile: alpine
     runs-on: ubuntu-latest
@@ -409,6 +415,6 @@ jobs:
       - name: Build ${{ matrix.from_image }} image
         run: |
           docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-          docker build --rm --build-arg from_image=${{ matrix.from_image }} -t ruby-test -f test/env/Dockerfile.${{ matrix.dockerfile }} .
+          docker build --rm --build-arg from_image=${{ matrix.from_image }} --platform=${{ matrix.image_platform }} -t ruby-test -f test/env/Dockerfile.${{ matrix.dockerfile }} .
       - name: Run tests
         run: docker run --rm -t --network=host -v `pwd`:/build ruby-test
