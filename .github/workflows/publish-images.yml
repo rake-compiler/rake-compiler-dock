@@ -41,7 +41,8 @@ jobs:
         with:
           ruby-version: "3.1"
           bundler-cache: true
-      - id: rcd_config
+      - name: Generate docker image names
+        id: rcd_config
         run: |
           bundle exec ruby -e ' \
             require "rake_compiler_dock"; \
@@ -49,8 +50,11 @@ jobs:
             puts RakeCompilerDock::Starter.container_image_name(:platform => %q(${{matrix.platform}})); \
             print "snapshot_name="; \
             puts RakeCompilerDock::Starter.container_image_name(:platform => %q(${{matrix.platform}}), :version => %q(snapshot)); \
+            if %q(${{matrix.platform}}).end_with?("-gnu"); \
+              print "generic_linux_snapshot_name="; \
+              puts RakeCompilerDock::Starter.container_image_name(:platform => %q(${{matrix.platform}}), :version => %q(snapshot)).chomp("-gnu"); \
+            end \
           ' | tee -a $GITHUB_OUTPUT
-
       - name: Build docker image
         env:
           RCD_DOCKER_BUILD: docker buildx build --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new --load
@@ -65,7 +69,13 @@ jobs:
           registry: ghcr.io
           username: ${{github.actor}}
           password: ${{secrets.GITHUB_TOKEN}}
-      - run: |
+      - name: Push the docker image
+        run: |
           docker images
           docker tag ${{steps.rcd_config.outputs.image_name}} ${{steps.rcd_config.outputs.snapshot_name}}
           docker push ${{steps.rcd_config.outputs.snapshot_name}}
+      - name: Push a generic linux image
+        if: ${{ steps.rcd_config.outputs.generic_linux_snapshot_name }}
+        run: |
+          docker tag ${{steps.rcd_config.outputs.image_name}} ${{steps.rcd_config.outputs.generic_linux_snapshot_name}}
+          docker push ${{steps.rcd_config.outputs.generic_linux_snapshot_name}}
