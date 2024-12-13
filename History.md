@@ -1,22 +1,31 @@
 # `rake-compiler/rake-compiler-dock` Changelog
 
-## next / unreleased
+## v1.6.0 / 2024-12-13
 
 ### Notable changes
 
-#### Standardizing Linux build images on Ubuntu base
+#### Standardizing all Linux build images on Ubuntu
 
-Changed the base image of `x86_64-linux-gnu` and `x86-linux-gnu` images from `manylinux2014` to `ubuntu:20.04`, unifying all the builds are the same base image. See https://github.com/rake-compiler/rake-compiler-dock/issues/122 for more context.
+In this release, we upgraded the base image for the `x86_64-linux-gnu` and `x86-linux-gnu` images from `manylinux2014` to `ubuntu:20.04`. (`manylinux2014` reached end-of-life earlier this year.) As a result, all of the build images are using the same base image, simplifying things considerably. (#122, #126) @flavorjones
+
+⚠ **Note** there are two important changes due to this upgrade:
+
+1. The minimum supported version of GLIBC for the `x86*-linux-gnu` images has increased from 2.17 to 2.29 for `x86_64` and `x86` architectures. (Note that GLIBC was already pinned to 2.29 for ARM architectures.)
+2. Precompiled gems built with the `x86*linux-gnu` images are less likely to be compatible with Musl systems, and may segfault.
+
+For (2) above, if you have been shipping a single `x86_64-linux` native gem for both GNU and Musl systems, **please make sure you test your gems on a Musl system before shipping them**. See the [actions workflow in flavorjones/ruby-c-extensions-explained](https://github.com/flavorjones/ruby-c-extensions-explained/blob/6619a0d94e627897838a79144704387db65a03bc/.github/workflows/precompiled.yml#L137) for an example of how to do this rigorously.
+
+
+### Ruby 3.3 support upgraded to `3.3.5`
+
+Update Ruby 3.3 support from 3.3.0-rc1 to 3.3.5. Note that the 3.3.x releases are not usable until 3.3.5 because of https://bugs.ruby-lang.org/issues/20088.
+
+⚠ **Note** that if you were specifying `3.3.0` in your `RUBY_CC_VERSION` environment variable, that string will must be updated to `3.3.5`.
 
 
 ### Added
 
-- Add support for the `SOURCE_DATE_EPOCH` environment variable, which can be used to create reproducible builds. #128 by @segiddins)
-
-
-### Changed
-
-- Move Ruby 3.3 support from 3.3.0-rc1 to 3.3.5. Note that the 3.3.x releases are not usable until 3.3.5 because of https://bugs.ruby-lang.org/issues/20088.
+- Add support for the `SOURCE_DATE_EPOCH` environment variable, which can be used to create reproducible builds. (#128) @segiddins
 
 
 ## 1.5.2 / 2024-07-30
