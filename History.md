@@ -11,16 +11,16 @@ In this release, we upgraded the base image for the `x86_64-linux-gnu` and `x86-
 ⚠ **Note** there are two important changes due to this upgrade:
 
 1. The minimum supported version of GLIBC for the `x86*-linux-gnu` images has increased from 2.17 to 2.29 for `x86_64` and `x86` architectures. (Note that GLIBC was already pinned to 2.29 for ARM architectures.)
-2. Precompiled gems built with the `x86*linux-gnu` images are less likely to be compatible with Musl systems, and may segfault.
+2. Precompiled gems built with the `x86*linux-gnu` images are less likely to be compatible with Musl libc, and may segfault when run on Musl systems.
 
 For (2) above, if you have been shipping a single `x86_64-linux` native gem for both GNU and Musl systems, **please make sure you test your gems on a Musl system before shipping them**. See the [actions workflow in flavorjones/ruby-c-extensions-explained](https://github.com/flavorjones/ruby-c-extensions-explained/blob/6619a0d94e627897838a79144704387db65a03bc/.github/workflows/precompiled.yml#L137) for an example of how to do this rigorously.
 
 
-### Ruby 3.3 support upgraded to `3.3.5`
+#### Ruby 3.3 support upgraded to `3.3.5`
 
 Update Ruby 3.3 support from 3.3.0-rc1 to 3.3.5. Note that the 3.3.x releases are not usable until 3.3.5 because of https://bugs.ruby-lang.org/issues/20088.
 
-⚠ **Note** that if you were specifying `3.3.0` in your `RUBY_CC_VERSION` environment variable, that string will must be updated to `3.3.5`.
+⚠ **Note** that if you were specifying `3.3.0` in your `RUBY_CC_VERSION` environment variable, that string must be updated to `3.3.5`.
 
 
 ### Added
