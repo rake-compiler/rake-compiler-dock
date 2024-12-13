@@ -1,6 +1,6 @@
 # `rake-compiler/rake-compiler-dock` Changelog
 
-## next / unreleased
+## v1.7.0.rc1 / 2024-12-13
 
 ### Ruby 3.4 support
 
