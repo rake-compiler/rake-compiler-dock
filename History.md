@@ -1,5 +1,12 @@
 # `rake-compiler/rake-compiler-dock` Changelog
 
+## v1.7.0 / 2024-12-25
+
+### Ruby 3.4 support
+
+- Add Ruby 3.4.0 cross-compilation support.
+
+
 ## v1.7.0.rc1 / 2024-12-13
 
 ### Ruby 3.4 support
