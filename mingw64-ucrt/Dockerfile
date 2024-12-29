@@ -32,7 +32,7 @@ RUN cd mingw-w64-* && \
 
 # Install UCRT enabled deb-packages
 RUN dpkg -i mingw-w64-common_7.0.0-2_all.deb \
-    mingw-w64-tools_7.0.0-2_amd64.deb \
+    mingw-w64-tools_7.0.0-2_*.deb \
     mingw-w64-x86-64-dev_7.0.0-2_all.deb
 
 # Download gcc-binutils sources for mingw
@@ -51,6 +51,10 @@ RUN cd binutils-mingw-w64-* && \
 RUN apt-get source gcc-mingw-w64 && \
     cd gcc-mingw-w64-* && \
     mk-build-deps -ir -t "apt-get -o Debug::pkgProblemResolver=yes -y --no-install-recommends"
+
+# Add version based alias
+RUN ln -s `which autoconf` `which autoconf`2.69 && \
+    ln -s `which autom4te` `which autom4te`2.69
 
 # Build gcc (only C and C++) based on UCRT headers and crt
 ADD gcc-mingw-w64-*.patch ./
