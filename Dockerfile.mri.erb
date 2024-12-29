@@ -169,9 +169,9 @@ RUN find /usr/local/rake-compiler/ruby -name rbconfig.rb | while read f ; do sed
 <% if platform =~ /darwin/ %>
 # ruby-3.2+ on darwin links with `-bundle_loader`,
 # - see https://github.com/rake-compiler/rake-compiler-dock/issues/87
-# - note that we do this for "3.[2-9].0" to match rubies 3.2 and later
-# - and we add a "*" on the end for "3.[2-9].0*" to match prereleases like "3.3.0+0"
-RUN find /usr/local/rake-compiler/ruby/*/*/lib/ruby/3.[2-9].0* -name rbconfig.rb | \
+# - note that we do this for "3.[2-9].*" to match rubies 3.2 and later
+# - and we use a "*" on the end instead of a digit to match prereleases like "3.3.0+0"
+RUN find /usr/local/rake-compiler/ruby/*/*/lib/ruby/3.[2-9].* -name rbconfig.rb | \
     while read f ; do sed -i 's/\["EXTDLDFLAGS"\] = "/&-Wl,-flat_namespace /' $f ; done
 <% end %>
 
