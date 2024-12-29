@@ -27,6 +27,8 @@ rm -rf *~ build tarballs/*
 echo "export PATH=/opt/osxcross/target/bin:\$PATH" >> /etc/rubybashrc
 echo "export MACOSX_DEPLOYMENT_TARGET=10.13" >> /etc/rubybashrc
 echo "export OSXCROSS_MP_INC=1" >> /etc/rubybashrc
+echo "export OSXCROSS_PKG_CONFIG_USE_NATIVE_VARIABLES=1" >> /etc/rubybashrc
+
 
 # Add links to build tools without target version kind of:
 #   arm64-apple-darwin-clang   =>   arm64-apple-darwin20.1-clang
