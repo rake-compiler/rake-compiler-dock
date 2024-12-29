@@ -90,7 +90,9 @@ RUN bash -c " \
         rbenv shell \$v && \
         gem install rake-compiler -v1.2.5 && \
         cd ${RBENV_ROOT}/versions/\$v/lib/ruby/gems/*/gems/rake-compiler-1.2.5 && \
-        patch -p1 < /home/rubyuser/patches/rake-compiler-1.2.5/*.patch ; \
+        for patch in /home/rubyuser/patches/rake-compiler-1.2.5/*.patch ; do \
+          patch -p1 < \$patch ; \
+        done ; \
       done \
     "
 
