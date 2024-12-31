@@ -304,7 +304,7 @@ jobs:
             ruby: "3.3"
             platform: x64-mingw-ucrt
           - os: windows-latest
-            ruby: "head" # "3.4.0-rc1" not available yet on windows
+            ruby: "3.4"
             platform: x64-mingw-ucrt
     runs-on: ${{ matrix.os }}
     steps:
@@ -359,7 +359,7 @@ jobs:
             ruby: "3.3"
             platform: x64-mingw-ucrt
           - os: windows-latest
-            ruby: "head" # "3.4.0-rc1" not available yet on windows
+            ruby: "3.4"
             platform: x64-mingw-ucrt
     runs-on: ${{ matrix.os }}
     steps:
