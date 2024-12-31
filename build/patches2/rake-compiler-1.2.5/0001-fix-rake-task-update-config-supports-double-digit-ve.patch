@@ -1,0 +1,34 @@
+From 7118fed4335415c5d8cc3e13d40747bf628f0d72 Mon Sep 17 00:00:00 2001
+From: Mike Dalessio <mike@37signals.com>
+Date: Sun, 29 Dec 2024 11:38:32 -0500
+Subject: [PATCH] fix: rake task 'update-config' supports double-digit version
+ segments
+
+Previously the regexp was
+
+    (\d.\d.\d.)
+
+which does not work for versions with a double-digit segment like
+2.6.10. Now the regexp is
+
+    (\d+\.\d+\.\d+\d)
+---
+ tasks/bin/cross-ruby.rake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tasks/bin/cross-ruby.rake b/tasks/bin/cross-ruby.rake
+index 8317a2a3..d37ab97b 100644
+--- a/tasks/bin/cross-ruby.rake
++++ b/tasks/bin/cross-ruby.rake
+@@ -154,7 +154,7 @@
+   files = Dir.glob("#{USER_HOME}/ruby/*/*/**/rbconfig.rb").sort
+ 
+   files.each do |rbconfig|
+-    version, platform = rbconfig.match(/.*-(\d.\d.\d).*\/([-\w]+)\/rbconfig/)[1,2]
++    version, platform = rbconfig.match(/.*-(\d+\.\d+\.\d+).*\/([-\w]+)\/rbconfig/)[1,2]
+     platforms = [platform]
+ 
+     # fake alternate (binary compatible) i386-mswin32-60 platform
+-- 
+2.47.1
+
