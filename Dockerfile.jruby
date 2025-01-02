@@ -44,13 +44,13 @@ RUN bash -c " \
     "
 
 # Install rake-compiler and patch it to build and install static libraries for Linux rubies
-COPY build/patches2 /home/rubyuser/patches
+COPY build/patches /home/rubyuser/patches
 RUN bash -c " \
       for v in ${RBENV_RUBIES} ; do \
         rbenv shell \$v && \
-        gem install rake-compiler -v1.2.5 && \
-        cd ${RBENV_ROOT}/versions/\$v/lib/ruby/gems/*/gems/rake-compiler-1.2.5 && \
-        patch -p1 < /home/rubyuser/patches/rake-compiler-1.2.5/*.patch ; \
+        gem install rake-compiler -v1.2.9 && \
+        cd ${RBENV_ROOT}/versions/\$v/lib/ruby/gems/*/gems/rake-compiler-1.2.9 && \
+        patch -p1 < /home/rubyuser/patches/rake-compiler-1.2.9/*.patch ; \
       done \
     "
 
