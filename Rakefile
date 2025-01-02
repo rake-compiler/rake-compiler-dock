@@ -8,6 +8,27 @@ CLEAN.include("tmp")
 
 RakeCompilerDock::GemHelper.install_tasks
 
+def build_mri_images(platforms, host_platforms, output: )
+  plats = host_platforms.map(&:first).join(",")
+  platforms.each do |platform, _|
+    sdf = "tmp/docker/Dockerfile.mri.#{platform}.#{host_platforms.first[1]}"
+    image_name = RakeCompilerDock::Starter.container_image_name(platform: platform)
+
+    RakeCompilerDock.docker_build(sdf, tag: image_name, platform: plats, output: output)
+
+    if image_name.include?("linux-gnu")
+      RakeCompilerDock.docker_build(sdf, tag: image_name.sub("linux-gnu", "linux"), platform: plats, output: output)
+    end
+  end
+end
+
+def build_jruby_images(host_platforms, output: )
+  image_name = RakeCompilerDock::Starter.container_image_name(rubyvm: "jruby")
+  plats = host_platforms.map(&:first).join(",")
+  sdf = "tmp/docker/Dockerfile.jruby.#{host_platforms.first[1]}"
+  RakeCompilerDock.docker_build(sdf, tag: image_name, platform: plats, output: output)
+end
+
 platforms = [
   # tuple is [platform, target]
   ["aarch64-linux-gnu", "aarch64-linux-gnu"],
@@ -26,47 +47,84 @@ platforms = [
   ["x86_64-linux-musl", "x86_64-unknown-linux-musl"],
 ]
 
+host_platforms = [
+  # tuple is [docker platform, rake task, RUBY_PLATFORM matcher]
+  ["linux/amd64", "x86", /^x86_64|^x64|^amd64/],
+  ["linux/arm64", "arm", /^aarch64|arm64/],
+]
+local_platform = host_platforms.find { |_,_,reg| reg =~ RUBY_PLATFORM } or
+    raise("RUBY_PLATFORM #{RUBY_PLATFORM} is not supported as host")
+
 namespace :build do
 
-  platforms.each do |platform, target|
-    sdf = "Dockerfile.mri.#{platform}"
+  mkdir_p "tmp/docker"
 
-    desc "Build image for platform #{platform}"
-    task platform => sdf
-    task sdf do
-      image_name = RakeCompilerDock::Starter.container_image_name(platform: platform)
-      sh(*RakeCompilerDock.docker_build_cmd(platform), "-t", image_name, "-f", "Dockerfile.mri.#{platform}", ".")
-      if image_name.include?("linux-gnu")
-        sh("docker", "tag", image_name, image_name.sub("linux-gnu", "linux"))
+  host_platforms.each do |docker_platform, rake_platform|
+    namespace rake_platform do
+
+      platforms.each do |platform, target|
+        sdf = "tmp/docker/Dockerfile.mri.#{platform}.#{rake_platform}"
+        df = ERB.new(File.read("Dockerfile.mri.erb"), trim_mode: ">").result(binding)
+        File.write(sdf, df)
+        CLEAN.include(sdf)
       end
+      sdf = "tmp/docker/Dockerfile.jruby.#{rake_platform}"
+      df = File.read("Dockerfile.jruby")
+      File.write(sdf, df)
+
+      builder = RakeCompilerDock::ParallelDockerBuild.new(platforms.map{|pl, _| "tmp/docker/Dockerfile.mri.#{pl}.#{rake_platform}" } + ["tmp/docker/Dockerfile.jruby.#{rake_platform}"], workdir: "tmp/docker", task_prefix: "common-#{rake_platform}-", platform: docker_platform)
+
+      platforms.each do |platform, target|
+        sdf = "tmp/docker/Dockerfile.mri.#{platform}.#{rake_platform}"
+
+        if docker_platform == local_platform[0]
+          # Load image after build on local platform only
+          desc "Build and load image for platform #{platform} on #{docker_platform}"
+          task platform => sdf do
+            build_mri_images([platform], [local_platform], output: 'load')
+          end
+        else
+          desc "Build image for platform #{platform} on #{docker_platform}"
+          task platform => sdf
+        end
+        multitask :all => platform
+      end
+
+      sdf = "tmp/docker/Dockerfile.jruby.#{rake_platform}"
+      if docker_platform == local_platform[0]
+        # Load image after build on local platform only
+        desc "Build and load image for JRuby on #{docker_platform}"
+        task :jruby => sdf do
+          build_jruby_images([local_platform], output: 'load')
+        end
+      else
+        desc "Build image for JRuby on #{docker_platform}"
+        task :jruby => sdf
+      end
+      multitask :all => :jruby
     end
-
-    df = ERB.new(File.read("Dockerfile.mri.erb"), trim_mode: ">").result(binding)
-    File.write(sdf, df)
-    CLEAN.include(sdf)
+    desc "Build all images on #{docker_platform} in parallel"
+    task rake_platform => "#{rake_platform}:all"
   end
 
-  desc "Build image for JRuby"
-  task :jruby => "Dockerfile.jruby"
-  task "Dockerfile.jruby" do
-    image_name = RakeCompilerDock::Starter.container_image_name(rubyvm: "jruby")
-    sh(*RakeCompilerDock.docker_build_cmd("jruby"), "-t", image_name, "-f", "Dockerfile.jruby", ".")
+  all_mri_images = host_platforms.flat_map do |_, rake_platform|
+    platforms.map do |platform, |
+      "#{rake_platform}:#{platform}"
+    end
   end
-
-  RakeCompilerDock::ParallelDockerBuild.new(platforms.map{|pl, _| "Dockerfile.mri.#{pl}" } + ["Dockerfile.jruby"], workdir: "tmp/docker")
-
-  desc "Build images for all MRI platforms in parallel"
+  desc "Build images for all MRI platforms and hosts in parallel"
   if ENV['RCD_USE_BUILDX_CACHE']
-    task :mri => platforms.map(&:first)
+    task :mri => all_mri_images
   else
-    multitask :mri => platforms.map(&:first)
+    multitask :mri => all_mri_images
   end
 
-  desc "Build images for all platforms in parallel"
+  all_images = all_mri_images + host_platforms.map { |_, pl| "#{pl}:jruby" }
+  desc "Build images for all platforms and hosts in parallel"
   if ENV['RCD_USE_BUILDX_CACHE']
-    task :all => platforms.map(&:first) + ["jruby"]
+    task :all => all_images
   else
-    multitask :all => platforms.map(&:first) + ["jruby"]
+    multitask :all => all_images
   end
 end
 
@@ -116,18 +174,9 @@ task :update_lists do
 end
 
 namespace :release do
-  desc "push all docker images"
-  task :images do
-    image_name = RakeCompilerDock::Starter.container_image_name(rubyvm: "jruby")
-    sh("docker", "push", image_name)
-
-    platforms.each do |platform, _|
-      image_name = RakeCompilerDock::Starter.container_image_name(platform: platform)
-      sh("docker", "push", image_name)
-
-      if image_name.include?("linux-gnu")
-        sh("docker", "push", image_name.sub("linux-gnu", "linux"))
-      end
-    end
+  desc "Push all docker images on #{host_platforms.map(&:first).join(",")}"
+  task :images => "build:all" do
+    build_jruby_images(host_platforms, output: 'push')
+    build_mri_images(platforms, host_platforms, output: 'push')
   end
 end
