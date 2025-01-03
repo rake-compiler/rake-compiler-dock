@@ -15,7 +15,7 @@ on:
 
 jobs:
   build:
-    name: "build ${{ inputs.tag }}"
+    name: "build ${{ inputs.tag }} ${{ matrix.platform }}"
     strategy:
       fail-fast: false
       matrix:
