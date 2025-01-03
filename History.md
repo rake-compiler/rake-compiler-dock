@@ -1,5 +1,11 @@
 # `rake-compiler/rake-compiler-dock` Changelog
 
+## v1.7.1 / 2025-01-03
+
+- Bump rake-compiler dependency to v1.2.9 (from v1.2.5).
+- Bump Ruby to v3.4.1 (from v3.4.0) to address `ruby_abi_version` issues.
+
+
 ## v1.7.0 / 2024-12-25
 
 ### Ruby 3.4 support
