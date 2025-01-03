@@ -1,11 +1,13 @@
-name: Publish docker images to GHCR
+name: Release docker images to GHCR
 concurrency:
   group: "${{github.workflow}}-${{github.ref}}"
   cancel-in-progress: true
+
+#
+#  This workflow assumes the maintainer has chosen the appropriate tag in the workflow dispatch UI.
+#
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 3 * * 3" # At 03:00 on Wednesday # https://crontab.guru/#0_3_*_*_3
 
 jobs:
   build:
@@ -48,11 +50,9 @@ jobs:
             require "rake_compiler_dock"; \
             print "image_name="; \
             puts RakeCompilerDock::Starter.container_image_name(:platform => %q(${{matrix.platform}})); \
-            print "snapshot_name="; \
-            puts RakeCompilerDock::Starter.container_image_name(:platform => %q(${{matrix.platform}}), :version => %q(snapshot)); \
             if %q(${{matrix.platform}}).end_with?("-gnu"); \
-              print "generic_linux_snapshot_name="; \
-              puts RakeCompilerDock::Starter.container_image_name(:platform => %q(${{matrix.platform}}), :version => %q(snapshot)).chomp("-gnu"); \
+              print "generic_linux_image_name="; \
+              puts RakeCompilerDock::Starter.container_image_name(:platform => %q(${{matrix.platform}})).chomp("-gnu"); \
             end \
           ' | tee -a $GITHUB_OUTPUT
       - name: Build docker image
@@ -72,10 +72,9 @@ jobs:
       - name: Push the docker image
         run: |
           docker images
-          docker tag ${{steps.rcd_config.outputs.image_name}} ${{steps.rcd_config.outputs.snapshot_name}}
-          docker push ${{steps.rcd_config.outputs.snapshot_name}}
+          docker push ${{steps.rcd_config.outputs.image_name}}
       - name: Push a generic linux image
-        if: ${{ steps.rcd_config.outputs.generic_linux_snapshot_name }}
+        if: ${{ steps.rcd_config.outputs.generic_linux_image_name }}
         run: |
-          docker tag ${{steps.rcd_config.outputs.image_name}} ${{steps.rcd_config.outputs.generic_linux_snapshot_name}}
-          docker push ${{steps.rcd_config.outputs.generic_linux_snapshot_name}}
+          docker tag ${{steps.rcd_config.outputs.image_name}} ${{steps.rcd_config.outputs.generic_linux_image_name}}
+          docker push ${{steps.rcd_config.outputs.generic_linux_image_name}}
