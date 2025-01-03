@@ -14,9 +14,21 @@ module RakeCompilerDock
           return nil
         end
       else
-        ENV['RCD_DOCKER_BUILD'] || "docker build"
+        ENV['RCD_DOCKER_BUILD'] || "docker buildx build"
       end
       Shellwords.split(cmd)
+    end
+
+    # Run an intermediate dockerfile without tag
+    #
+    # The layers will be reused in subsequent builds, even if they run in parallel.
+    def docker_build(filename, tag: nil, output: false, platform: )
+      cmd = docker_build_cmd
+      return if cmd.nil?
+      tag_args = ["-t", tag] if tag
+      push_args = ["--push"] if output == 'push'
+      push_args = ["--load"] if output == 'load'
+      Class.new.extend(FileUtils).sh(*cmd, "-f", filename, ".", "--platform", platform, *tag_args, *push_args)
     end
   end
 
@@ -24,7 +36,7 @@ module RakeCompilerDock
   class ParallelDockerBuild
     include Rake::DSL
 
-    def initialize(dockerfiles, workdir: "tmp/docker", inputdir: ".", task_prefix: "common-")
+    def initialize(dockerfiles, workdir: "tmp/docker", inputdir: ".", task_prefix: "common-", platform: "local")
       FileUtils.mkdir_p(workdir)
 
       files = parse_dockerfiles(dockerfiles, inputdir)
@@ -34,6 +46,7 @@ module RakeCompilerDock
       # pp vcs
 
       define_common_tasks(vcs, workdir, task_prefix)
+      @platform = platform
     end
 
     # Read given dockerfiles from inputdir and split into a list of commands.
@@ -96,7 +109,7 @@ module RakeCompilerDock
         fn = "#{task_prefix}#{Digest::SHA1.hexdigest(files.join)}"
         File.write(File.join(workdir, fn), (plines + lines).join)
         task fn do
-          docker_build(fn, workdir)
+          RakeCompilerDock.docker_build(File.join(workdir, fn), platform: @platform)
         end
 
         nfn = define_common_tasks(nvcs, workdir, task_prefix, plines + lines)
@@ -108,15 +121,6 @@ module RakeCompilerDock
         end
         fn
       end
-    end
-
-    # Run an intermediate dockerfile without tag
-    #
-    # The layers will be reused in subsequent builds, even if they run in parallel.
-    def docker_build(filename, workdir)
-      cmd = RakeCompilerDock.docker_build_cmd
-      return if cmd.nil?
-      sh(*RakeCompilerDock.docker_build_cmd, "-f", File.join(workdir, filename), ".")
     end
   end
 end

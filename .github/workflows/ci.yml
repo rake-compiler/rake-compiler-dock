@@ -82,7 +82,7 @@ jobs:
       - name: Build docker image
         run: |
           docker buildx create --driver docker-container --use
-          bundle exec rake build:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new --load"
+          bundle exec rake build:x86:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new"
           docker images
       - name: Update and prune docker buildx layer cache
         run: |
