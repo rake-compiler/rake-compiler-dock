@@ -57,10 +57,10 @@ jobs:
           ' | tee -a $GITHUB_OUTPUT
       - name: Build docker image
         env:
-          RCD_DOCKER_BUILD: docker buildx build --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new --load
+          RCD_DOCKER_BUILD: docker buildx build --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new
         run: |
           docker buildx create --driver docker-container --use
-          bundle exec rake build:${{matrix.platform}}
+          bundle exec rake build:x86:${{matrix.platform}}
           # move build cache and remove outdated layers
           rm -rf tmp/build-cache
           mv tmp/build-cache-new tmp/build-cache
