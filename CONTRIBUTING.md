@@ -7,16 +7,27 @@ This document is intended for the rake-compiler-dock contributors.
 - prep
   - [ ] make sure CI is green!
   - [ ] update `History.md` and `lib/rake_compiler_dock/version.rb`
-- build
-  - [ ] run the steps below to generate the images locally
-  - [ ] run `gem build rake-compiler-dock`
-  - [ ] create a git tag
-- push
-  - [ ] run `bundle exec rake release:images`
-  - [ ] run `gem push pkg/rake-compiler-dock*gem`
-  - [ ] run `git push && git push --tags`
+  - [ ] commit and create a git tag
+- option 1: build locally
+  - build
+    - [ ] run the steps below to generate the images locally
+    - [ ] run `gem build rake-compiler-dock`
+  - push
+    - [ ] run `bundle exec rake release:images`
+    - [ ] run `gem push pkg/rake-compiler-dock*gem`
+    - [ ] run `git push && git push --tags`
+- option 2: build with github actions
+  - build and push images from github actions
+    - [ ] run `git push && git push --tags`
+    - [ ] wait for CI to go green on the tag
+    - [ ] go to the [release-images pipeline][] and run the workflow on the tag
+  - build the gem locally and push it
+    - [ ] locally, run `gem build rake-compiler-dock`
+    - [ ] run `gem push pkg/rake-compiler-dock*gem`
 - announce
   - [ ] create a release at https://github.com/rake-compiler/rake-compiler-dock/releases
+
+[release-images pipeline]: https://github.com/rake-compiler/rake-compiler-dock/actions/workflows/release-images.yml
 
 
 ## Building a versioned image

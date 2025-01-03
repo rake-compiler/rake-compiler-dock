@@ -8,9 +8,14 @@ concurrency:
 #
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag name to release"
+        required: true
 
 jobs:
   build:
+    name: "build ${{ inputs.tag }}"
     strategy:
       fail-fast: false
       matrix:
@@ -32,6 +37,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
       - name: Use cache from primary pipeline
         uses: actions/cache@v4
         with:
