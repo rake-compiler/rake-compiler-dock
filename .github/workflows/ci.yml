@@ -4,8 +4,6 @@ concurrency:
   cancel-in-progress: true
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 5 * * 3" # At 05:00 on Wednesday # https://crontab.guru/#0_5_*_*_3
   push:
     branches:
       - main
@@ -17,28 +15,6 @@ on:
       - "*"
 
 jobs:
-  build_source_gem:
-    name: build source
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.3"
-          working-directory: test/rcd_test
-          bundler-cache: true
-
-      - name: Build source gem
-        run: |
-          cd test/rcd_test/
-          bundle exec rake gem
-
-      - name: Upload source gem
-        uses: actions/upload-artifact@v4
-        with:
-          name: gem-ruby
-          path: test/rcd_test/pkg/rcd_test-?.?.?.gem # e.g. rcd_test-1.0.0.gem
-
   build_native_gem:
     name: build native
     strategy:
@@ -46,33 +22,21 @@ jobs:
       matrix:
         include:
           - platform: aarch64-linux-gnu
-            alias:    aarch64-linux
-          - platform: aarch64-linux-musl
-          - platform: arm-linux-gnu
-            alias:    arm-linux
-          - platform: arm-linux-musl
-          - platform: arm64-darwin
-          - platform: jruby
-          - platform: x64-mingw-ucrt
-            static: true
-          - platform: x64-mingw32
-            static: true
-          - platform: x86-linux-gnu
-            alias:    x86-linux
-          - platform: x86-linux-musl
-          - platform: x86-mingw32
-          - platform: x86_64-darwin
-          - platform: x86_64-linux-gnu
-            alias:    x86_64-linux
-          - platform: x86_64-linux-musl
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ruby/setup-ruby@v1
+      - uses: ruby/setup-ruby-pkgs@v1
         with:
           ruby-version: "3.3"
-          bundler-cache: true
-
+          brew: "docker docker-buildx colima"
+      - name: enable buildx command
+        run: |
+          mkdir -p ~/.docker
+          echo '{"cliPluginsExtraDirs": ["/opt/homebrew/lib/docker/cli-plugins"]}' > ~/.docker/config.json
+          cat ~/.docker/config.json
+      - name: start colima
+        run: |
+          colima start
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
         with:
@@ -82,7 +46,7 @@ jobs:
       - name: Build docker image
         run: |
           docker buildx create --driver docker-container --use
-          bundle exec rake build:x86:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new"
+          bundle exec rake build:arm:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new"
           docker images
       - name: Update and prune docker buildx layer cache
         run: |
@@ -136,31 +100,6 @@ jobs:
         with:
           name: gem-${{ matrix.alias }}
           path: test/rcd_test/pkg/*-*-*.gem
-
-  test_source_gem:
-    name: source gem
-    needs: build_source_gem
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        ruby: ["3.4.0-rc1", "3.3", "3.2", "3.1", "3.0", "2.7", "2.6", "2.5", "2.4"]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ matrix.ruby }}
-      - name: Download source gem
-        uses: actions/download-artifact@v4
-        with:
-          name: gem-ruby
-      - name: Test source gem
-        run: |
-          gem install --local *.gem --verbose
-          cd test/rcd_test/
-          bundle install
-          ruby -rrcd_test -S rake test
 
   test-x86_64-linux-setup-ruby:
     name: "${{ matrix.platform }} setup-ruby(${{ matrix.ruby }})"
