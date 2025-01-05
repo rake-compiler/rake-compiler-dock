@@ -1,5 +1,10 @@
 # `rake-compiler/rake-compiler-dock` Changelog
 
+## next / unreleased
+
+- Base ruby updated to v3.1.6 (from v3.1.3).
+
+
 ## v1.7.1 / 2025-01-03
 
 - Bump rake-compiler dependency to v1.2.9 (from v1.2.5).
