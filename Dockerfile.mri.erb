@@ -167,12 +167,15 @@ RUN find /usr/local/rake-compiler/ruby -name lib*-ruby*.dll.a | while read f ; d
 RUN find /usr/local/rake-compiler/ruby -name rbconfig.rb | while read f ; do sed -i 's/-lcrypt//' $f ; done
 
 <% if platform =~ /darwin/ %>
-# ruby-3.2+ on darwin links with `-bundle_loader`,
-# - see https://github.com/rake-compiler/rake-compiler-dock/issues/87
-# - note that we do this for "3.[2-9].*" to match rubies 3.2 and later
-# - and we use a "*" on the end instead of a digit to match prereleases like "3.3.0+0"
-RUN find /usr/local/rake-compiler/ruby/*/*/lib/ruby/3.[2-9].* -name rbconfig.rb | \
-    while read f ; do sed -i 's/\["EXTDLDFLAGS"\] = "/&-Wl,-flat_namespace /' $f ; done
+# for rubies which use `-bundle_loader` on darwin
+# - the upstream change: https://github.com/ruby/ruby/pull/6193
+# - how we got to this solution: https://github.com/rake-compiler/rake-compiler-dock/issues/87
+#
+# note that ruby/ruby#6193 was backported to 2.7.7, 3.0.5, and 3.1.3
+# - see https://github.com/rake-compiler/rake-compiler-dock/issues/134 for more notes
+RUN find /usr/local/rake-compiler/ruby/*/*/lib/ruby -name rbconfig.rb | while read f ; do \
+      sed -E -i 's/(\["EXTDLDFLAGS"\] = ".*)(-bundle_loader)/\1-Wl,-flat_namespace \2/' $f ; \
+    done
 <% end %>
 
 
