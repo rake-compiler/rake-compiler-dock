@@ -1,8 +1,17 @@
 # `rake-compiler/rake-compiler-dock` Changelog
 
-## next / unreleased
+## v1.8.0 / 2025-01-05
 
-- Base ruby updated to v3.1.6 (from v3.1.3).
+### Notable changes
+
+All versions of Ruby in the build containers are the latest patch version. #135 @flavorjones
+- `RUBY_CC_VERSION=3.4.1:3.3.5:3.2.6:3.1.6:3.0.7:2.7.8:2.6.10:2.5.9:2.4.10`
+
+### Other changes
+
+- Base ruby updated to v3.1.6 (from v3.1.3), which is now the default `rbenv` ruby.
+- (Darwin) Set `OSXCROSS_PKG_CONFIG_USE_NATIVE_VARIABLES=1` to successfully build the 3.0 series.
+- (Darwin) The linker flags include `-Wl,-flat_namespace` for 2.7, 3.0, 3.1, 3.2, 3.3, and 3.4 rubies. Previously this was only needed for 3.2+, but code backported to 2.7.7, 3.0.5, and 3.1.3 required it for those versions as well.
 
 
 ## v1.7.1 / 2025-01-03
