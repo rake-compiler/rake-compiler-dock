@@ -78,26 +78,26 @@ ENV RBENV_RUBIES="2.5.9 3.1.6 3.4.1"
 
 # Install the bootstrap rubies
 RUN bash -c " \
-      echo 'gem: --no-ri --no-rdoc --no-document' >> ~/.gemrc && \
-      export CFLAGS='-s -O3 -fno-fast-math -fPIC' && \
-      for v in ${RBENV_RUBIES} ; do \
-        rbenv install \$v -- --disable-install-doc ; \
-      done && \
-      find ${RBENV_ROOT} -type d -print0 | sudo xargs -0 chmod g+w \
-    "
+  echo 'gem: --no-ri --no-rdoc --no-document' >> ~/.gemrc && \
+  export CFLAGS='-s -O3 -fno-fast-math -fPIC' && \
+  for v in ${RBENV_RUBIES} ; do \
+    rbenv install \$v -- --disable-install-doc ; \
+  done && \
+  find ${RBENV_ROOT} -type d -print0 | sudo xargs -0 chmod g+w \
+"
 
 # Install rake-compiler and patch it to build and install static libraries for Linux rubies
 COPY build/patches /home/rubyuser/patches
 RUN bash -c " \
-      for v in ${RBENV_RUBIES} ; do \
-        rbenv shell \$v && \
-        gem install rake-compiler -v1.2.9 && \
-        cd ${RBENV_ROOT}/versions/\$v/lib/ruby/gems/*/gems/rake-compiler-1.2.9 && \
-        for patch in /home/rubyuser/patches/rake-compiler-1.2.9/*.patch ; do \
-          patch -p1 < \$patch ; \
-        done \
-      done \
-    "
+  for v in ${RBENV_RUBIES} ; do \
+    rbenv shell \$v && \
+    gem install rake-compiler -v1.2.9 && \
+    cd ${RBENV_ROOT}/versions/\$v/lib/ruby/gems/*/gems/rake-compiler-1.2.9 && \
+    for patch in /home/rubyuser/patches/rake-compiler-1.2.9/*.patch ; do \
+      patch -p1 < \$patch ; \
+    done \
+  done \
+"
 
 # Install rake-compiler's cross rubies in global dir instead of /root
 RUN sudo mkdir -p /usr/local/rake-compiler && \
@@ -134,16 +134,16 @@ strip = '-s' if platform !~ /darwin/
 
 xrubies_build_plan.each do |xrubies, bootstrap_ruby_version| %>
 RUN bash -c " \
-      rbenv shell <%= bootstrap_ruby_version %> && \
-      export CPPFLAGS='<%= "-D__USE_MINGW_ANSI_STDIO=1" if platform =~ /x64-mingw-ucrt/ %>' && \
-      export CFLAGS='-O1 -fno-omit-frame-pointer -fno-fast-math -fstack-protector-strong <%= strip %>' && \
-      export LDFLAGS='-pipe <%= strip %>' && \
-      <%= "export LIBS='-l:libssp.a' &&" if platform =~ /mingw/ %> \
-      <%= "export CC=#{target}-clang &&" if platform =~ /darwin/ %> \
-      export MAKE='make V=1' && \
-      rake-compiler cross-ruby VERSION=<%= xrubies %> HOST=<%= target %> && \
-      rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources \
-    "
+  rbenv shell <%= bootstrap_ruby_version %> && \
+  export CPPFLAGS='<%= "-D__USE_MINGW_ANSI_STDIO=1" if platform =~ /x64-mingw-ucrt/ %>' && \
+  export CFLAGS='-O1 -fno-omit-frame-pointer -fno-fast-math -fstack-protector-strong <%= strip %>' && \
+  export LDFLAGS='-pipe <%= strip %>' && \
+  <%= "export LIBS='-l:libssp.a' &&" if platform =~ /mingw/ %> \
+  <%= "export CC=#{target}-clang &&" if platform =~ /darwin/ %> \
+  export MAKE='make V=1' && \
+  rake-compiler cross-ruby VERSION=<%= xrubies %> HOST=<%= target %> && \
+  rm -rf ~/.rake-compiler/builds ~/.rake-compiler/sources \
+"
 <% end %>
 # "
 
