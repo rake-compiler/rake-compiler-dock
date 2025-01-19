@@ -1,5 +1,19 @@
 # `rake-compiler/rake-compiler-dock` Changelog
 
+## v1.9.0 / 2025-01-19
+
+### Changes
+
+- Bump Ruby 3.3 to v3.3.7 (from v3.3.5). #147 @flavorjones
+- The default `rbenv` ruby in the container is now Ruby v3.4.1 (previously the default was 3.1.6), which allows gems to drop Ruby 3.1 from their gemspecs. Fixes #145. #146 @flavorjones
+- Ruby 3.4.x, 3.3.x, 3.2.x, 3.1.x, and 3.0.x are cross-compiled using Ruby v3.4.1. #146 @flavorjones
+
+### CRuby container summary
+
+- native rubies: 3.4.1 (default), 3.1.6, 2.5.9
+- `RUBY_CC_VERSION=3.4.1:3.3.7:3.2.6:3.1.6:3.0.7:2.7.8:2.6.10:2.5.9:2.4.10`
+
+
 ## v1.8.0 / 2025-01-05
 
 ### Notable changes
@@ -12,6 +26,11 @@ All versions of Ruby in the build containers are the latest patch version. #135 
 - Base ruby updated to v3.1.6 (from v3.1.3), which is now the default `rbenv` ruby.
 - (Darwin) Set `OSXCROSS_PKG_CONFIG_USE_NATIVE_VARIABLES=1` to successfully build the 3.0 series.
 - (Darwin) The linker flags include `-Wl,-flat_namespace` for 2.7, 3.0, 3.1, 3.2, 3.3, and 3.4 rubies. Previously this was only needed for 3.2+, but code backported to 2.7.7, 3.0.5, and 3.1.3 required it for those versions as well.
+
+### CRuby container summary
+
+- native rubies: 3.1.6 (default), 2.5.9
+- `RUBY_CC_VERSION=3.4.1:3.3.5:3.2.6:3.1.6:3.0.7:2.7.8:2.6.10:2.5.9:2.4.10`
 
 
 ## v1.7.1 / 2025-01-03
