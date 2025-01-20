@@ -362,7 +362,7 @@ For example, if you wanted to only support Ruby 3.4 and 3.3, you might set this 
 ENV["RUBY_CC_VERSION"] = "3.4.1:3.3.7"
 ```
 
-In practice, though, hardcoding these versions is brittle because the patch versions in the container may very from release to release.
+In practice, though, hardcoding these versions is brittle because the patch versions in the container may vary from release to release.
 
 A more robust way to do this is to use `RakeCompilerDock.ruby_cc_version` which accepts an array of Ruby minor versions or patch version requirements.
 
