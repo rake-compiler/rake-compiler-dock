@@ -352,6 +352,44 @@ Other environment variables can be set or passed through to the container like t
 RakeCompilerDock.sh "rake cross native gem OPENSSL_VERSION=#{ENV['OPENSSL_VERSION']}"
 ```
 
+### Choosing specific Ruby versions to support
+
+If you only want to precompile for certain Ruby versions, you can specify those versions by overwriting the `RUBY_CC_VERSION` environment variable.
+
+For example, if you wanted to only support Ruby 3.4 and 3.3, you might set this variable to:
+
+``` ruby
+ENV["RUBY_CC_VERSION"] = "3.4.1:3.3.7"
+```
+
+In practice, though, hardcoding these versions is brittle because the patch versions in the container may very from release to release.
+
+A more robust way to do this is to use `RakeCompilerDock.ruby_cc_version` which accepts an array of Ruby minor versions or patch version requirements.
+
+``` ruby
+RakeCompilerDock.ruby_cc_version("3.3", "3.4")
+# => "3.4.1:3.3.7"
+
+RakeCompilerDock.ruby_cc_version("~> 3.4.0", "~> 3.3.0")
+# => "3.4.1:3.3.7"
+
+RakeCompilerDock.ruby_cc_version("~> 3.3")
+# => "3.4.1:3.3.7"
+```
+
+So you can either set the environment variable directly:
+
+``` ruby
+ENV["RUBY_CC_VERSION"] = RakeCompilerDock.ruby_cc_version("~> 3.1")
+```
+
+or do the same thing using the `set_ruby_cc_version` convenience method:
+
+``` ruby
+RakeCompilerDock.set_ruby_cc_version("~> 3.1") # equivalent to the above assignment
+```
+
+
 
 ## More information
 

@@ -73,5 +73,86 @@ module RakeCompilerDock
     Starter.exec(*args, &block)
   end
 
-  module_function :exec, :sh, :image_name
+  # Retrieve the cross-rubies that are available in the docker image. This can be used to construct
+  # a custom `RUBY_CC_VERSION` string that is valid.
+  #
+  # Returns a Hash<minor_version => corresponding_patch_version>
+  #
+  # For example:
+  #
+  #   RakeCompilerDock.cross_rubies
+  #   # => {
+  #   #      "3.4" => "3.4.1",
+  #   #      "3.3" => "3.3.5",
+  #   #      "3.2" => "3.2.6",
+  #   #      "3.1" => "3.1.6",
+  #   #      "3.0" => "3.0.7",
+  #   #      "2.7" => "2.7.8",
+  #   #      "2.6" => "2.6.10",
+  #   #      "2.5" => "2.5.9",
+  #   #      "2.4" => "2.4.10",
+  #   #    }
+  #
+  def cross_rubies
+    {
+      "3.4" => "3.4.1",
+      "3.3" => "3.3.7",
+      "3.2" => "3.2.6",
+      "3.1" => "3.1.6",
+      "3.0" => "3.0.7",
+      "2.7" => "2.7.8",
+      "2.6" => "2.6.10",
+      "2.5" => "2.5.9",
+      "2.4" => "2.4.10",
+    }
+  end
+
+  # Returns a valid RUBY_CC_VERSION string for the given requirements,
+  # where each `requirement` may be:
+  #
+  # - a String that matches the minor version exactly
+  # - a String that can be used as a Gem::Requirement constructor argument
+  # - a Gem::Requirement object
+  #
+  # Note that the returned string will contain versions sorted in descending order.
+  #
+  # For example:
+  #   RakeCompilerDock.ruby_cc_version("2.7", "3.4")
+  #   # => "3.4.1:2.7.8"
+  #
+  #   RakeCompilerDock.ruby_cc_version("~> 3.2")
+  #   # => "3.4.1:3.3.7:3.2.6"
+  #
+  #   RakeCompilerDock.ruby_cc_version(Gem::Requirement.new("~> 3.2"))
+  #   # => "3.4.1:3.3.7:3.2.6"
+  #
+  def ruby_cc_version(*requirements)
+    cross = cross_rubies
+    output = []
+
+    if requirements.empty?
+      output += cross.values
+    else
+      requirements.each do |requirement|
+        if cross[requirement]
+          output << cross[requirement]
+        else
+          requirement = Gem::Requirement.new(requirement) unless requirement.is_a?(Gem::Requirement)
+          versions = cross.values.find_all { |v| requirement.satisfied_by?(Gem::Version.new(v)) }
+          raise("No matching ruby version for requirement: #{requirement.inspect}") if versions.empty?
+          output += versions
+        end
+      end
+    end
+
+    output.uniq.sort.reverse.join(":")
+  end
+
+  # Set the environment variable `RUBY_CC_VERSION` to the value returned by `ruby_cc_version`,
+  # for the given requirements.
+  def set_ruby_cc_version(*requirements)
+    ENV["RUBY_CC_VERSION"] = ruby_cc_version(*requirements)
+  end
+
+  module_function :exec, :sh, :image_name, :cross_rubies, :ruby_cc_version, :set_ruby_cc_version
 end
