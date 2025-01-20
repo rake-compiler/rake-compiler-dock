@@ -1,5 +1,12 @@
 # `rake-compiler/rake-compiler-dock` Changelog
 
+## v1.9.1 / 2025-01-20
+
+### Features
+
+- Introduce `RakeCompilerDock.set_ruby_cc_version` to make it easier to set `RUBY_CC_VERSION` without hardcoding specific patch-level ruby versions. See the README for more deteails. #149, #150 @flavorjones
+
+
 ## v1.9.0 / 2025-01-19
 
 ### Changes
