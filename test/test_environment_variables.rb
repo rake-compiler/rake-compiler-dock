@@ -34,6 +34,8 @@ class TestEnvironmentVariables
         df = File.read(File.expand_path("../../Dockerfile.mri.erb", __FILE__))
         df =~ /^ENV RUBY_CC_VERSION=(.*)$/
         assert_equal $1, rcd_env['RUBY_CC_VERSION']
+
+        assert_equal RakeCompilerDock.ruby_cc_version, rcd_env['RUBY_CC_VERSION']
       end
 
       def test_RAKE_EXTENSION_TASK_NO_NATIVE
