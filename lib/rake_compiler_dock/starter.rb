@@ -41,6 +41,11 @@ module RakeCompilerDock
         user = options.fetch(:username){ current_user }
         group = options.fetch(:groupname){ current_group }
 
+        ruby_version = options[:ruby] || ENV['RCD_RUBY_VERSION']
+        rbenv_opts = if ruby_version
+          ["-e", "RBENV_VERSION=#{ruby_version}"]
+        end
+
         platforms(options).split(" ").each do |platform|
           image_name = container_image_name(options.merge(platform: platform))
 
@@ -73,6 +78,7 @@ module RakeCompilerDock
               "-e", "RCD_HOST_RUBY_PLATFORM=#{RUBY_PLATFORM}",
               "-e", "RCD_HOST_RUBY_VERSION=#{RUBY_VERSION}",
               "-e", "RCD_IMAGE=#{image_name}",
+              *rbenv_opts,
               "-w", make_valid_path(workdir),
               *docker_opts,
               image_name,
