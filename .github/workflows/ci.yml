@@ -48,6 +48,7 @@ jobs:
           - platform: aarch64-linux-gnu
             alias:    aarch64-linux
           - platform: aarch64-linux-musl
+          - platform: aarch64-mingw-ucrt
           - platform: arm-linux-gnu
             alias:    arm-linux
           - platform: arm-linux-musl

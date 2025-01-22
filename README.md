@@ -16,6 +16,7 @@ The following platforms are supported for cross-compilation by rake-compiler-doc
 
 - `aarch64-linux` and `aarch64-linux-gnu`
 - `aarch64-linux-musl`
+- `aarch64-mingw-ucrt`
 - `arm-linux` and `arm-linux-gnu`
 - `arm-linux-musl`
 - `arm64-darwin`
@@ -193,6 +194,7 @@ This can be done like this:
 PLATFORMS = %w[
   aarch64-linux-gnu
   aarch64-linux-musl
+  aarch64-mingw-ucrt
   arm-linux-gnu
   arm-linux-musl
   arm64-darwin
