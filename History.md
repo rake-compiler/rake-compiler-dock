@@ -1,5 +1,16 @@
 # `rake-compiler/rake-compiler-dock` Changelog
 
+## Unreleased
+
+- Drop support for Ruby 2.4, 2.5, and 2.6. #153 @ianks @flavorjones
+- Remove `rbenv` ruby version 2.5.9 from the build container. #153 @ianks @flavorjones
+
+### CRuby container summary
+
+- native rubies: 3.4.1 (default), 3.1.6
+- `RUBY_CC_VERSION=3.4.1:3.3.7:3.2.6:3.1.6:3.0.7:2.7.8`
+
+
 ## v1.9.1 / 2025-01-20
 
 ### Features

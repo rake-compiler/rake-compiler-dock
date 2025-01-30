@@ -2,7 +2,7 @@
 
 **Easy to use and reliable cross compiler environment for building Windows, Linux, Mac and JRuby binary gems.**
 
-It provides cross compilers and Ruby environments for 2.4 and newer versions of the [RubyInstaller](http://rubyinstaller.org/) and Linux runtime environments.
+It provides cross compilers and Ruby environments for 2.6 and newer versions of the [RubyInstaller](http://rubyinstaller.org/) and Linux runtime environments.
 They are prepared for use with [rake-compiler](https://github.com/rake-compiler/rake-compiler).
 It is used by [many gems with C or JRuby extentions](https://github.com/rake-compiler/rake-compiler-dock/wiki/Projects-using-rake-compiler-dock).
 
@@ -72,8 +72,6 @@ Ruby version 3.1 and later ship with a sufficient Rubygems version. For earlier 
 - ruby: "3.0", rubygems: "3.5.5" # or possibly higher
 - ruby: "2.7", rubygems: "3.4.22"
 - ruby: "2.6", rubygems: "3.4.22"
-- ruby: "2.5", rubygems: "3.3.26"
-- ruby: "2.4", rubygems: "3.3.26"
 
 **It's strongly suggested that you use rake-compiler v1.2.7 or later to build `linux-musl` and/or `linux-gnu` native gems.** That version of rake-compiler sets `required_rubygems_version` automatically in the native platform gems' gemspecs.
 

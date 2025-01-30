@@ -74,7 +74,7 @@ ENV BASH_ENV=/etc/rubybashrc
 ##
 USER rubyuser
 
-ENV RBENV_RUBIES="2.5.9 3.1.6 3.4.1"
+ENV RBENV_RUBIES="3.1.6 3.4.1"
 
 # Install the bootstrap rubies
 RUN bash -c " \
@@ -106,7 +106,6 @@ RUN sudo mkdir -p /usr/local/rake-compiler && \
 
 <%
 #
-# Build ruby versions prior to ruby2_keywords using ruby-2.5
 # Build ruby versions with ruby2_keywords using ruby-3.x
 #
 # Note that parallel builds of ruby with make flag `-j` are often flaky, see
@@ -120,12 +119,10 @@ xrubies_build_plan = if platform =~ /x64-mingw-ucrt/
 elsif platform =~ /x64-mingw32/
   [
     # Rubyinstaller prior to 3.1 is platform x64-mingw32
-    ["2.6.10:2.5.9:2.4.10", "2.5.9"],
     ["3.0.7:2.7.8", "3.1.6"],
   ]
 else
   [
-    ["2.6.10:2.5.9:2.4.10", "2.5.9"],
     ["2.7.8", "3.1.6"],
     ["3.4.1:3.3.7:3.2.6:3.1.6:3.0.7", "3.4.1"],
   ]
@@ -160,14 +157,9 @@ RUN find /usr/local/rake-compiler/ruby/*linux*/ -name mkmf.rb | while read f ; d
 <% if platform =~ /mingw/ %>
 # RubyInstaller doesn't install libgcc -> link it static.
 RUN find /usr/local/rake-compiler/ruby/*mingw*/ -name rbconfig.rb | while read f ; do sed -i 's/."LDFLAGS". = "/&-static-libgcc /' $f ; done
-# Raise Windows-API to Vista (affects ruby < 2.6 only)
-RUN find /usr/local/rake-compiler/ruby -name rbconfig.rb | while read f ; do sed -i 's/0x0501/0x0600/' $f ; done
 # Don't link to static libruby
 RUN find /usr/local/rake-compiler/ruby -name lib*-ruby*.dll.a | while read f ; do n=`echo $f | sed s/.dll//` ; mv $f $n ; done
 <% end %>
-
-# ruby-2.5 links to libcrypt, which isn't necessary for extensions
-RUN find /usr/local/rake-compiler/ruby -name rbconfig.rb | while read f ; do sed -i 's/-lcrypt//' $f ; done
 
 <% if platform =~ /darwin/ %>
 # for rubies which use `-bundle_loader` on darwin
@@ -226,6 +218,6 @@ COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 
 RUN bash -c "rbenv global 3.4.1"
 
-ENV RUBY_CC_VERSION=3.4.1:3.3.7:3.2.6:3.1.6:3.0.7:2.7.8:2.6.10:2.5.9:2.4.10
+ENV RUBY_CC_VERSION=3.4.1:3.3.7:3.2.6:3.1.6:3.0.7:2.7.8
 
 CMD bash
