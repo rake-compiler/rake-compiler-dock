@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.summary       = "C extension for testing rake-compiler-dock"
   spec.description   = "This gem has no real use other than testing builds of binary gems."
   spec.homepage      = "https://github.com/rake-compiler/rake-compiler-dock"
-  spec.required_ruby_version = ">= 2.0.0"
+  spec.required_ruby_version = ">= 2.7.0"
   spec.license = "MIT"
 
   spec.files = [
