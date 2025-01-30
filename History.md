@@ -1,5 +1,9 @@
 # `rake-compiler/rake-compiler-dock` Changelog
 
+## Unreleased
+
+- Drop support for Ruby 2.4 and 2.5.
+
 ## v1.9.1 / 2025-01-20
 
 ### Features

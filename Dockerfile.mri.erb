@@ -120,12 +120,12 @@ xrubies_build_plan = if platform =~ /x64-mingw-ucrt/
 elsif platform =~ /x64-mingw32/
   [
     # Rubyinstaller prior to 3.1 is platform x64-mingw32
-    ["2.6.10:2.5.9:2.4.10", "2.5.9"],
+    ["2.6.10", "2.5.9"],
     ["3.0.7:2.7.8", "3.1.6"],
   ]
 else
   [
-    ["2.6.10:2.5.9:2.4.10", "2.5.9"],
+    ["2.6.10", "2.5.9"],
     ["2.7.8", "3.1.6"],
     ["3.4.1:3.3.7:3.2.6:3.1.6:3.0.7", "3.4.1"],
   ]
@@ -226,6 +226,6 @@ COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 
 RUN bash -c "rbenv global 3.4.1"
 
-ENV RUBY_CC_VERSION=3.4.1:3.3.7:3.2.6:3.1.6:3.0.7:2.7.8:2.6.10:2.5.9:2.4.10
+ENV RUBY_CC_VERSION=3.4.1:3.3.7:3.2.6:3.1.6:3.0.7:2.7.8:2.6.10
 
 CMD bash
