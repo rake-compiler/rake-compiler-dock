@@ -18,6 +18,8 @@ else
   puts "cc --version: #{ %x[#{CONFIG['CC']} --version].lines.first}"
   puts "-"*70
 
+  $CFLAGS << " -Wall -Werror"
+
   have_func('rb_thread_call_without_gvl', 'ruby/thread.h') ||
       raise("rb_thread_call_without_gvl() not found")
 
