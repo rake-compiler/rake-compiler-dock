@@ -2,7 +2,7 @@ diff --git a/tasks/bin/cross-ruby.rake b/tasks/bin/cross-ruby.rake
 index 8317a2a3..8ed21718 100644
 --- a/tasks/bin/cross-ruby.rake
 +++ b/tasks/bin/cross-ruby.rake
-@@ -116,11 +116,30 @@
+@@ -116,11 +116,31 @@
          "--host=#{mingw_host}",
          "--target=#{mingw_target}",
          "--build=#{RUBY_BUILD}",
@@ -12,6 +12,7 @@ index 8317a2a3..8ed21718 100644
 +        'ac_cv_lib_z_uncompress=no',
 +        'ac_cv_lib_crypt_crypt=no',
 +        'ac_cv_func_crypt_r=no',
++        'extra_warnflags=-Wno-shorten-64-to-32 -Wno-dll-attribute-on-redeclaration',
          '--disable-install-doc',
          '--with-ext=',
        ]
