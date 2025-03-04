@@ -229,7 +229,7 @@ Please note, that parallel builds only work reliable, if the specific platform g
     task 'prepare' do
       require 'rake_compiler_dock'
       require 'io/console'
-      sh "bundle package --all"
+      sh "bundle config set cache_all true"
       sh "cp ~/.gem/gem-*.pem build/gem/ || true"
       ENV["GEM_PRIVATE_KEY_PASSPHRASE"] = STDIN.getpass("Enter passphrase of gem signature key: ")
     end
