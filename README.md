@@ -205,7 +205,7 @@ PLATFORMS = %w[
 ]
 task 'gem:native' do
   require 'rake_compiler_dock'
-  sh "bundle package --all"   # Avoid repeated downloads of gems by using gem files from the host.
+  sh "bundle config set cache_all true"   # Avoid repeated downloads of gems by using gem files from the host.
   PLATFORMS.each do |plat|
     RakeCompilerDock.sh "bundle --local && rake native:#{plat} gem", platform: plat
   end
