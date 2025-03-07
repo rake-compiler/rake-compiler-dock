@@ -205,7 +205,8 @@ PLATFORMS = %w[
 ]
 task 'gem:native' do
   require 'rake_compiler_dock'
-  sh "bundle package --all"   # Avoid repeated downloads of gems by using gem files from the host.
+  sh "bundle config set cache_all true"   # Avoid repeated downloads of gems by using gem files from the host.
+  sh "bundle package"
   PLATFORMS.each do |plat|
     RakeCompilerDock.sh "bundle --local && rake native:#{plat} gem", platform: plat
   end
@@ -229,7 +230,8 @@ Please note, that parallel builds only work reliable, if the specific platform g
     task 'prepare' do
       require 'rake_compiler_dock'
       require 'io/console'
-      sh "bundle package --all"
+      sh "bundle config set cache_all true"
+      sh "bundle package"
       sh "cp ~/.gem/gem-*.pem build/gem/ || true"
       ENV["GEM_PRIVATE_KEY_PASSPHRASE"] = STDIN.getpass("Enter passphrase of gem signature key: ")
     end
