@@ -85,6 +85,19 @@ class TestEnvironmentVariables
     end
   end
 
+  class UsingWrapperSpecifyingRuby < UsingWrapper
+    include Common
+
+    def invocation(command)
+      idir = File.join(File.dirname(__FILE__), '../lib')
+      "RCD_RUBY_VERSION=3.1.6 RCD_PLATFORM=#{TEST_PLATFORM} RCD_RUBYVM=#{IS_JRUBY ? 'jruby' : 'mri'} #{RbConfig::CONFIG['RUBY_INSTALL_NAME']} -I#{idir.inspect} bin/rake-compiler-dock bash -c '#{command}'"
+    end
+
+    def test_RUBY_VERSION
+      assert_equal "3.1.6", rcd_env['RBENV_VERSION']
+    end
+  end
+
   class AsIfContinuousIntegration < Test::Unit::TestCase
     include Common
 
