@@ -211,6 +211,16 @@ RUN printf "1\n" | update-alternatives --config <%= target %>-gcc && \
     printf "1\n" | update-alternatives --config <%= target %>-g++
 <% end %>
 
+<% if platform =~ /aarch64-mingw/ %>
+# Fool libtool to allow building a shared library although linking to libclang_rt.builtins-aarch64.a
+#
+# Linker option "-llibclang_rt.builtins-aarch64.a" is required on Windows on ARM when compiling C++ and when clang is called with -nostdlib (due to be invoked by libtool).
+# Unfortunately libtool then forces a static build.
+# This is a ugly hack to make libtool beleave that the library is a DLL instead of an archive and to allow building a DLL instand.
+#
+RUN sudo cp /llvm-mingw-20250114-ucrt-ubuntu-20.04-<%= RUBY_PLATFORM[/^\w+/] %>/aarch64-w64-mingw32/bin/libc++.dll /llvm-mingw-20250114-ucrt-ubuntu-20.04-<%= RUBY_PLATFORM[/^\w+/] %>/aarch64-w64-mingw32/lib/libclang_rt.builtins-aarch64.0
+<% end %>
+
 <% if platform =~ /darwin/ %>
 # Install wrapper around strip to re-sign binaries (ad-hoc signature)
 COPY build/strip_wrapper_codesign /root/
