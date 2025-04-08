@@ -27,9 +27,9 @@ RUN dpkg -i /debs/*.deb
 <% elsif platform =~ /aarch64-mingw-ucrt/ %>
 RUN wget https://github.com/mstorsjo/llvm-mingw/releases/download/20250114/llvm-mingw-20250114-ucrt-ubuntu-20.04-<%= RUBY_PLATFORM[/^\w+/] %>.tar.xz && \
     tar xf llvm-mingw*.tar.xz && \
-    export MINGW_PATH=`ls -d llvm-mingw-*/` && \
-    echo "export PATH=`pwd`/$MINGW_PATH/bin:\$PATH" >> /etc/rubybashrc && \
-    rm -r $MINGW_PATH/bin/i686-w64* $MINGW_PATH/bin/armv7-w64* $MINGW_PATH/bin/x86_64-w64* $MINGW_PATH/i686-w64* $MINGW_PATH/armv7-w64* $MINGW_PATH/x86_64-w64*
+    mv `ls -d llvm-mingw-*/` /llvm-mingw && \
+    echo "export PATH=/llvm-mingw/bin:\$PATH" >> /etc/rubybashrc && \
+    rm -r /llvm-mingw/bin/i686-w64* /llvm-mingw/bin/armv7-w64* /llvm-mingw/bin/x86_64-w64* /llvm-mingw/i686-w64* /llvm-mingw/armv7-w64* /llvm-mingw/x86_64-w64*
 
 <% elsif platform =~ /linux-musl/ %>
 COPY build/mk_musl_cross.sh /tmp
@@ -218,7 +218,7 @@ RUN printf "1\n" | update-alternatives --config <%= target %>-gcc && \
 # Unfortunately libtool then forces a static build.
 # This is a ugly hack to make libtool beleave that the library is a DLL instead of an archive and to allow building a DLL instand.
 #
-RUN sudo cp /llvm-mingw-20250114-ucrt-ubuntu-20.04-<%= RUBY_PLATFORM[/^\w+/] %>/aarch64-w64-mingw32/bin/libc++.dll /llvm-mingw-20250114-ucrt-ubuntu-20.04-<%= RUBY_PLATFORM[/^\w+/] %>/aarch64-w64-mingw32/lib/libclang_rt.builtins-aarch64.0
+RUN sudo cp /llvm-mingw/aarch64-w64-mingw32/bin/libc++.dll /llvm-mingw/aarch64-w64-mingw32/lib/libclang_rt.builtins-aarch64.0
 <% end %>
 
 <% if platform =~ /darwin/ %>
