@@ -197,6 +197,18 @@ RUN printf "1\n" | update-alternatives --config <%= target %>-gcc && \
 COPY build/strip_wrapper_codesign /root/
 RUN mv /opt/osxcross/target/bin/<%= target %>-strip /opt/osxcross/target/bin/<%= target %>-strip.bin && \
     ln /root/strip_wrapper_codesign /opt/osxcross/target/bin/<%= target %>-strip
+
+# Install mig which is a Macos specific RPC code generator, which is part of xcode
+RUN apt-get -y update && \
+    apt-get install -y bison flex && \
+    rm -rf /var/lib/apt/lists/*
+RUN git clone --branch=cross_platform https://github.com/markmentovai/bootstrap_cmds && \
+    cd bootstrap_cmds && \
+    autoreconf --install && \
+    sh configure && \
+    make && \
+    sed -E -i 's/^cppflags=(.*)/cppflags=(\1 "-D<%= platform =~ /arm64/ ? "__arm64__" : "__x86_64__" %>" "-I\/opt\/osxcross\/target\/SDK\/MacOSX11.1.sdk\/usr\/include")/' migcom.tproj/mig.sh && \
+    sudo make install
 <% end %>
 
 <% if platform =~ /arm64-darwin/ %>
