@@ -1,0 +1,8 @@
+#include <mach/std_types.defs>
+#include <mach/mach_types.defs>
+
+subsystem mig_test_ipc 1;
+
+routine mig_test_call(
+                                server_port     : mach_port_t;
+                out             returnvalue     : int);
