@@ -9,12 +9,12 @@ module RakeCompilerDock
         if platform
           cache_version = RakeCompilerDock::IMAGE_VERSION.split(".").take(2).join(".")
           cache = File.join("cache", cache_version, platform)
-          "docker buildx build --cache-to=type=local,dest=#{cache},mode=max --cache-from=type=local,src=#{cache} --load"
+          "docker buildx build --cache-to=type=local,dest=#{cache},mode=max --cache-from=type=local,src=#{cache} --progress=plain"
         else
           return nil
         end
       else
-        ENV['RCD_DOCKER_BUILD'] || "docker buildx build"
+        ENV['RCD_DOCKER_BUILD'] || "docker buildx build --progress=plain"
       end
       Shellwords.split(cmd)
     end
@@ -23,7 +23,7 @@ module RakeCompilerDock
     #
     # The layers will be reused in subsequent builds, even if they run in parallel.
     def docker_build(filename, tag: nil, output: false, platform: )
-      cmd = docker_build_cmd
+      cmd = docker_build_cmd(platform)
       return if cmd.nil?
       tag_args = ["-t", tag] if tag
       push_args = ["--push"] if output == 'push'
