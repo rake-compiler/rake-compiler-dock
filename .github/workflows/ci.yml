@@ -44,6 +44,25 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+        platform:
+          - aarch64-linux-gnu
+          - aarch64-linux-musl
+          - aarch64-mingw-ucrt
+          - arm-linux-gnu
+          - arm-linux-musl
+          - arm64-darwin
+          - jruby
+          - x64-mingw-ucrt
+          - x64-mingw32
+          - x86-linux-gnu
+          - x86-linux-musl
+          - x86-mingw32
+          - x86_64-darwin
+          - x86_64-linux-gnu
+          - x86_64-linux-musl
         include:
           - platform: aarch64-linux-gnu
             alias:    aarch64-linux
@@ -66,7 +85,7 @@ jobs:
           - platform: x86_64-linux-gnu
             alias:    x86_64-linux
           - platform: x86_64-linux-musl
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
@@ -78,13 +97,22 @@ jobs:
         uses: actions/cache@v4
         with:
           path: tmp/build-cache
-          key: ${{ runner.os }}-${{ matrix.platform }}-buildx-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-${{ matrix.platform }}-buildx
-      - name: Build docker image
+          key: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-buildx-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-buildx
+          enableCrossOsArchive: true
+      - name: Change docker to a cache-able driver
         run: |
           docker buildx create --driver docker-container --use
-          bundle exec rake build:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new --load"
-          docker images
+      - name: Build docker image
+        if: runner.arch == 'X64'
+        run: |
+          bundle exec rake build:x86:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new"
+      - name: Build docker image
+        if: runner.arch == 'ARM64'
+        run: |
+          bundle exec rake build:arm:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache
@@ -101,6 +129,7 @@ jobs:
           bundle exec rake gem:${{ matrix.platform }}
 
       - name: Upload native gem
+        if: runner.arch == 'X64'
         uses: actions/upload-artifact@v4
         with:
           name: gem-${{ matrix.platform }}
@@ -116,7 +145,7 @@ jobs:
           bundle exec rake clean clobber
           bundle exec rake gem:${{ matrix.platform }}
 
-      - if: matrix.static
+      - if: matrix.static && runner.arch == 'X64'
         name: Upload static native gem
         uses: actions/upload-artifact@v4
         with:
@@ -131,7 +160,7 @@ jobs:
           bundle exec rake clean clobber
           bundle exec rake gem:${{ matrix.alias }}
 
-      - if: matrix.alias
+      - if: matrix.alias && runner.arch == 'X64'
         name: Upload native gem ${{ matrix.alias }}
         uses: actions/upload-artifact@v4
         with:
