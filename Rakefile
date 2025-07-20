@@ -174,9 +174,23 @@ task :update_lists do
 end
 
 namespace :release do
-  desc "Push all docker images on #{host_platforms.map(&:first).join(",")}"
-  task :images => "build:all" do
+  host_pl = host_platforms.map(&:first).join(",")
+
+  desc "Push image for JRuby on #{host_pl}"
+  task :jruby => ["build:x86:jruby", "build:arm:jruby"] do
     build_jruby_images(host_platforms, output: 'push')
-    build_mri_images(platforms, host_platforms, output: 'push')
+  end
+
+  desc "Push all docker images on #{host_pl}"
+  multitask :images => :jruby
+
+  platforms.each do |platform, target|
+    desc "Push image for platform #{platform} on #{host_pl}"
+    task platform => ["build:x86:#{platform}", "build:arm:#{platform}"] do
+      build_mri_images([platform], host_platforms, output: 'push')
+    end
+
+    desc "Push all docker images on #{host_pl}"
+    multitask :images => platform
   end
 end

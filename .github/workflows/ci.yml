@@ -99,6 +99,7 @@ jobs:
           path: tmp/build-cache
           key: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-buildx-${{ github.sha }}
           restore-keys: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-buildx
+          enableCrossOsArchive: true
       - name: Change docker to a cache-able driver
         run: |
           docker buildx create --driver docker-container --use
