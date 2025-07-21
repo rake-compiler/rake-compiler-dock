@@ -112,8 +112,6 @@ jobs:
         run: |
           bundle exec ruby -e ' \
             require "rake_compiler_dock"; \
-            print "image_name_opt=-t "; \
-            puts RakeCompilerDock::Starter.container_image_name(:platform => %q(${{matrix.platform}})); \
             print "snapshot_name_opt=-t "; \
             puts RakeCompilerDock::Starter.container_image_name(:platform => %q(${{matrix.platform}}), :version => %q(snapshot)); \
             if %q(${{matrix.platform}}).end_with?("-gnu"); \
@@ -121,7 +119,7 @@ jobs:
               puts RakeCompilerDock::Starter.container_image_name(:platform => %q(${{matrix.platform}}), :version => %q(snapshot)).chomp("-gnu"); \
             end \
           ' | tee -a $GITHUB_OUTPUT
-      - name: Build docker image
+      - name: Use cache and push docker image
         env:
           RCD_DOCKER_BUILD: docker buildx build --cache-from=type=local,src=tmp/build-cache-X64 --cache-from=type=local,src=tmp/build-cache-ARM64 --cache-to=type=local,dest=tmp/build-cache-new ${{steps.rcd_config.outputs.snapshot_name_opt}} ${{steps.rcd_config.outputs.generic_linux_snapshot_name_opt}}
         run: |
