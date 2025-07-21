@@ -9,6 +9,58 @@ on:
 
 jobs:
   build:
+    name: build native
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+        platform:
+          - aarch64-linux-gnu
+          - aarch64-linux-musl
+          - aarch64-mingw-ucrt
+          - arm-linux-gnu
+          - arm-linux-musl
+          - arm64-darwin
+          - jruby
+          - x64-mingw-ucrt
+          - x64-mingw32
+          - x86-linux-gnu
+          - x86-linux-musl
+          - x86-mingw32
+          - x86_64-darwin
+          - x86_64-linux-gnu
+          - x86_64-linux-musl
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-buildx-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-buildx
+          enableCrossOsArchive: true
+      - name: Change docker to a cache-able driver
+        run: |
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+
+  push:
+    name: push
+    needs: build
     strategy:
       fail-fast: false
       matrix:
@@ -60,8 +112,6 @@ jobs:
         run: |
           bundle exec ruby -e ' \
             require "rake_compiler_dock"; \
-            print "image_name_opt=-t "; \
-            puts RakeCompilerDock::Starter.container_image_name(:platform => %q(${{matrix.platform}})); \
             print "snapshot_name_opt=-t "; \
             puts RakeCompilerDock::Starter.container_image_name(:platform => %q(${{matrix.platform}}), :version => %q(snapshot)); \
             if %q(${{matrix.platform}}).end_with?("-gnu"); \
@@ -69,7 +119,7 @@ jobs:
               puts RakeCompilerDock::Starter.container_image_name(:platform => %q(${{matrix.platform}}), :version => %q(snapshot)).chomp("-gnu"); \
             end \
           ' | tee -a $GITHUB_OUTPUT
-      - name: Build docker image
+      - name: Use cache and push docker image
         env:
           RCD_DOCKER_BUILD: docker buildx build --cache-from=type=local,src=tmp/build-cache-X64 --cache-from=type=local,src=tmp/build-cache-ARM64 --cache-to=type=local,dest=tmp/build-cache-new ${{steps.rcd_config.outputs.snapshot_name_opt}} ${{steps.rcd_config.outputs.generic_linux_snapshot_name_opt}}
         run: |

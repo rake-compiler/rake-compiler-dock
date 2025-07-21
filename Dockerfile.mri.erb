@@ -1,6 +1,8 @@
 <% image = "ubuntu:20.04" %>
 FROM <%= image %>
 
+ARG TARGETPLATFORM
+
 ##
 ## Install required base packages for compiling ruby
 ##
@@ -25,11 +27,23 @@ COPY --from=larskanis/mingw64-ucrt:20.04 \
 RUN dpkg -i /debs/*.deb
 
 <% elsif platform =~ /aarch64-mingw-ucrt/ %>
-RUN wget https://github.com/mstorsjo/llvm-mingw/releases/download/20250114/llvm-mingw-20250114-ucrt-ubuntu-20.04-<%= RUBY_PLATFORM[/^\w+/] %>.tar.xz && \
+
+RUN echo $TARGETPLATFORM
+RUN <<EOF
+if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
+    DOWNLOAD_PLATFORM="x86_64";
+elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
+    DOWNLOAD_PLATFORM="aarch64";
+else
+    echo "Unsupported platform $TARGETPLATFORM";
+    exit 1;
+fi &&
+wget https://github.com/mstorsjo/llvm-mingw/releases/download/20250114/llvm-mingw-20250114-ucrt-ubuntu-20.04-$DOWNLOAD_PLATFORM.tar.xz && \
     tar xf llvm-mingw*.tar.xz && \
     mv `ls -d llvm-mingw-*/` /llvm-mingw && \
     echo "export PATH=/llvm-mingw/bin:\$PATH" >> /etc/rubybashrc && \
     rm -r /llvm-mingw/bin/i686-w64* /llvm-mingw/bin/armv7-w64* /llvm-mingw/bin/x86_64-w64* /llvm-mingw/i686-w64* /llvm-mingw/armv7-w64* /llvm-mingw/x86_64-w64*
+EOF
 
 <% elsif platform =~ /linux-musl/ %>
 COPY build/mk_musl_cross.sh /tmp

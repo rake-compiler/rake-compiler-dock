@@ -96,27 +96,20 @@ jobs:
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
         with:
-          path: tmp/build-cache
+          path: tmp/build-cache-${{ runner.arch }}
           key: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-buildx-${{ github.sha }}
           restore-keys: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-buildx
           enableCrossOsArchive: true
       - name: Change docker to a cache-able driver
         run: |
           docker buildx create --driver docker-container --use
-      - name: Build docker image
-        if: runner.arch == 'X64'
-        run: |
-          bundle exec rake build:x86:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new"
-      - name: Build docker image
-        if: runner.arch == 'ARM64'
-        run: |
-          bundle exec rake build:arm:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,src=tmp/build-cache --cache-to=type=local,dest=tmp/build-cache-new"
+          bundle exec rake build:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,dest=tmp/build-cache-new"
       - name: Show docker images
         run: docker images
       - name: Update and prune docker buildx layer cache
         run: |
-          rm -rf tmp/build-cache
-          mv tmp/build-cache-new tmp/build-cache
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
 
       - name: Test the generated image
         run: bundle exec rake test TEST_PLATFORM=${{ matrix.platform }}
