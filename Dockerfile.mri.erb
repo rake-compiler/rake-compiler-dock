@@ -174,7 +174,7 @@ RUN bash -c " \
   export CPPFLAGS='<%= "-D__USE_MINGW_ANSI_STDIO=1" if platform =~ /x64-mingw-ucrt/ %>' && \
   export CFLAGS='-O1 -fno-omit-frame-pointer -fno-fast-math -fstack-protector-strong <%= strip %>' && \
   export LDFLAGS='-pipe <%= strip %>' && \
-  <%= "export LIBS='-l:libssp.a' &&" if platform =~ /mingw/ %> \
+  <%= "export LIBS='-l:libssp.a -lpthread' &&" if platform =~ /mingw/ %> \
   <%= "export CC=#{target}-clang &&" if platform =~ /darwin/ %> \
   export MAKE='make V=1' && \
   rake-compiler cross-ruby VERSION=<%= xrubies %> HOST=<%= target %> && \
