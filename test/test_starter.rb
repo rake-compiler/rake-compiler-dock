@@ -38,6 +38,12 @@ class TestStarter < Test::Unit::TestCase
     with_env({"RAKE_COMPILER_DOCK_IMAGE" => "env-var-value"}) do
       assert_equal("env-var-value", Starter.container_image_name)
     end
+    with_env({"CONTAINER_REGISTRY" => "env-var-value"}) do
+      assert_match(/env-var-value\//, Starter.container_image_name(platform: "x64-mingw-ucrt"))
+    end
+    with_env({"RCD_IMAGE_VERSION" => "env-var-value"}) do
+      assert_match(/:env-var-value-/, Starter.container_image_name(platform: "x64-mingw-ucrt"))
+    end
 
     # with image option
     assert_equal("option-value", Starter.container_image_name({:image => "option-value"}))
