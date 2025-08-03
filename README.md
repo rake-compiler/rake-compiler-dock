@@ -315,6 +315,7 @@ OCI images snapshotted from `main` are published weekly to Github Container Regi
 - `ghcr.io/rake-compiler/rake-compiler-dock-image:snapshot-mri-x86_64-linux-gnu`
 
 These images are intended for integration testing. They may not work properly and should not be considered production ready.
+Snapshot images can be used by setting `RCD_IMAGE_VERSION` environment variable.
 
 
 ## Environment Variables
@@ -330,6 +331,9 @@ The following variables are recognized by rake-compiler-dock:
     It is ignored when `rubyvm` is set to `:jruby`.
 * `RCD_IMAGE` - The docker image that is downloaded and started.
     Defaults to "ghcr.io/rake-compiler/rake-compiler-dock-image:IMAGE_VERSION-PLATFORM" with an image version that is determined by the gem version.
+* `RCD_IMAGE_VERSION` - The docker image version that is downloaded and started.
+    Defaults to the version of the rake-compiler-dock gem in use.
+    Can be set to `snapshot` in order to use the latest images from main branch.
 
 The following variables are passed through to the docker container without modification:
 

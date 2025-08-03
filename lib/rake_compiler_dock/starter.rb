@@ -167,7 +167,7 @@ module RakeCompilerDock
 
           "%s/rake-compiler-dock-image:%s-%s%s" % [
             container_registry,
-            options.fetch(:version) { IMAGE_VERSION },
+            options.fetch(:version) { image_version },
             container_rubyvm(options),
             container_jrubyvm?(options) ? "" : "-#{options.fetch(:platform)}",
           ]
@@ -176,6 +176,10 @@ module RakeCompilerDock
 
       def container_registry
         ENV['CONTAINER_REGISTRY'] || "ghcr.io/rake-compiler"
+      end
+
+      def image_version
+        ENV['RCD_IMAGE_VERSION'] || IMAGE_VERSION
       end
 
       def container_rubyvm(options={})

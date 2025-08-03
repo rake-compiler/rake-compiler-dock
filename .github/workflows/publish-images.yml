@@ -107,21 +107,10 @@ jobs:
           registry: ghcr.io
           username: ${{github.actor}}
           password: ${{secrets.GITHUB_TOKEN}}
-      - name: Generate docker image names
-        id: rcd_config
-        run: |
-          bundle exec ruby -e ' \
-            require "rake_compiler_dock"; \
-            print "snapshot_name_opt=-t "; \
-            puts RakeCompilerDock::Starter.container_image_name(:platform => %q(${{matrix.platform}}), :version => %q(snapshot)); \
-            if %q(${{matrix.platform}}).end_with?("-gnu"); \
-              print "generic_linux_snapshot_name_opt=-t "; \
-              puts RakeCompilerDock::Starter.container_image_name(:platform => %q(${{matrix.platform}}), :version => %q(snapshot)).chomp("-gnu"); \
-            end \
-          ' | tee -a $GITHUB_OUTPUT
       - name: Use cache and push docker image
         env:
-          RCD_DOCKER_BUILD: docker buildx build --cache-from=type=local,src=tmp/build-cache-X64 --cache-from=type=local,src=tmp/build-cache-ARM64 --cache-to=type=local,dest=tmp/build-cache-new ${{steps.rcd_config.outputs.snapshot_name_opt}} ${{steps.rcd_config.outputs.generic_linux_snapshot_name_opt}}
+          RCD_IMAGE_VERSION: snapshot
+          RCD_DOCKER_BUILD: docker buildx build --cache-from=type=local,src=tmp/build-cache-X64 --cache-from=type=local,src=tmp/build-cache-ARM64 --cache-to=type=local,dest=tmp/build-cache-new
         run: |
           docker buildx create --driver docker-container --use
           bundle exec rake release:${{matrix.platform}}
