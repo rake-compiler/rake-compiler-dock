@@ -13,7 +13,7 @@ module RakeCompilerDock
     end
 
     def hfile
-      "History.md"
+      "CHANGELOG.md"
     end
 
     def headline

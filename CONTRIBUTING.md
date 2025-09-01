@@ -6,7 +6,7 @@ This document is intended for the rake-compiler-dock contributors.
 
 - prep
   - [ ] make sure CI is green!
-  - [ ] update `History.md` and `lib/rake_compiler_dock/version.rb`
+  - [ ] update `CHANGELOG.md` and `lib/rake_compiler_dock/version.rb`
   - [ ] commit and create a git tag
 - option 1: build locally
   - build
