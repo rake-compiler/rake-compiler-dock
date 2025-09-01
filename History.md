@@ -2,13 +2,19 @@
 
 ## Unreleased
 
+- Add support for ARM64 host images and release rake-compiler-dock host images for ARM64 and x86_64. #140
+- Add new target platform `aarch64-mingw-ucrt` aka Windows on ARM. #152
+- Install `mig` which is a Macos specific RPC code generator. #155
+- Add `RCD_IMAGE_VERSION` env var to easily set image version or `snapshot`. #163
+- Disable `rpath` in cross compiled C extensions, since it is only valid in the build environment. #165
 - Drop support for Ruby 2.4, 2.5, and 2.6. #153 @ianks @flavorjones
 - Remove `rbenv` ruby version 2.5.9 from the build container. #153 @ianks @flavorjones
+- Rename `History.md` to `CHANGELOG.md` which is more common.
 
 ### CRuby container summary
 
-- native rubies: 3.4.1 (default), 3.1.6
-- `RUBY_CC_VERSION=3.4.1:3.3.7:3.2.6:3.1.6:3.0.7:2.7.8`
+- native rubies: 3.4.5 (default), 3.1.7
+- `RUBY_CC_VERSION=3.4.5:3.3.9:3.2.9:3.1.7:3.0.7:2.7.8`
 
 
 ## v1.9.1 / 2025-01-20
