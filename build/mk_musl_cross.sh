@@ -29,7 +29,7 @@ GCC_CONFIG += --disable-libquadmath --disable-decimal-float
 GCC_CONFIG += --disable-multilib
 EOF
 
-make -j$(nproc) install
+make -j$(nproc) install LINUX_HEADERS_SITE=http://mirrors.2f30.org/sabotage/tarballs/
 
 popd
 
