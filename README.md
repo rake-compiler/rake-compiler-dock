@@ -358,6 +358,42 @@ Other environment variables can be set or passed through to the container like t
 RakeCompilerDock.sh "rake cross native gem OPENSSL_VERSION=#{ENV['OPENSSL_VERSION']}"
 ```
 
+### Choosing the version of ruby to run in the build container
+
+There are [multiple versions of Ruby installed in the build container](https://github.com/rake-compiler/rake-compiler-dock/blob/d3e6b44916d9d63d4c431b8c749a2c58bf1fe8e8/Dockerfile.mri.erb#L77). The latest version will be the default, but you may need to choose a different version to run during your build process.
+
+You can do this by passing a `ruby:` keyword argument to `RakeCompilerDock.sh`:
+
+```ruby
+RakeCompilerDock.sh "ruby -v"
+# => ruby 3.4.1 (2024-12-25 revision 48d4efcb85) +PRISM [x86_64-linux]
+
+RakeCompilerDock.sh "ruby -v", ruby: "3.1.6"
+# => ruby 3.1.6p260 (2024-05-29 revision a777087be6) [x86_64-linux]48d4efcb85) +PRISM [x86_64-linux]
+```
+
+Or by setting the environment variable `RCD_RUBY_VERSION`:
+
+``` sh
+$ rake-compiler-dock bash -c "ruby -v"
+ruby 3.4.1 (2024-12-25 revision 48d4efcb85) +PRISM [x86_64-linux]
+
+$ RCD_RUBY_VERSION=3.1.6 rake-compiler-dock bash -c "ruby -v"
+ruby 3.1.6p260 (2024-05-29 revision a777087be6) [x86_64-linux]
+```
+
+Or by running `rbenv shell` in the command:
+
+``` ruby
+RakeCompilerDock.sh "rbenv shell 3.1.6 && ruby -v", platform: "x86_64-linux-gnu"
+# => ruby 3.1.6p260 (2024-05-29 revision a777087be6) [x86_64-linux]
+```
+
+``` sh
+$ rake-compiler-dock bash -c "rbenv shell 3.1.6 && ruby -v"
+ruby 3.1.6p260 (2024-05-29 revision a777087be6) [x86_64-linux]
+```
+
 ### Choosing specific Ruby versions to support
 
 If you only want to precompile for certain Ruby versions, you can specify those versions by overwriting the `RUBY_CC_VERSION` environment variable.
