@@ -1,9 +1,10 @@
 # `rake-compiler/rake-compiler-dock` Changelog
 
-## Unreleased
+## 1.10.1 / 2025-10-25
 
 - Add support for ARM64 host images and release rake-compiler-dock host images for ARM64 and x86_64. #140
 - Add new target platform `aarch64-mingw-ucrt` aka Windows on ARM. #152
+- Allow easier selection of the ruby run in the container. #151
 - Install `mig` which is a Macos specific RPC code generator. #155
 - Add `RCD_IMAGE_VERSION` env var to easily set image version or `snapshot`. #163
 - Disable `rpath` in cross compiled C extensions, since it is only valid in the build environment. #165
