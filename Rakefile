@@ -80,7 +80,7 @@ namespace :build do
     task platform => sdf do
       build_mri_images([platform], [local_platform], output: 'load')
     end
-    multitask :all => platform
+    multitask :images => platform
   end
 
   sdf = "tmp/docker/Dockerfile.jruby.#{rake_platform}"
@@ -89,7 +89,7 @@ namespace :build do
   task :jruby => sdf do
     build_jruby_images([local_platform], output: 'load')
   end
-  multitask :all => :jruby
+  multitask :images => :jruby
 
   all_mri_images = platforms.map(&:first)
   desc "Build images for all MRI platforms in parallel"
@@ -102,13 +102,11 @@ namespace :build do
   all_images = all_mri_images + ["jruby"]
   desc "Build images for all platforms in parallel"
   if ENV['RCD_USE_BUILDX_CACHE']
-    task :all => all_images
+    task :images => all_images
   else
-    multitask :all => all_images
+    multitask :images => all_images
   end
 end
-
-task :build => "build:all"
 
 namespace :release do
   host_pl = host_platforms.map(&:first).join(",")
