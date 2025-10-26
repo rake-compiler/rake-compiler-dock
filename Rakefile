@@ -172,3 +172,16 @@ task :update_lists do
     EOT
   end
 end
+
+desc "Update CI publish workflows from erb"
+namespace :ci do
+  task :update_workflows do
+    erb = ERB.new(File.read(".github/workflows/publish-images.yml.erb"))
+    sdf = ".github/workflows/publish-images.yml"
+    release = false
+    File.write(sdf, erb.result(binding))
+    sdf = ".github/workflows/release-images.yml"
+    release = true
+    File.write(sdf, erb.result(binding))
+  end
+end
