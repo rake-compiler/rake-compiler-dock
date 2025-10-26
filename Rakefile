@@ -11,7 +11,7 @@ RakeCompilerDock::GemHelper.install_tasks
 def build_mri_images(platforms, host_platforms, output: )
   plats = host_platforms.map(&:first).join(",")
   platforms.each do |platform, _|
-    sdf = "tmp/docker/Dockerfile.mri.#{platform}.#{host_platforms.first[1]}"
+    sdf = "tmp/docker/Dockerfile.mri.#{platform}"
     image_name = RakeCompilerDock::Starter.container_image_name(platform: platform)
 
     RakeCompilerDock.docker_build(sdf, tag: image_name, platform: plats, output: output)
@@ -25,7 +25,7 @@ end
 def build_jruby_images(host_platforms, output: )
   image_name = RakeCompilerDock::Starter.container_image_name(rubyvm: "jruby")
   plats = host_platforms.map(&:first).join(",")
-  sdf = "tmp/docker/Dockerfile.jruby.#{host_platforms.first[1]}"
+  sdf = "tmp/docker/Dockerfile.jruby"
   RakeCompilerDock.docker_build(sdf, tag: image_name, platform: plats, output: output)
 end
 
@@ -48,32 +48,32 @@ platforms = [
 ]
 
 host_platforms = [
-  # tuple is [docker platform, rake task, RUBY_PLATFORM matcher]
-  ["linux/amd64", "x86", /^x86_64|^x64|^amd64/],
-  ["linux/arm64", "arm", /^aarch64|arm64/],
+  # tuple is [docker platform, RUBY_PLATFORM matcher]
+  ["linux/amd64", /^x86_64|^x64|^amd64/],
+  ["linux/arm64", /^aarch64|arm64/],
 ]
-local_platform = host_platforms.find { |_,_,reg| reg =~ RUBY_PLATFORM } or
+local_platform = host_platforms.find { |_,reg| reg =~ RUBY_PLATFORM } or
     raise("RUBY_PLATFORM #{RUBY_PLATFORM} is not supported as host")
 
 namespace :build do
 
   mkdir_p "tmp/docker"
 
-  docker_platform, rake_platform, _ = local_platform
+  docker_platform, _ = local_platform
   platforms.each do |platform, target|
-    sdf = "tmp/docker/Dockerfile.mri.#{platform}.#{rake_platform}"
+    sdf = "tmp/docker/Dockerfile.mri.#{platform}"
     df = ERB.new(File.read("Dockerfile.mri.erb"), trim_mode: ">").result(binding)
     File.write(sdf, df)
     CLEAN.include(sdf)
   end
-  sdf = "tmp/docker/Dockerfile.jruby.#{rake_platform}"
+  sdf = "tmp/docker/Dockerfile.jruby"
   df = File.read("Dockerfile.jruby")
   File.write(sdf, df)
 
-  RakeCompilerDock::ParallelDockerBuild.new(platforms.map{|pl, _| "tmp/docker/Dockerfile.mri.#{pl}.#{rake_platform}" } + ["tmp/docker/Dockerfile.jruby.#{rake_platform}"], workdir: "tmp/docker", task_prefix: "common-#{rake_platform}-", platform: docker_platform)
+  RakeCompilerDock::ParallelDockerBuild.new(platforms.map{|pl, _| "tmp/docker/Dockerfile.mri.#{pl}" } + ["tmp/docker/Dockerfile.jruby"], workdir: "tmp/docker", task_prefix: "common-", platform: docker_platform)
 
   platforms.each do |platform, target|
-    sdf = "tmp/docker/Dockerfile.mri.#{platform}.#{rake_platform}"
+    sdf = "tmp/docker/Dockerfile.mri.#{platform}"
 
     # Load image after build on local platform only
     desc "Build and load image for platform #{platform} on #{docker_platform}"
@@ -83,7 +83,7 @@ namespace :build do
     multitask :images => platform
   end
 
-  sdf = "tmp/docker/Dockerfile.jruby.#{rake_platform}"
+  sdf = "tmp/docker/Dockerfile.jruby"
   # Load image after build on local platform only
   desc "Build and load image for JRuby on #{docker_platform}"
   task :jruby => sdf do
