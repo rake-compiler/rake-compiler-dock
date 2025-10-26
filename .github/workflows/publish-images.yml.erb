@@ -1,0 +1,142 @@
+<% if release %>
+name: Release docker images to GHCR
+#
+#  This workflow assumes the maintainer has chosen the appropriate tag in the workflow dispatch UI.
+#
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag name to release"
+        required: true
+
+<% else %>
+name: Weekly publish docker images to GHCR
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * 3" # At 03:00 on Wednesday # https://crontab.guru/#0_3_*_*_3
+<% end %>
+
+concurrency:
+  group: "${{github.workflow}}-${{github.ref}}"
+  cancel-in-progress: true
+
+
+<%
+platforms = %w[
+  aarch64-linux-gnu
+  aarch64-linux-musl
+  aarch64-mingw-ucrt
+  arm-linux-gnu
+  arm-linux-musl
+  arm64-darwin
+  jruby
+  x64-mingw-ucrt
+  x64-mingw32
+  x86-linux-gnu
+  x86-linux-musl
+  x86-mingw32
+  x86_64-darwin
+  x86_64-linux-gnu
+  x86_64-linux-musl
+]
+%>
+
+jobs:
+  build:
+    name: "build ${{ matrix.platform }} ${{ matrix.os }}"
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+        platform:
+<% platforms.each do |pl| %>
+          <%= "- #{pl}" %>
+<% end %>
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+<% if release %>
+        with:
+          ref: ${{ inputs.tag }}
+<% end %>
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-buildxz
+          enableCrossOsArchive: true
+      - name: Build the image for platform ${{ matrix.platform }} on ${{ runner.arch }}
+        run: |
+          # Change docker to a cache-able driver
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+
+  push:
+    name: push
+    needs: build
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+
+      # https://github.com/orgs/community/discussions/26351#discussioncomment-3251595
+      - name: free disk space
+        run: |
+          df -h
+          sudo swapoff -a
+          sudo rm -f /swapfile
+          sudo apt clean
+          df -h
+
+<% platforms.each do |pl| %>
+      - name: Use X64 cache from primary pipeline of <%= pl %>
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-X64
+          key: ${{ runner.os }}-on-X64-<%= pl %>-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-X64-<%= pl %>-buildxz
+          enableCrossOsArchive: true
+      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-<%= pl %>
+      - name: Use ARM64 cache from primary pipeline of <%= pl %>
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-ARM64
+          key: ${{ runner.os }}-on-ARM64-<%= pl %>-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-ARM64-<%= pl %>-buildxz
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-<%= pl %>
+<% end %>
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
+      - name: Use cache and push docker image
+        env:
+          RCD_IMAGE_VERSION: snapshot
+          RCD_DOCKER_BUILD: docker buildx build <%= platforms.map{|pl| "--cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-#{pl} --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-#{pl} " }.join %> --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new
+        run: |
+          docker buildx create --driver docker-container --use
+          bundle exec rake release:images

@@ -1,15 +1,21 @@
-name: Publish docker images to GHCR
-concurrency:
-  group: "${{github.workflow}}-${{github.ref}}"
-  cancel-in-progress: true
+
+name: Weekly publish docker images to GHCR
 on:
   workflow_dispatch:
   schedule:
     - cron: "0 3 * * 3" # At 03:00 on Wednesday # https://crontab.guru/#0_3_*_*_3
 
+
+concurrency:
+  group: "${{github.workflow}}-${{github.ref}}"
+  cancel-in-progress: true
+
+
+
+
 jobs:
   build:
-    name: build native
+    name: "build ${{ matrix.platform }} ${{ matrix.os }}"
     strategy:
       fail-fast: false
       matrix:
@@ -17,24 +23,41 @@ jobs:
           - ubuntu-latest
           - ubuntu-24.04-arm
         platform:
+
           - aarch64-linux-gnu
+
           - aarch64-linux-musl
+
           - aarch64-mingw-ucrt
+
           - arm-linux-gnu
+
           - arm-linux-musl
+
           - arm64-darwin
+
           - jruby
+
           - x64-mingw-ucrt
+
           - x64-mingw32
+
           - x86-linux-gnu
+
           - x86-linux-musl
+
           - x86-mingw32
+
           - x86_64-darwin
+
           - x86_64-linux-gnu
+
           - x86_64-linux-musl
+
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.3"
@@ -44,13 +67,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: tmp/build-cache-${{ runner.arch }}
-          key: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-buildx-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-buildx
+          key: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-buildxz
           enableCrossOsArchive: true
-      - name: Change docker to a cache-able driver
+      - name: Build the image for platform ${{ matrix.platform }} on ${{ runner.arch }}
         run: |
+          # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,dest=tmp/build-cache-new"
+          bundle exec rake build:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
       - name: Show docker images
         run: docker images
       - name: Update and prune docker buildx layer cache
@@ -63,41 +87,290 @@ jobs:
     needs: build
     strategy:
       fail-fast: false
-      matrix:
-        platform:
-          - aarch64-linux-gnu
-          - aarch64-linux-musl
-          - aarch64-mingw-ucrt
-          - arm-linux-gnu
-          - arm-linux-musl
-          - arm64-darwin
-          - jruby
-          - x64-mingw-ucrt
-          - x64-mingw32
-          - x86-linux-gnu
-          - x86-linux-musl
-          - x86-mingw32
-          - x86_64-darwin
-          - x86_64-linux-gnu
-          - x86_64-linux-musl
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
-      - name: Use X64 cache from primary pipeline
+
+      # https://github.com/orgs/community/discussions/26351#discussioncomment-3251595
+      - name: free disk space
+        run: |
+          df -h
+          sudo swapoff -a
+          sudo rm -f /swapfile
+          sudo apt clean
+          df -h
+
+
+      - name: Use X64 cache from primary pipeline of aarch64-linux-gnu
         uses: actions/cache/restore@v4
         with:
           path: tmp/build-cache-X64
-          key: ${{ runner.os }}-on-X64-${{ matrix.platform }}-buildx-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-X64-${{ matrix.platform }}-buildx
+          key: ${{ runner.os }}-on-X64-aarch64-linux-gnu-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-X64-aarch64-linux-gnu-buildxz
           enableCrossOsArchive: true
-      - name: Use ARM64 cache from primary pipeline
+      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-aarch64-linux-gnu
+      - name: Use ARM64 cache from primary pipeline of aarch64-linux-gnu
         uses: actions/cache/restore@v4
         with:
           path: tmp/build-cache-ARM64
-          key: ${{ runner.os }}-on-ARM64-${{ matrix.platform }}-buildx-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-ARM64-${{ matrix.platform }}-buildx
+          key: ${{ runner.os }}-on-ARM64-aarch64-linux-gnu-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-ARM64-aarch64-linux-gnu-buildxz
           enableCrossOsArchive: true
           fail-on-cache-miss: true
+      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-aarch64-linux-gnu
+
+      - name: Use X64 cache from primary pipeline of aarch64-linux-musl
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-X64
+          key: ${{ runner.os }}-on-X64-aarch64-linux-musl-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-X64-aarch64-linux-musl-buildxz
+          enableCrossOsArchive: true
+      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-aarch64-linux-musl
+      - name: Use ARM64 cache from primary pipeline of aarch64-linux-musl
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-ARM64
+          key: ${{ runner.os }}-on-ARM64-aarch64-linux-musl-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-ARM64-aarch64-linux-musl-buildxz
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-aarch64-linux-musl
+
+      - name: Use X64 cache from primary pipeline of aarch64-mingw-ucrt
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-X64
+          key: ${{ runner.os }}-on-X64-aarch64-mingw-ucrt-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-X64-aarch64-mingw-ucrt-buildxz
+          enableCrossOsArchive: true
+      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-aarch64-mingw-ucrt
+      - name: Use ARM64 cache from primary pipeline of aarch64-mingw-ucrt
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-ARM64
+          key: ${{ runner.os }}-on-ARM64-aarch64-mingw-ucrt-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-ARM64-aarch64-mingw-ucrt-buildxz
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-aarch64-mingw-ucrt
+
+      - name: Use X64 cache from primary pipeline of arm-linux-gnu
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-X64
+          key: ${{ runner.os }}-on-X64-arm-linux-gnu-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-X64-arm-linux-gnu-buildxz
+          enableCrossOsArchive: true
+      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-arm-linux-gnu
+      - name: Use ARM64 cache from primary pipeline of arm-linux-gnu
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-ARM64
+          key: ${{ runner.os }}-on-ARM64-arm-linux-gnu-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-ARM64-arm-linux-gnu-buildxz
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-arm-linux-gnu
+
+      - name: Use X64 cache from primary pipeline of arm-linux-musl
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-X64
+          key: ${{ runner.os }}-on-X64-arm-linux-musl-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-X64-arm-linux-musl-buildxz
+          enableCrossOsArchive: true
+      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-arm-linux-musl
+      - name: Use ARM64 cache from primary pipeline of arm-linux-musl
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-ARM64
+          key: ${{ runner.os }}-on-ARM64-arm-linux-musl-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-ARM64-arm-linux-musl-buildxz
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-arm-linux-musl
+
+      - name: Use X64 cache from primary pipeline of arm64-darwin
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-X64
+          key: ${{ runner.os }}-on-X64-arm64-darwin-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-X64-arm64-darwin-buildxz
+          enableCrossOsArchive: true
+      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-arm64-darwin
+      - name: Use ARM64 cache from primary pipeline of arm64-darwin
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-ARM64
+          key: ${{ runner.os }}-on-ARM64-arm64-darwin-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-ARM64-arm64-darwin-buildxz
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-arm64-darwin
+
+      - name: Use X64 cache from primary pipeline of jruby
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-X64
+          key: ${{ runner.os }}-on-X64-jruby-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-X64-jruby-buildxz
+          enableCrossOsArchive: true
+      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-jruby
+      - name: Use ARM64 cache from primary pipeline of jruby
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-ARM64
+          key: ${{ runner.os }}-on-ARM64-jruby-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-ARM64-jruby-buildxz
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-jruby
+
+      - name: Use X64 cache from primary pipeline of x64-mingw-ucrt
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-X64
+          key: ${{ runner.os }}-on-X64-x64-mingw-ucrt-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-X64-x64-mingw-ucrt-buildxz
+          enableCrossOsArchive: true
+      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-x64-mingw-ucrt
+      - name: Use ARM64 cache from primary pipeline of x64-mingw-ucrt
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-ARM64
+          key: ${{ runner.os }}-on-ARM64-x64-mingw-ucrt-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-ARM64-x64-mingw-ucrt-buildxz
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-x64-mingw-ucrt
+
+      - name: Use X64 cache from primary pipeline of x64-mingw32
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-X64
+          key: ${{ runner.os }}-on-X64-x64-mingw32-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-X64-x64-mingw32-buildxz
+          enableCrossOsArchive: true
+      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-x64-mingw32
+      - name: Use ARM64 cache from primary pipeline of x64-mingw32
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-ARM64
+          key: ${{ runner.os }}-on-ARM64-x64-mingw32-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-ARM64-x64-mingw32-buildxz
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-x64-mingw32
+
+      - name: Use X64 cache from primary pipeline of x86-linux-gnu
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-X64
+          key: ${{ runner.os }}-on-X64-x86-linux-gnu-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-X64-x86-linux-gnu-buildxz
+          enableCrossOsArchive: true
+      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-x86-linux-gnu
+      - name: Use ARM64 cache from primary pipeline of x86-linux-gnu
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-ARM64
+          key: ${{ runner.os }}-on-ARM64-x86-linux-gnu-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-ARM64-x86-linux-gnu-buildxz
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-x86-linux-gnu
+
+      - name: Use X64 cache from primary pipeline of x86-linux-musl
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-X64
+          key: ${{ runner.os }}-on-X64-x86-linux-musl-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-X64-x86-linux-musl-buildxz
+          enableCrossOsArchive: true
+      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-x86-linux-musl
+      - name: Use ARM64 cache from primary pipeline of x86-linux-musl
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-ARM64
+          key: ${{ runner.os }}-on-ARM64-x86-linux-musl-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-ARM64-x86-linux-musl-buildxz
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-x86-linux-musl
+
+      - name: Use X64 cache from primary pipeline of x86-mingw32
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-X64
+          key: ${{ runner.os }}-on-X64-x86-mingw32-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-X64-x86-mingw32-buildxz
+          enableCrossOsArchive: true
+      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-x86-mingw32
+      - name: Use ARM64 cache from primary pipeline of x86-mingw32
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-ARM64
+          key: ${{ runner.os }}-on-ARM64-x86-mingw32-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-ARM64-x86-mingw32-buildxz
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-x86-mingw32
+
+      - name: Use X64 cache from primary pipeline of x86_64-darwin
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-X64
+          key: ${{ runner.os }}-on-X64-x86_64-darwin-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-X64-x86_64-darwin-buildxz
+          enableCrossOsArchive: true
+      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-x86_64-darwin
+      - name: Use ARM64 cache from primary pipeline of x86_64-darwin
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-ARM64
+          key: ${{ runner.os }}-on-ARM64-x86_64-darwin-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-ARM64-x86_64-darwin-buildxz
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-x86_64-darwin
+
+      - name: Use X64 cache from primary pipeline of x86_64-linux-gnu
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-X64
+          key: ${{ runner.os }}-on-X64-x86_64-linux-gnu-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-X64-x86_64-linux-gnu-buildxz
+          enableCrossOsArchive: true
+      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-x86_64-linux-gnu
+      - name: Use ARM64 cache from primary pipeline of x86_64-linux-gnu
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-ARM64
+          key: ${{ runner.os }}-on-ARM64-x86_64-linux-gnu-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-ARM64-x86_64-linux-gnu-buildxz
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-x86_64-linux-gnu
+
+      - name: Use X64 cache from primary pipeline of x86_64-linux-musl
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-X64
+          key: ${{ runner.os }}-on-X64-x86_64-linux-musl-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-X64-x86_64-linux-musl-buildxz
+          enableCrossOsArchive: true
+      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-x86_64-linux-musl
+      - name: Use ARM64 cache from primary pipeline of x86_64-linux-musl
+        uses: actions/cache/restore@v4
+        with:
+          path: tmp/build-cache-ARM64
+          key: ${{ runner.os }}-on-ARM64-x86_64-linux-musl-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-ARM64-x86_64-linux-musl-buildxz
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-x86_64-linux-musl
+
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.3"
@@ -110,7 +383,7 @@ jobs:
       - name: Use cache and push docker image
         env:
           RCD_IMAGE_VERSION: snapshot
-          RCD_DOCKER_BUILD: docker buildx build --cache-from=type=local,src=tmp/build-cache-X64 --cache-from=type=local,src=tmp/build-cache-ARM64 --cache-to=type=local,dest=tmp/build-cache-new
+          RCD_DOCKER_BUILD: docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-aarch64-linux-gnu --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-aarch64-linux-gnu --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-aarch64-linux-musl --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-aarch64-linux-musl --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-aarch64-mingw-ucrt --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-aarch64-mingw-ucrt --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-arm-linux-gnu --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-arm-linux-gnu --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-arm-linux-musl --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-arm-linux-musl --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-arm64-darwin --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-arm64-darwin --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-jruby --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-jruby --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-x64-mingw-ucrt --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-x64-mingw-ucrt --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-x64-mingw32 --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-x64-mingw32 --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-x86-linux-gnu --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-x86-linux-gnu --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-x86-linux-musl --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-x86-linux-musl --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-x86-mingw32 --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-x86-mingw32 --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-x86_64-darwin --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-x86_64-darwin --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-x86_64-linux-gnu --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-x86_64-linux-gnu --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-x86_64-linux-musl --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-x86_64-linux-musl  --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new
         run: |
           docker buildx create --driver docker-container --use
-          bundle exec rake release:${{matrix.platform}}
+          bundle exec rake release:images

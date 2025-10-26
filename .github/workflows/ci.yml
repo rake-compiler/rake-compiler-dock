@@ -97,13 +97,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: tmp/build-cache-${{ runner.arch }}
-          key: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-buildx-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-buildx
+          key: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-buildxz-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-buildxz
           enableCrossOsArchive: true
       - name: Change docker to a cache-able driver
         run: |
           docker buildx create --driver docker-container --use
-          bundle exec rake build:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,dest=tmp/build-cache-new"
+          bundle exec rake build:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
       - name: Show docker images
         run: docker images
       - name: Update and prune docker buildx layer cache
