@@ -55,22 +55,23 @@ host_platforms = [
 local_platform = host_platforms.find { |_,reg| reg =~ RUBY_PLATFORM } or
     raise("RUBY_PLATFORM #{RUBY_PLATFORM} is not supported as host")
 
-namespace :build do
+mkdir_p "tmp/docker"
 
-  mkdir_p "tmp/docker"
-
-  docker_platform, _ = local_platform
-  platforms.each do |platform, target|
-    sdf = "tmp/docker/Dockerfile.mri.#{platform}"
-    df = ERB.new(File.read("Dockerfile.mri.erb"), trim_mode: ">").result(binding)
-    File.write(sdf, df)
-    CLEAN.include(sdf)
-  end
-  sdf = "tmp/docker/Dockerfile.jruby"
-  df = File.read("Dockerfile.jruby")
+docker_platform, _ = local_platform
+platforms.each do |platform, target|
+  sdf = "tmp/docker/Dockerfile.mri.#{platform}"
+  df = ERB.new(File.read("Dockerfile.mri.erb"), trim_mode: ">").result(binding)
   File.write(sdf, df)
+  CLEAN.include(sdf)
+end
+sdf = "tmp/docker/Dockerfile.jruby"
+df = File.read("Dockerfile.jruby")
+File.write(sdf, df)
 
-  RakeCompilerDock::ParallelDockerBuild.new(platforms.map{|pl, _| "tmp/docker/Dockerfile.mri.#{pl}" } + ["tmp/docker/Dockerfile.jruby"], workdir: "tmp/docker", task_prefix: "common-", platform: docker_platform)
+parallel_docker_build = RakeCompilerDock::ParallelDockerBuild.new(platforms.map{|pl, _| "tmp/docker/Dockerfile.mri.#{pl}" } + ["tmp/docker/Dockerfile.jruby"], workdir: "tmp/docker", task_prefix: "common-")
+
+namespace :build do
+  parallel_docker_build.define_rake_tasks platform: docker_platform
 
   platforms.each do |platform, target|
     sdf = "tmp/docker/Dockerfile.mri.#{platform}"
@@ -127,6 +128,48 @@ namespace :release do
 
     desc "Push all docker images on #{host_pl}"
     multitask :images => platform
+  end
+
+  desc "Show download sizes of the release images"
+  task :sizes do
+    require "yaml"
+
+    ths = platforms.map do |pl, _|
+      image_name = RakeCompilerDock::Starter.container_image_name(platform: pl)
+      Thread.new do
+        [ pl,
+          IO.popen("docker manifest inspect #{image_name} -v", &:read)
+        ]
+      end
+    end
+
+    hlayers = Hash.new{|h,k| h[k] = {} }
+    isize_sums = Hash.new{|h,k| h[k] = 0 }
+
+    ths.map(&:value).each do |pl, ystr|
+      y = YAML.load(ystr)
+      y = [y] unless y.is_a?(Array)
+      y.each do |img|
+        next unless img
+        host_pl = "#{img.dig("Descriptor", "platform", "architecture")}-#{
+        img.dig("Descriptor", "platform", "os")}"
+        next if host_pl=="unknown-unknown"
+        lays = img.dig("OCIManifest", "layers") || img.dig("SchemaV2Manifest", "layers")
+        isize = lays.map do |lay|
+          hlayers[host_pl][lay["digest"]] = lay["size"]
+        end.sum
+        isize_sums[host_pl] += isize
+        puts format("%-15s %-20s:%12d MB", host_pl, pl, isize/1024/1024)
+      end
+    end
+    puts "----------"
+    isize_sums.each do |host_pl, isize|
+      puts format("%-15s %-20s:%12d MB", host_pl, "all-separate", isize/1024/1024)
+    end
+    hlayers.each do |host_pl, layers|
+      asize = layers.values.sum
+      puts format("%-15s %-20s:%12d MB", host_pl, "all-combined", asize/1024/1024)
+    end
   end
 end
 

@@ -10,71 +10,40 @@ concurrency:
   group: "${{github.workflow}}-${{github.ref}}"
   cancel-in-progress: true
 
-
-
-
 jobs:
-  build:
-    name: "build ${{ matrix.platform }} ${{ matrix.os }}"
+
+  common-7f790bc6d2444edacd5337c9048dae13842eb9ff:
+    name: "build ${{ matrix.os }} common-7f790bc6d2444edacd5337c9048dae13842eb9ff"
+    needs: common-8c26987a5e78ace67587139520ec4d44e00a8f54
     strategy:
       fail-fast: false
       matrix:
         os:
           - ubuntu-latest
           - ubuntu-24.04-arm
-        platform:
-
-          - aarch64-linux-gnu
-
-          - aarch64-linux-musl
-
-          - aarch64-mingw-ucrt
-
-          - arm-linux-gnu
-
-          - arm-linux-musl
-
-          - arm64-darwin
-
-          - jruby
-
-          - x64-mingw-ucrt
-
-          - x64-mingw32
-
-          - x86-linux-gnu
-
-          - x86-linux-musl
-
-          - x86-mingw32
-
-          - x86_64-darwin
-
-          - x86_64-linux-gnu
-
-          - x86_64-linux-musl
-
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.3"
+          ruby-version: "3.4"
           bundler-cache: true
 
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
         with:
           path: tmp/build-cache-${{ runner.arch }}
-          key: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-buildxz
+          key: ${{ runner.os }}-on-${{ runner.arch }}-common-7f790bc6d2444edacd5337c9048dae13842eb9ff-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-common-7f790bc6d2444edacd5337c9048dae13842eb9ff
+            ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987a5e78ace67587139520ec4d44e00a8f54
           enableCrossOsArchive: true
-      - name: Build the image for platform ${{ matrix.platform }} on ${{ runner.arch }}
+      - name: Build the image layers common-7f790bc6d2444edacd5337c9048dae13842eb9ff on ${{ runner.arch }}
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:common-7f790bc6d2444edacd5337c9048dae13842eb9ff RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
       - name: Show docker images
         run: docker images
       - name: Update and prune docker buildx layer cache
@@ -82,298 +51,785 @@ jobs:
           rm -rf tmp/build-cache-${{ runner.arch }}
           mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
 
-  push:
-    name: push
-    needs: build
+  common-d1f437046b79903f679102aadd5269e80f584d09:
+    name: "build ${{ matrix.os }} common-d1f437046b79903f679102aadd5269e80f584d09"
+    needs: common-8c26987a5e78ace67587139520ec4d44e00a8f54
     strategy:
       fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-common-d1f437046b79903f679102aadd5269e80f584d09-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-common-d1f437046b79903f679102aadd5269e80f584d09
+            ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987a5e78ace67587139520ec4d44e00a8f54
+          enableCrossOsArchive: true
+      - name: Build the image layers common-d1f437046b79903f679102aadd5269e80f584d09 on ${{ runner.arch }}
+        run: |
+          # Change docker to a cache-able driver
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:common-d1f437046b79903f679102aadd5269e80f584d09 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+
+  common-8c26987a5e78ace67587139520ec4d44e00a8f54:
+    name: "build ${{ matrix.os }} common-8c26987a5e78ace67587139520ec4d44e00a8f54"
+    needs: common-8a6d86116e9a9ffad5888a4a8b7fbee50535dbe0
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987a5e78ace67587139520ec4d44e00a8f54-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987a5e78ace67587139520ec4d44e00a8f54
+            ${{ runner.os }}-on-${{ runner.arch }}-common-8a6d86116e9a9ffad5888a4a8b7fbee50535dbe0
+          enableCrossOsArchive: true
+      - name: Build the image layers common-8c26987a5e78ace67587139520ec4d44e00a8f54 on ${{ runner.arch }}
+        run: |
+          # Change docker to a cache-able driver
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:common-8c26987a5e78ace67587139520ec4d44e00a8f54 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+
+  common-8a6d86116e9a9ffad5888a4a8b7fbee50535dbe0:
+    name: "build ${{ matrix.os }} common-8a6d86116e9a9ffad5888a4a8b7fbee50535dbe0"
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-common-8a6d86116e9a9ffad5888a4a8b7fbee50535dbe0-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-common-8a6d86116e9a9ffad5888a4a8b7fbee50535dbe0
+            ${{ runner.os }}-on-${{ runner.arch }}-
+          enableCrossOsArchive: true
+      - name: Build the image layers common-8a6d86116e9a9ffad5888a4a8b7fbee50535dbe0 on ${{ runner.arch }}
+        run: |
+          # Change docker to a cache-able driver
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:common-8a6d86116e9a9ffad5888a4a8b7fbee50535dbe0 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+
+  common-723ac6e8df696b68867754088d542e27005deaaf:
+    name: "build ${{ matrix.os }} common-723ac6e8df696b68867754088d542e27005deaaf"
+    needs: common-7f790bc6d2444edacd5337c9048dae13842eb9ff
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-common-723ac6e8df696b68867754088d542e27005deaaf-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-common-723ac6e8df696b68867754088d542e27005deaaf
+            ${{ runner.os }}-on-${{ runner.arch }}-common-7f790bc6d2444edacd5337c9048dae13842eb9ff
+          enableCrossOsArchive: true
+      - name: Build the image layers common-723ac6e8df696b68867754088d542e27005deaaf on ${{ runner.arch }}
+        run: |
+          # Change docker to a cache-able driver
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:common-723ac6e8df696b68867754088d542e27005deaaf RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+
+  common-fbc527a24691e48b3ceae3946e031e5e7e88c321:
+    name: "build ${{ matrix.os }} common-fbc527a24691e48b3ceae3946e031e5e7e88c321"
+    needs: common-7f790bc6d2444edacd5337c9048dae13842eb9ff
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-common-fbc527a24691e48b3ceae3946e031e5e7e88c321-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-common-fbc527a24691e48b3ceae3946e031e5e7e88c321
+            ${{ runner.os }}-on-${{ runner.arch }}-common-7f790bc6d2444edacd5337c9048dae13842eb9ff
+          enableCrossOsArchive: true
+      - name: Build the image layers common-fbc527a24691e48b3ceae3946e031e5e7e88c321 on ${{ runner.arch }}
+        run: |
+          # Change docker to a cache-able driver
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:common-fbc527a24691e48b3ceae3946e031e5e7e88c321 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+
+  common-63da25377d0818f37111c2410d4816b73d1a9060:
+    name: "build ${{ matrix.os }} common-63da25377d0818f37111c2410d4816b73d1a9060"
+    needs: common-7f790bc6d2444edacd5337c9048dae13842eb9ff
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-common-63da25377d0818f37111c2410d4816b73d1a9060-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-common-63da25377d0818f37111c2410d4816b73d1a9060
+            ${{ runner.os }}-on-${{ runner.arch }}-common-7f790bc6d2444edacd5337c9048dae13842eb9ff
+          enableCrossOsArchive: true
+      - name: Build the image layers common-63da25377d0818f37111c2410d4816b73d1a9060 on ${{ runner.arch }}
+        run: |
+          # Change docker to a cache-able driver
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:common-63da25377d0818f37111c2410d4816b73d1a9060 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+
+  common-dc7239babc93dee187ce0f0fa030de8c792e8611:
+    name: "build ${{ matrix.os }} common-dc7239babc93dee187ce0f0fa030de8c792e8611"
+    needs: common-7f790bc6d2444edacd5337c9048dae13842eb9ff
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-common-dc7239babc93dee187ce0f0fa030de8c792e8611-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-common-dc7239babc93dee187ce0f0fa030de8c792e8611
+            ${{ runner.os }}-on-${{ runner.arch }}-common-7f790bc6d2444edacd5337c9048dae13842eb9ff
+          enableCrossOsArchive: true
+      - name: Build the image layers common-dc7239babc93dee187ce0f0fa030de8c792e8611 on ${{ runner.arch }}
+        run: |
+          # Change docker to a cache-able driver
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:common-dc7239babc93dee187ce0f0fa030de8c792e8611 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+
+  common-2829589da6681b1b5f379e6d68ff6be60cba5cf6:
+    name: "build ${{ matrix.os }} common-2829589da6681b1b5f379e6d68ff6be60cba5cf6"
+    needs: common-d1f437046b79903f679102aadd5269e80f584d09
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-common-2829589da6681b1b5f379e6d68ff6be60cba5cf6-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-common-2829589da6681b1b5f379e6d68ff6be60cba5cf6
+            ${{ runner.os }}-on-${{ runner.arch }}-common-d1f437046b79903f679102aadd5269e80f584d09
+          enableCrossOsArchive: true
+      - name: Build the image layers common-2829589da6681b1b5f379e6d68ff6be60cba5cf6 on ${{ runner.arch }}
+        run: |
+          # Change docker to a cache-able driver
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:common-2829589da6681b1b5f379e6d68ff6be60cba5cf6 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+
+  common-bc540754626a1ebf8164f8ae4378b9104b383663:
+    name: "build ${{ matrix.os }} common-bc540754626a1ebf8164f8ae4378b9104b383663"
+    needs: common-d1f437046b79903f679102aadd5269e80f584d09
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-common-bc540754626a1ebf8164f8ae4378b9104b383663-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-common-bc540754626a1ebf8164f8ae4378b9104b383663
+            ${{ runner.os }}-on-${{ runner.arch }}-common-d1f437046b79903f679102aadd5269e80f584d09
+          enableCrossOsArchive: true
+      - name: Build the image layers common-bc540754626a1ebf8164f8ae4378b9104b383663 on ${{ runner.arch }}
+        run: |
+          # Change docker to a cache-able driver
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:common-bc540754626a1ebf8164f8ae4378b9104b383663 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+
+  common-b45d14aea28f4d30cfaa5bc6a34d751db67da79f:
+    name: "build ${{ matrix.os }} common-b45d14aea28f4d30cfaa5bc6a34d751db67da79f"
+    needs: common-8c26987a5e78ace67587139520ec4d44e00a8f54
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-common-b45d14aea28f4d30cfaa5bc6a34d751db67da79f-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-common-b45d14aea28f4d30cfaa5bc6a34d751db67da79f
+            ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987a5e78ace67587139520ec4d44e00a8f54
+          enableCrossOsArchive: true
+      - name: Build the image layers common-b45d14aea28f4d30cfaa5bc6a34d751db67da79f on ${{ runner.arch }}
+        run: |
+          # Change docker to a cache-able driver
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:common-b45d14aea28f4d30cfaa5bc6a34d751db67da79f RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+
+  common-2378386d2f098439bb4555bfc930aa62eab2dd65:
+    name: "build ${{ matrix.os }} common-2378386d2f098439bb4555bfc930aa62eab2dd65"
+    needs: common-8c26987a5e78ace67587139520ec4d44e00a8f54
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-common-2378386d2f098439bb4555bfc930aa62eab2dd65-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-common-2378386d2f098439bb4555bfc930aa62eab2dd65
+            ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987a5e78ace67587139520ec4d44e00a8f54
+          enableCrossOsArchive: true
+      - name: Build the image layers common-2378386d2f098439bb4555bfc930aa62eab2dd65 on ${{ runner.arch }}
+        run: |
+          # Change docker to a cache-able driver
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:common-2378386d2f098439bb4555bfc930aa62eab2dd65 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+
+  common-8fd4771bba44643d3934e41c218db66645f9e96f:
+    name: "build ${{ matrix.os }} common-8fd4771bba44643d3934e41c218db66645f9e96f"
+    needs: common-8c26987a5e78ace67587139520ec4d44e00a8f54
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-common-8fd4771bba44643d3934e41c218db66645f9e96f-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-common-8fd4771bba44643d3934e41c218db66645f9e96f
+            ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987a5e78ace67587139520ec4d44e00a8f54
+          enableCrossOsArchive: true
+      - name: Build the image layers common-8fd4771bba44643d3934e41c218db66645f9e96f on ${{ runner.arch }}
+        run: |
+          # Change docker to a cache-able driver
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:common-8fd4771bba44643d3934e41c218db66645f9e96f RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+
+  common-fad6604335c2d8c64475e5d69c083d0cce4f63a7:
+    name: "build ${{ matrix.os }} common-fad6604335c2d8c64475e5d69c083d0cce4f63a7"
+    needs: common-8c26987a5e78ace67587139520ec4d44e00a8f54
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-common-fad6604335c2d8c64475e5d69c083d0cce4f63a7-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-common-fad6604335c2d8c64475e5d69c083d0cce4f63a7
+            ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987a5e78ace67587139520ec4d44e00a8f54
+          enableCrossOsArchive: true
+      - name: Build the image layers common-fad6604335c2d8c64475e5d69c083d0cce4f63a7 on ${{ runner.arch }}
+        run: |
+          # Change docker to a cache-able driver
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:common-fad6604335c2d8c64475e5d69c083d0cce4f63a7 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+
+  common-c435c444a8baec018c75861cf5b32aeb9345683e:
+    name: "build ${{ matrix.os }} common-c435c444a8baec018c75861cf5b32aeb9345683e"
+    needs: common-8c26987a5e78ace67587139520ec4d44e00a8f54
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-common-c435c444a8baec018c75861cf5b32aeb9345683e-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-common-c435c444a8baec018c75861cf5b32aeb9345683e
+            ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987a5e78ace67587139520ec4d44e00a8f54
+          enableCrossOsArchive: true
+      - name: Build the image layers common-c435c444a8baec018c75861cf5b32aeb9345683e on ${{ runner.arch }}
+        run: |
+          # Change docker to a cache-able driver
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:common-c435c444a8baec018c75861cf5b32aeb9345683e RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+
+  common-cda3746d187096bfcb5179842dc5b8f845ea3da6:
+    name: "build ${{ matrix.os }} common-cda3746d187096bfcb5179842dc5b8f845ea3da6"
+    needs: common-8c26987a5e78ace67587139520ec4d44e00a8f54
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-common-cda3746d187096bfcb5179842dc5b8f845ea3da6-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-common-cda3746d187096bfcb5179842dc5b8f845ea3da6
+            ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987a5e78ace67587139520ec4d44e00a8f54
+          enableCrossOsArchive: true
+      - name: Build the image layers common-cda3746d187096bfcb5179842dc5b8f845ea3da6 on ${{ runner.arch }}
+        run: |
+          # Change docker to a cache-able driver
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:common-cda3746d187096bfcb5179842dc5b8f845ea3da6 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+
+  common-697f3ca4a0ddea1b26a66aee35ab6fc30ae3010b:
+    name: "build ${{ matrix.os }} common-697f3ca4a0ddea1b26a66aee35ab6fc30ae3010b"
+    needs: common-8c26987a5e78ace67587139520ec4d44e00a8f54
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-common-697f3ca4a0ddea1b26a66aee35ab6fc30ae3010b-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-common-697f3ca4a0ddea1b26a66aee35ab6fc30ae3010b
+            ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987a5e78ace67587139520ec4d44e00a8f54
+          enableCrossOsArchive: true
+      - name: Build the image layers common-697f3ca4a0ddea1b26a66aee35ab6fc30ae3010b on ${{ runner.arch }}
+        run: |
+          # Change docker to a cache-able driver
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:common-697f3ca4a0ddea1b26a66aee35ab6fc30ae3010b RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+
+  common-7b065f9c97f9d9f355f67f09b97c844d21539e42:
+    name: "build ${{ matrix.os }} common-7b065f9c97f9d9f355f67f09b97c844d21539e42"
+    needs: common-8c26987a5e78ace67587139520ec4d44e00a8f54
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-common-7b065f9c97f9d9f355f67f09b97c844d21539e42-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-common-7b065f9c97f9d9f355f67f09b97c844d21539e42
+            ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987a5e78ace67587139520ec4d44e00a8f54
+          enableCrossOsArchive: true
+      - name: Build the image layers common-7b065f9c97f9d9f355f67f09b97c844d21539e42 on ${{ runner.arch }}
+        run: |
+          # Change docker to a cache-able driver
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:common-7b065f9c97f9d9f355f67f09b97c844d21539e42 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+
+  common-58bf949eac408202d0b3113ff93f6330354c92a1:
+    name: "build ${{ matrix.os }} common-58bf949eac408202d0b3113ff93f6330354c92a1"
+    needs: common-8a6d86116e9a9ffad5888a4a8b7fbee50535dbe0
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-common-58bf949eac408202d0b3113ff93f6330354c92a1-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-common-58bf949eac408202d0b3113ff93f6330354c92a1
+            ${{ runner.os }}-on-${{ runner.arch }}-common-8a6d86116e9a9ffad5888a4a8b7fbee50535dbe0
+          enableCrossOsArchive: true
+      - name: Build the image layers common-58bf949eac408202d0b3113ff93f6330354c92a1 on ${{ runner.arch }}
+        run: |
+          # Change docker to a cache-able driver
+          docker buildx create --driver docker-container --use
+          bundle exec rake build:common-58bf949eac408202d0b3113ff93f6330354c92a1 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+      - name: Show docker images
+        run: docker images
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+
+
+  push:
+    name: push
+    needs: [common-b45d14aea28f4d30cfaa5bc6a34d751db67da79f,common-723ac6e8df696b68867754088d542e27005deaaf,common-2378386d2f098439bb4555bfc930aa62eab2dd65,common-8fd4771bba44643d3934e41c218db66645f9e96f,common-fbc527a24691e48b3ceae3946e031e5e7e88c321,common-2829589da6681b1b5f379e6d68ff6be60cba5cf6,common-fad6604335c2d8c64475e5d69c083d0cce4f63a7,common-c435c444a8baec018c75861cf5b32aeb9345683e,common-cda3746d187096bfcb5179842dc5b8f845ea3da6,common-63da25377d0818f37111c2410d4816b73d1a9060,common-697f3ca4a0ddea1b26a66aee35ab6fc30ae3010b,common-bc540754626a1ebf8164f8ae4378b9104b383663,common-7b065f9c97f9d9f355f67f09b97c844d21539e42,common-dc7239babc93dee187ce0f0fa030de8c792e8611,common-58bf949eac408202d0b3113ff93f6330354c92a1]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+
+          - platform: aarch64-linux-gnu
+            tree_dep: common-b45d14aea28f4d30cfaa5bc6a34d751db67da79f
+
+          - platform: aarch64-linux-musl
+            tree_dep: common-723ac6e8df696b68867754088d542e27005deaaf
+
+          - platform: aarch64-mingw-ucrt
+            tree_dep: common-2378386d2f098439bb4555bfc930aa62eab2dd65
+
+          - platform: arm-linux-gnu
+            tree_dep: common-8fd4771bba44643d3934e41c218db66645f9e96f
+
+          - platform: arm-linux-musl
+            tree_dep: common-fbc527a24691e48b3ceae3946e031e5e7e88c321
+
+          - platform: arm64-darwin
+            tree_dep: common-2829589da6681b1b5f379e6d68ff6be60cba5cf6
+
+          - platform: x64-mingw-ucrt
+            tree_dep: common-fad6604335c2d8c64475e5d69c083d0cce4f63a7
+
+          - platform: x64-mingw32
+            tree_dep: common-c435c444a8baec018c75861cf5b32aeb9345683e
+
+          - platform: x86-linux-gnu
+            tree_dep: common-cda3746d187096bfcb5179842dc5b8f845ea3da6
+
+          - platform: x86-linux-musl
+            tree_dep: common-63da25377d0818f37111c2410d4816b73d1a9060
+
+          - platform: x86-mingw32
+            tree_dep: common-697f3ca4a0ddea1b26a66aee35ab6fc30ae3010b
+
+          - platform: x86_64-darwin
+            tree_dep: common-bc540754626a1ebf8164f8ae4378b9104b383663
+
+          - platform: x86_64-linux-gnu
+            tree_dep: common-7b065f9c97f9d9f355f67f09b97c844d21539e42
+
+          - platform: x86_64-linux-musl
+            tree_dep: common-dc7239babc93dee187ce0f0fa030de8c792e8611
+
+          - platform: jruby
+            tree_dep: common-58bf949eac408202d0b3113ff93f6330354c92a1
+
     runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
 
-      # https://github.com/orgs/community/discussions/26351#discussioncomment-3251595
-      - name: free disk space
-        run: |
-          df -h
-          sudo swapoff -a
-          sudo rm -f /swapfile
-          sudo apt clean
-          df -h
-
-
-      - name: Use X64 cache from primary pipeline of aarch64-linux-gnu
+      - name: Use X64 cache from tree pipeline of ${{ matrix.platform }}
         uses: actions/cache/restore@v4
         with:
           path: tmp/build-cache-X64
-          key: ${{ runner.os }}-on-X64-aarch64-linux-gnu-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-X64-aarch64-linux-gnu-buildxz
+          key: ${{ runner.os }}-on-X64-${{ matrix.tree_dep }}-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-X64-${{ matrix.tree_dep }}
           enableCrossOsArchive: true
-      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-aarch64-linux-gnu
-      - name: Use ARM64 cache from primary pipeline of aarch64-linux-gnu
+      - name: Use ARM64 cache from tree pipeline of ${{ matrix.platform }}
         uses: actions/cache/restore@v4
         with:
           path: tmp/build-cache-ARM64
-          key: ${{ runner.os }}-on-ARM64-aarch64-linux-gnu-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-ARM64-aarch64-linux-gnu-buildxz
+          key: ${{ runner.os }}-on-ARM64-${{ matrix.tree_dep }}-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-ARM64-${{ matrix.tree_dep }}
           enableCrossOsArchive: true
           fail-on-cache-miss: true
-      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-aarch64-linux-gnu
-
-      - name: Use X64 cache from primary pipeline of aarch64-linux-musl
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-X64
-          key: ${{ runner.os }}-on-X64-aarch64-linux-musl-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-X64-aarch64-linux-musl-buildxz
-          enableCrossOsArchive: true
-      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-aarch64-linux-musl
-      - name: Use ARM64 cache from primary pipeline of aarch64-linux-musl
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-ARM64
-          key: ${{ runner.os }}-on-ARM64-aarch64-linux-musl-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-ARM64-aarch64-linux-musl-buildxz
-          enableCrossOsArchive: true
-          fail-on-cache-miss: true
-      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-aarch64-linux-musl
-
-      - name: Use X64 cache from primary pipeline of aarch64-mingw-ucrt
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-X64
-          key: ${{ runner.os }}-on-X64-aarch64-mingw-ucrt-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-X64-aarch64-mingw-ucrt-buildxz
-          enableCrossOsArchive: true
-      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-aarch64-mingw-ucrt
-      - name: Use ARM64 cache from primary pipeline of aarch64-mingw-ucrt
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-ARM64
-          key: ${{ runner.os }}-on-ARM64-aarch64-mingw-ucrt-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-ARM64-aarch64-mingw-ucrt-buildxz
-          enableCrossOsArchive: true
-          fail-on-cache-miss: true
-      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-aarch64-mingw-ucrt
-
-      - name: Use X64 cache from primary pipeline of arm-linux-gnu
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-X64
-          key: ${{ runner.os }}-on-X64-arm-linux-gnu-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-X64-arm-linux-gnu-buildxz
-          enableCrossOsArchive: true
-      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-arm-linux-gnu
-      - name: Use ARM64 cache from primary pipeline of arm-linux-gnu
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-ARM64
-          key: ${{ runner.os }}-on-ARM64-arm-linux-gnu-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-ARM64-arm-linux-gnu-buildxz
-          enableCrossOsArchive: true
-          fail-on-cache-miss: true
-      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-arm-linux-gnu
-
-      - name: Use X64 cache from primary pipeline of arm-linux-musl
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-X64
-          key: ${{ runner.os }}-on-X64-arm-linux-musl-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-X64-arm-linux-musl-buildxz
-          enableCrossOsArchive: true
-      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-arm-linux-musl
-      - name: Use ARM64 cache from primary pipeline of arm-linux-musl
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-ARM64
-          key: ${{ runner.os }}-on-ARM64-arm-linux-musl-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-ARM64-arm-linux-musl-buildxz
-          enableCrossOsArchive: true
-          fail-on-cache-miss: true
-      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-arm-linux-musl
-
-      - name: Use X64 cache from primary pipeline of arm64-darwin
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-X64
-          key: ${{ runner.os }}-on-X64-arm64-darwin-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-X64-arm64-darwin-buildxz
-          enableCrossOsArchive: true
-      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-arm64-darwin
-      - name: Use ARM64 cache from primary pipeline of arm64-darwin
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-ARM64
-          key: ${{ runner.os }}-on-ARM64-arm64-darwin-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-ARM64-arm64-darwin-buildxz
-          enableCrossOsArchive: true
-          fail-on-cache-miss: true
-      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-arm64-darwin
-
-      - name: Use X64 cache from primary pipeline of jruby
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-X64
-          key: ${{ runner.os }}-on-X64-jruby-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-X64-jruby-buildxz
-          enableCrossOsArchive: true
-      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-jruby
-      - name: Use ARM64 cache from primary pipeline of jruby
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-ARM64
-          key: ${{ runner.os }}-on-ARM64-jruby-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-ARM64-jruby-buildxz
-          enableCrossOsArchive: true
-          fail-on-cache-miss: true
-      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-jruby
-
-      - name: Use X64 cache from primary pipeline of x64-mingw-ucrt
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-X64
-          key: ${{ runner.os }}-on-X64-x64-mingw-ucrt-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-X64-x64-mingw-ucrt-buildxz
-          enableCrossOsArchive: true
-      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-x64-mingw-ucrt
-      - name: Use ARM64 cache from primary pipeline of x64-mingw-ucrt
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-ARM64
-          key: ${{ runner.os }}-on-ARM64-x64-mingw-ucrt-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-ARM64-x64-mingw-ucrt-buildxz
-          enableCrossOsArchive: true
-          fail-on-cache-miss: true
-      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-x64-mingw-ucrt
-
-      - name: Use X64 cache from primary pipeline of x64-mingw32
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-X64
-          key: ${{ runner.os }}-on-X64-x64-mingw32-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-X64-x64-mingw32-buildxz
-          enableCrossOsArchive: true
-      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-x64-mingw32
-      - name: Use ARM64 cache from primary pipeline of x64-mingw32
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-ARM64
-          key: ${{ runner.os }}-on-ARM64-x64-mingw32-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-ARM64-x64-mingw32-buildxz
-          enableCrossOsArchive: true
-          fail-on-cache-miss: true
-      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-x64-mingw32
-
-      - name: Use X64 cache from primary pipeline of x86-linux-gnu
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-X64
-          key: ${{ runner.os }}-on-X64-x86-linux-gnu-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-X64-x86-linux-gnu-buildxz
-          enableCrossOsArchive: true
-      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-x86-linux-gnu
-      - name: Use ARM64 cache from primary pipeline of x86-linux-gnu
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-ARM64
-          key: ${{ runner.os }}-on-ARM64-x86-linux-gnu-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-ARM64-x86-linux-gnu-buildxz
-          enableCrossOsArchive: true
-          fail-on-cache-miss: true
-      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-x86-linux-gnu
-
-      - name: Use X64 cache from primary pipeline of x86-linux-musl
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-X64
-          key: ${{ runner.os }}-on-X64-x86-linux-musl-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-X64-x86-linux-musl-buildxz
-          enableCrossOsArchive: true
-      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-x86-linux-musl
-      - name: Use ARM64 cache from primary pipeline of x86-linux-musl
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-ARM64
-          key: ${{ runner.os }}-on-ARM64-x86-linux-musl-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-ARM64-x86-linux-musl-buildxz
-          enableCrossOsArchive: true
-          fail-on-cache-miss: true
-      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-x86-linux-musl
-
-      - name: Use X64 cache from primary pipeline of x86-mingw32
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-X64
-          key: ${{ runner.os }}-on-X64-x86-mingw32-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-X64-x86-mingw32-buildxz
-          enableCrossOsArchive: true
-      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-x86-mingw32
-      - name: Use ARM64 cache from primary pipeline of x86-mingw32
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-ARM64
-          key: ${{ runner.os }}-on-ARM64-x86-mingw32-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-ARM64-x86-mingw32-buildxz
-          enableCrossOsArchive: true
-          fail-on-cache-miss: true
-      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-x86-mingw32
-
-      - name: Use X64 cache from primary pipeline of x86_64-darwin
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-X64
-          key: ${{ runner.os }}-on-X64-x86_64-darwin-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-X64-x86_64-darwin-buildxz
-          enableCrossOsArchive: true
-      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-x86_64-darwin
-      - name: Use ARM64 cache from primary pipeline of x86_64-darwin
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-ARM64
-          key: ${{ runner.os }}-on-ARM64-x86_64-darwin-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-ARM64-x86_64-darwin-buildxz
-          enableCrossOsArchive: true
-          fail-on-cache-miss: true
-      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-x86_64-darwin
-
-      - name: Use X64 cache from primary pipeline of x86_64-linux-gnu
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-X64
-          key: ${{ runner.os }}-on-X64-x86_64-linux-gnu-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-X64-x86_64-linux-gnu-buildxz
-          enableCrossOsArchive: true
-      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-x86_64-linux-gnu
-      - name: Use ARM64 cache from primary pipeline of x86_64-linux-gnu
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-ARM64
-          key: ${{ runner.os }}-on-ARM64-x86_64-linux-gnu-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-ARM64-x86_64-linux-gnu-buildxz
-          enableCrossOsArchive: true
-          fail-on-cache-miss: true
-      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-x86_64-linux-gnu
-
-      - name: Use X64 cache from primary pipeline of x86_64-linux-musl
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-X64
-          key: ${{ runner.os }}-on-X64-x86_64-linux-musl-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-X64-x86_64-linux-musl-buildxz
-          enableCrossOsArchive: true
-      - run: mv tmp/build-cache-X64 tmp/build-cache-X64-x86_64-linux-musl
-      - name: Use ARM64 cache from primary pipeline of x86_64-linux-musl
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-ARM64
-          key: ${{ runner.os }}-on-ARM64-x86_64-linux-musl-buildxz-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-ARM64-x86_64-linux-musl-buildxz
-          enableCrossOsArchive: true
-          fail-on-cache-miss: true
-      - run: mv tmp/build-cache-ARM64 tmp/build-cache-ARM64-x86_64-linux-musl
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.3"
+          ruby-version: "3.4"
           bundler-cache: true
       - uses: docker/login-action@v3
         with:
@@ -383,7 +839,7 @@ jobs:
       - name: Use cache and push docker image
         env:
           RCD_IMAGE_VERSION: snapshot
-          RCD_DOCKER_BUILD: docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-aarch64-linux-gnu --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-aarch64-linux-gnu --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-aarch64-linux-musl --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-aarch64-linux-musl --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-aarch64-mingw-ucrt --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-aarch64-mingw-ucrt --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-arm-linux-gnu --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-arm-linux-gnu --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-arm-linux-musl --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-arm-linux-musl --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-arm64-darwin --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-arm64-darwin --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-jruby --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-jruby --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-x64-mingw-ucrt --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-x64-mingw-ucrt --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-x64-mingw32 --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-x64-mingw32 --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-x86-linux-gnu --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-x86-linux-gnu --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-x86-linux-musl --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-x86-linux-musl --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-x86-mingw32 --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-x86-mingw32 --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-x86_64-darwin --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-x86_64-darwin --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-x86_64-linux-gnu --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-x86_64-linux-gnu --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64-x86_64-linux-musl --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64-x86_64-linux-musl  --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new
+          RCD_DOCKER_BUILD: docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64 --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64 --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new
         run: |
           docker buildx create --driver docker-container --use
-          bundle exec rake release:images
+          bundle exec rake release:${{ matrix.platform }}

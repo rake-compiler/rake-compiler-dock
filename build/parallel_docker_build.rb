@@ -36,7 +36,11 @@ module RakeCompilerDock
   class ParallelDockerBuild
     include Rake::DSL
 
-    def initialize(dockerfiles, workdir: "tmp/docker", inputdir: ".", task_prefix: "common-", platform: "local")
+    attr_reader :file_deps
+    attr_reader :tree_deps
+    attr_reader :final_deps
+
+    def initialize(dockerfiles, workdir: "tmp/docker", inputdir: ".", task_prefix: "common-")
       FileUtils.mkdir_p(workdir)
 
       files = parse_dockerfiles(dockerfiles, inputdir)
@@ -45,8 +49,11 @@ module RakeCompilerDock
       vcs = find_commons(files)
       # pp vcs
 
-      define_common_tasks(vcs, workdir, task_prefix)
-      @platform = platform
+      @file_deps = {}
+      @tree_deps = {}
+      @final_deps = {}
+
+      write_docker_files(vcs, workdir, task_prefix)
     end
 
     # Read given dockerfiles from inputdir and split into a list of commands.
@@ -100,26 +107,44 @@ module RakeCompilerDock
       end.compact.to_h
     end
 
-    # Write intermediate dockerfiles to workdir and define rake tasks
+    # Write intermediate dockerfiles to workdir and fill properties
+    def write_docker_files(vcs, workdir, task_prefix, plines=[])
+      vcs.map do |files, (lines, nvcs)|
+        fn = "#{task_prefix}#{Digest::SHA1.hexdigest(files.join)}"
+        wfn = File.join(workdir, fn)
+        File.write(wfn, (plines + lines).join)
+        @file_deps[fn] = wfn
+
+        files.each do |file|
+          @final_deps[file] = fn
+        end
+
+        nfn = write_docker_files(nvcs, workdir, task_prefix, plines + lines)
+        nfn.each do |file|
+          @tree_deps[file] = fn
+        end
+        fn
+      end
+    end
+
+    # Define rake tasks for building common docker files
     #
     # The rake tasks are named after the dockerfiles given to #new .
     # This also adds dependant intermediate tasks as prerequisites.
-    def define_common_tasks(vcs, workdir, task_prefix, plines=[])
-      vcs.map do |files, (lines, nvcs)|
-        fn = "#{task_prefix}#{Digest::SHA1.hexdigest(files.join)}"
-        File.write(File.join(workdir, fn), (plines + lines).join)
+    def define_rake_tasks(**build_options)
+      file_deps.each do |fn, wfn|
+        # p file_deps: {fn => wfn}
         task fn do
-          RakeCompilerDock.docker_build(File.join(workdir, fn), platform: @platform)
+          RakeCompilerDock.docker_build(wfn, **build_options)
         end
-
-        nfn = define_common_tasks(nvcs, workdir, task_prefix, plines + lines)
-        nfn.each do |file|
-          task file => fn
-        end
-        files.each do |file|
-          task file => fn
-        end
-        fn
+      end
+      tree_deps.each do |file, prereq|
+        # p tree_deps: {file => prereq}
+        task file => prereq
+      end
+      final_deps.each do |file, prereq|
+        # p final_deps: {file => prereq}
+        task file => prereq
       end
     end
   end
