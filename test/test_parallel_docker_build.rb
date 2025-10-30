@@ -44,7 +44,7 @@ class TestParallelDockerBuild < Test::Unit::TestCase
 
   def test_tasks
     Dir.chdir(@tmpdir) do
-      RakeCompilerDock::ParallelDockerBuild.new(%w[ File0 File1 File2 File3 ], task_prefix: "y")
+      RakeCompilerDock::ParallelDockerBuild.new(%w[ File0 File1 File2 File3 ], task_prefix: "y").define_rake_tasks
     end
 
     assert_operator Rake::Task["File0"].prerequisites, :include?, hd("File0File1")
