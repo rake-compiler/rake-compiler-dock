@@ -43,10 +43,12 @@ jobs:
       - name: Expose GitHub Runtime for docker cache
         uses: crazy-max/ghaction-github-runtime@v3
       - name: Build the image layers <%= job %> on ${{ runner.arch }}
+        env:
+          RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:<%= job %> RCD_DOCKER_BUILD="docker buildx build --cache-from type=gha,scope=${{ runner.os }}-on-${{ runner.arch }}-<%= job %> --cache-from type=gha,scope=${{ runner.os }}-on-${{ runner.arch }}-<%= need %> --cache-to=type=gha,scope=${{ runner.os }}-on-${{ runner.arch }}-<%= job %>"
+          bundle exec rake build:<%= tree_dep %> RCD_DOCKER_BUILD="docker buildx build --cache-from type=gha,scope=${{ runner.os }}-on-${{ runner.arch }}-<%= need %> --cache-from type=gha,scope=${{ runner.os }}-on-${{ runner.arch }}-<%= job %> --cache-to=type=gha,mode=max,scope=${{ runner.os }}-on-${{ runner.arch }}-<%= job %>"
 <% end %>
 
   build_source_gem:
@@ -129,6 +131,8 @@ jobs:
       - name: Expose GitHub Runtime for docker cache
         uses: crazy-max/ghaction-github-runtime@v3
       - name: Build the image from already filled cache
+        env:
+          RCD_TASK_DEPENDENCIES: "false"
         run: |
           docker buildx create --driver docker-container --use
           bundle exec rake build:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from type=gha,scope=${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}"

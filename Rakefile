@@ -69,7 +69,14 @@ File.write(sdf, df)
 parallel_docker_build = RakeCompilerDock::ParallelDockerBuild.new(platforms.map{|pl, _| "tmp/docker/Dockerfile.mri.#{pl}" } + ["tmp/docker/Dockerfile.jruby"], workdir: "tmp/docker", task_prefix: "common-")
 
 namespace :build do
-  parallel_docker_build.define_rake_tasks platform: docker_platform
+  parallel_docker_build.define_file_tasks platform: docker_platform
+
+  # The jobs in the CI pipeline are already organized in a tree structure.
+  # So we can avoid unnecessary rebuilds by omitting the dependecies.
+  unless ENV['RCD_TASK_DEPENDENCIES'] = "false"
+    parallel_docker_build.define_tree_tasks
+    parallel_docker_build.define_final_tasks
+  end
 
   platforms.each do |platform, target|
     sdf = "tmp/docker/Dockerfile.mri.#{platform}"
