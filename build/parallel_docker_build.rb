@@ -132,16 +132,28 @@ module RakeCompilerDock
     # The rake tasks are named after the dockerfiles given to #new .
     # This also adds dependant intermediate tasks as prerequisites.
     def define_rake_tasks(**build_options)
+      define_file_tasks(**build_options)
+      define_tree_tasks
+      define_final_tasks
+    end
+
+    def define_file_tasks(**build_options)
       file_deps.each do |fn, wfn|
         # p file_deps: {fn => wfn}
         task fn do
           RakeCompilerDock.docker_build(wfn, **build_options)
         end
       end
+    end
+
+    def define_tree_tasks
       tree_deps.each do |file, prereq|
         # p tree_deps: {file => prereq}
         task file => prereq
       end
+    end
+
+    def define_final_tasks
       final_deps.each do |file, prereq|
         # p final_deps: {file => prereq}
         task file => prereq

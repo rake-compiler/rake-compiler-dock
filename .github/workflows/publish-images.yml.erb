@@ -60,10 +60,12 @@ jobs:
             ${{ runner.os }}-on-${{ runner.arch }}-<%= need %>
           enableCrossOsArchive: true
       - name: Build the image layers <%= job %> on ${{ runner.arch }}
+        env:
+          RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:<%= job %> RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:<%= tree_dep %> RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -113,6 +115,7 @@ jobs:
         env:
           RCD_IMAGE_VERSION: snapshot
           RCD_DOCKER_BUILD: docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64 --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64
+          RCD_TASK_DEPENDENCIES: "false"
         run: |
           docker buildx create --driver docker-container --use
           bundle exec rake release:${{ matrix.platform }}
