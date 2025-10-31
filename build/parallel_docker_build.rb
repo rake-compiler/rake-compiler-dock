@@ -25,7 +25,7 @@ module RakeCompilerDock
     def docker_build(filename, tag: nil, output: false, platform: )
       cmd = docker_build_cmd(platform)
       return if cmd.nil?
-      tag_args = ["-t", tag] if tag
+      tag_args = Array(tag).flat_map{|t| ["-t", t] } if tag
       push_args = ["--push"] if output == 'push'
       push_args = ["--load"] if output == 'load'
       Class.new.extend(FileUtils).sh(*cmd, "-f", filename, ".", "--platform", platform, *tag_args, *push_args)

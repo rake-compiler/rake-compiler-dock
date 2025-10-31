@@ -14,11 +14,9 @@ def build_mri_images(platforms, host_platforms, output: )
     sdf = "tmp/docker/Dockerfile.mri.#{platform}"
     image_name = RakeCompilerDock::Starter.container_image_name(platform: platform)
 
-    RakeCompilerDock.docker_build(sdf, tag: image_name, platform: plats, output: output)
-
-    if image_name.include?("linux-gnu")
-      RakeCompilerDock.docker_build(sdf, tag: image_name.sub("linux-gnu", "linux"), platform: plats, output: output)
-    end
+    tags = [image_name]
+    tags << image_name.sub("linux-gnu", "linux") if image_name.include?("linux-gnu")
+    RakeCompilerDock.docker_build(sdf, tag: tags, platform: plats, output: output)
   end
 end
 
