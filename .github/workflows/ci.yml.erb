@@ -40,15 +40,26 @@ jobs:
           ruby-version: "3.4"
           bundler-cache: true
 
-      - name: Expose GitHub Runtime for docker cache
-        uses: crazy-max/ghaction-github-runtime@v3
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-<%= job %>-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-<%= job %>
+            ${{ runner.os }}-on-${{ runner.arch }}-<%= need %>
+          enableCrossOsArchive: true
       - name: Build the image layers <%= job %> on ${{ runner.arch }}
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:<%= tree_dep %> RCD_DOCKER_BUILD="docker buildx build --cache-from type=gha,scope=${{ runner.os }}-on-${{ runner.arch }}-<%= need %> --cache-from type=gha,scope=${{ runner.os }}-on-${{ runner.arch }}-<%= job %> --cache-to=type=gha,mode=max,scope=${{ runner.os }}-on-${{ runner.arch }}-<%= job %>"
+          bundle exec rake build:<%= tree_dep %> RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
 <% end %>
 
   build_source_gem:
@@ -128,14 +139,21 @@ jobs:
           ruby-version: "3.3"
           bundler-cache: true
 
-      - name: Expose GitHub Runtime for docker cache
-        uses: crazy-max/ghaction-github-runtime@v3
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}
+          enableCrossOsArchive: true
+
       - name: Build the image from already filled cache
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           docker buildx create --driver docker-container --use
-          bundle exec rake build:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from type=gha,scope=${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}"
+          bundle exec rake build:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }}"
+
       - name: Show docker images
         run: docker images
 
