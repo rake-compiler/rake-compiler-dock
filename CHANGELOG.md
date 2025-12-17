@@ -2,6 +2,7 @@
 
 ## next / unreleased
 
+- Add Ruby 4.0.0-preview2 cross-compilation support.
 - Bump Ruby 3.3 to v3.3.10 (from v3.3.9) @flavorjones
 - Bump Ruby 3.4 to v3.4.8 (from v3.4.5) @flavorjones
 - Bump rake-compiler dependency to v1.3.1 (from v1.2.9) @flavorjones
