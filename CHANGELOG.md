@@ -1,6 +1,6 @@
 # `rake-compiler/rake-compiler-dock` Changelog
 
-## 1.10.1 / 2025-10-25
+## 1.10.0 / 2025-10-25
 
 - Add support for ARM64 host images and release rake-compiler-dock host images for ARM64 and x86_64. #140
 - Add new target platform `aarch64-mingw-ucrt` aka Windows on ARM. #152
