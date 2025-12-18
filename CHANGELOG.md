@@ -1,20 +1,25 @@
 # `rake-compiler/rake-compiler-dock` Changelog
 
-## next / unreleased
+## 1.11.0.rc1 / 2025-12-18
 
-- Add Ruby 4.0.0-preview2 cross-compilation support.
+### Changes
+
+- Add Ruby 4.0.0-preview2 cross-compilation support. @flavorjones
 - Bump Ruby 3.3 to v3.3.10 (from v3.3.9) @flavorjones
 - Bump Ruby 3.4 to v3.4.8 (from v3.4.5) @flavorjones
 - Bump rake-compiler dependency to v1.3.1 (from v1.2.9) @flavorjones
+- The default `rbenv` ruby in the container is now Ruby v3.4.8 (previously the default was 3.4.5).
+- Optimized images by improving layer sharing. @larskanis
 
 ### CRuby container summary
 
-- native rubies: 3.4.8 (default), 3.1.7
-- `RUBY_CC_VERSION=3.4.8:3.3.10:3.2.9:3.1.7:3.0.7:2.7.8`
-- The default `rbenv` ruby in the container is now Ruby v3.4.8 (previously the default was 3.4.5).
+- native rubies: 4.0.0-preview2, 3.4.8 (default), 3.1.7
+- `RUBY_CC_VERSION=4.0.0:3.4.8:3.3.10:3.2.9:3.1.7:3.0.7:2.7.8`
 
 
 ## 1.10.0 / 2025-10-25
+
+### Changes
 
 - Add support for ARM64 host images and release rake-compiler-dock host images for ARM64 and x86_64. #140
 - Add new target platform `aarch64-mingw-ucrt` aka Windows on ARM. #152
