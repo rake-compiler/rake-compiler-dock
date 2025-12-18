@@ -1,5 +1,5 @@
 diff --git a/tasks/bin/cross-ruby.rake b/tasks/bin/cross-ruby.rake
-index 8317a2a3..8ed21718 100644
+index d37ab97b..4623896a 100644
 --- a/tasks/bin/cross-ruby.rake
 +++ b/tasks/bin/cross-ruby.rake
 @@ -116,11 +116,32 @@
