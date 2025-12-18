@@ -92,6 +92,7 @@ module RakeCompilerDock
   #
   def cross_rubies
     {
+      "4.0" => "4.0.0",
       "3.4" => "3.4.8",
       "3.3" => "3.3.10",
       "3.2" => "3.2.9",

@@ -55,7 +55,7 @@ class TestVersions < Test::Unit::TestCase
     assert_equal(expected, RakeCompilerDock.ruby_cc_version("~> 3.2.0", "~> 3.4.0"))
     assert_equal(expected, RakeCompilerDock.ruby_cc_version(Gem::Requirement.new("~> 3.2.0"), Gem::Requirement.new("~> 3.4.0")))
 
-    expected = [cross["3.4"], cross["3.3"], cross["3.2"]].join(":")
+    expected = [cross["4.0"], cross["3.4"], cross["3.3"], cross["3.2"]].join(":")
     assert_equal(expected, RakeCompilerDock.ruby_cc_version(">= 3.2"))
     assert_equal(expected, RakeCompilerDock.ruby_cc_version(Gem::Requirement.new(">= 3.2")))
 
