@@ -110,7 +110,7 @@ module RakeCompilerDock
     # Write intermediate dockerfiles to workdir and fill properties
     def write_docker_files(vcs, workdir, task_prefix, plines=[])
       vcs.map do |files, (lines, nvcs)|
-        fn = "#{task_prefix}#{Digest::SHA1.hexdigest(files.join)}"
+        fn = "#{task_prefix}#{Digest::SHA1.hexdigest(files.join)[0, 7]}"
         wfn = File.join(workdir, fn)
         File.write(wfn, (plines + lines).join)
         @file_deps[fn] = wfn
