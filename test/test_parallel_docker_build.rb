@@ -39,7 +39,7 @@ class TestParallelDockerBuild < Test::Unit::TestCase
   end
 
   private def hd(str)
-    "y" + Digest::SHA1.hexdigest(str)
+    "y" + Digest::SHA1.hexdigest(str)[0, 7]
   end
 
   def test_tasks

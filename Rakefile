@@ -14,11 +14,9 @@ def build_mri_images(platforms, host_platforms, output: )
     sdf = "tmp/docker/Dockerfile.mri.#{platform}"
     image_name = RakeCompilerDock::Starter.container_image_name(platform: platform)
 
-    RakeCompilerDock.docker_build(sdf, tag: image_name, platform: plats, output: output)
-
-    if image_name.include?("linux-gnu")
-      RakeCompilerDock.docker_build(sdf, tag: image_name.sub("linux-gnu", "linux"), platform: plats, output: output)
-    end
+    tags = [image_name]
+    tags << image_name.sub("linux-gnu", "linux") if image_name.include?("linux-gnu")
+    RakeCompilerDock.docker_build(sdf, tag: tags, platform: plats, output: output)
   end
 end
 
@@ -71,7 +69,14 @@ File.write(sdf, df)
 parallel_docker_build = RakeCompilerDock::ParallelDockerBuild.new(platforms.map{|pl, _| "tmp/docker/Dockerfile.mri.#{pl}" } + ["tmp/docker/Dockerfile.jruby"], workdir: "tmp/docker", task_prefix: "common-")
 
 namespace :build do
-  parallel_docker_build.define_rake_tasks platform: docker_platform
+  parallel_docker_build.define_file_tasks platform: docker_platform
+
+  # The jobs in the CI pipeline are already organized in a tree structure.
+  # So we can avoid unnecessary rebuilds by omitting the dependecies.
+  unless ENV['RCD_TASK_DEPENDENCIES'] = "false"
+    parallel_docker_build.define_tree_tasks
+    parallel_docker_build.define_final_tasks
+  end
 
   platforms.each do |platform, target|
     sdf = "tmp/docker/Dockerfile.mri.#{platform}"

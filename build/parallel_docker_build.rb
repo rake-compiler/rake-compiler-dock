@@ -25,7 +25,7 @@ module RakeCompilerDock
     def docker_build(filename, tag: nil, output: false, platform: )
       cmd = docker_build_cmd(platform)
       return if cmd.nil?
-      tag_args = ["-t", tag] if tag
+      tag_args = Array(tag).flat_map{|t| ["-t", t] } if tag
       push_args = ["--push"] if output == 'push'
       push_args = ["--load"] if output == 'load'
       Class.new.extend(FileUtils).sh(*cmd, "-f", filename, ".", "--platform", platform, *tag_args, *push_args)
@@ -110,7 +110,7 @@ module RakeCompilerDock
     # Write intermediate dockerfiles to workdir and fill properties
     def write_docker_files(vcs, workdir, task_prefix, plines=[])
       vcs.map do |files, (lines, nvcs)|
-        fn = "#{task_prefix}#{Digest::SHA1.hexdigest(files.join)}"
+        fn = "#{task_prefix}#{Digest::SHA1.hexdigest(files.join)[0, 7]}"
         wfn = File.join(workdir, fn)
         File.write(wfn, (plines + lines).join)
         @file_deps[fn] = wfn
@@ -132,16 +132,28 @@ module RakeCompilerDock
     # The rake tasks are named after the dockerfiles given to #new .
     # This also adds dependant intermediate tasks as prerequisites.
     def define_rake_tasks(**build_options)
+      define_file_tasks(**build_options)
+      define_tree_tasks
+      define_final_tasks
+    end
+
+    def define_file_tasks(**build_options)
       file_deps.each do |fn, wfn|
         # p file_deps: {fn => wfn}
         task fn do
           RakeCompilerDock.docker_build(wfn, **build_options)
         end
       end
+    end
+
+    def define_tree_tasks
       tree_deps.each do |file, prereq|
         # p tree_deps: {file => prereq}
         task file => prereq
       end
+    end
+
+    def define_final_tasks
       final_deps.each do |file, prereq|
         # p final_deps: {file => prereq}
         task file => prereq
