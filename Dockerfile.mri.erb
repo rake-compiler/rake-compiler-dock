@@ -39,7 +39,7 @@ ENV BASH_ENV=/etc/rubybashrc
 ##
 USER rubyuser
 
-ENV RBENV_RUBIES="3.1.7 3.4.8 4.0.0-preview2"
+ENV RBENV_RUBIES="3.1.7 3.4.8 4.0.0-preview3"
 
 # Install the bootstrap rubies
 RUN bash -c " \
@@ -152,7 +152,7 @@ xrubies_build_plan = if platform =~ /x64-mingw-ucrt/
   [
     # Rubyinstaller-3.1+ is platform x64-mingw-ucrt
     ["3.4.8:3.3.10:3.2.9:3.1.7", "3.4.8"],
-    ["4.0.0-preview2", "4.0.0-preview2"],
+    ["4.0.0-preview3", "4.0.0-preview3"],
   ]
 elsif platform =~ /aarch64-mingw-ucrt/
   [
@@ -167,7 +167,7 @@ else
   [
     ["2.7.8", "3.1.7"],
     ["3.4.8:3.3.10:3.2.9:3.1.7:3.0.7", "3.4.8"],
-    ["4.0.0-preview2", "4.0.0-preview2"],
+    ["4.0.0-preview3", "4.0.0-preview3"],
   ]
 end
 
