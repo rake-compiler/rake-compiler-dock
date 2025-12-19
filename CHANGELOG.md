@@ -1,6 +1,6 @@
 # `rake-compiler/rake-compiler-dock` Changelog
 
-## 1.11.0.rc1 / 2025-12-18
+## 1.11.0.rc1 / 2025-12-19
 
 ### Changes
 
