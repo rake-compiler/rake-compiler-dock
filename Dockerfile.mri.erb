@@ -39,7 +39,7 @@ ENV BASH_ENV=/etc/rubybashrc
 ##
 USER rubyuser
 
-ENV RBENV_RUBIES="3.1.7 3.4.8 4.0.0-preview2"
+ENV RBENV_RUBIES="3.1.7 3.4.8 4.0.0-preview3"
 
 # Install the bootstrap rubies
 RUN bash -c " \
@@ -152,7 +152,7 @@ xrubies_build_plan = if platform =~ /x64-mingw-ucrt/
   [
     # Rubyinstaller-3.1+ is platform x64-mingw-ucrt
     ["3.4.8:3.3.10:3.2.9:3.1.7", "3.4.8"],
-    ["4.0.0-preview2", "4.0.0-preview2"],
+    ["4.0.0-preview3", "4.0.0-preview3"],
   ]
 elsif platform =~ /aarch64-mingw-ucrt/
   [
@@ -167,7 +167,7 @@ else
   [
     ["2.7.8", "3.1.7"],
     ["3.4.8:3.3.10:3.2.9:3.1.7:3.0.7", "3.4.8"],
-    ["4.0.0-preview2", "4.0.0-preview2"],
+    ["4.0.0-preview3", "4.0.0-preview3"],
   ]
 end
 
@@ -194,7 +194,7 @@ RUN bash -c " \
 RUN find /usr/local/rake-compiler/ruby/*linux*/ -name libruby.so | xargs rm
 RUN find /usr/local/rake-compiler/ruby/*linux*/ -name libruby-static.a | while read f ; do cp $f `echo $f | sed s/-static//` ; done
 RUN find /usr/local/rake-compiler/ruby/*linux*/ -name libruby.a | while read f ; do ar t $f | xargs ar d $f ; done
-RUN find /usr/local/rake-compiler/ruby/*linux*/ -name mkmf.rb | while read f ; do sed -i ':a;N;$!ba;s/TRY_LINK = [^\n]*\n[^\n]*\n[^\n]*LOCAL_LIBS)/& -lruby-static -lpthread -lrt -ldl/' $f ; done
+RUN find /usr/local/rake-compiler/ruby/*linux*/ -name mkmf.rb | while read f ; do sed -i ':a;N;$!ba;s/TRY_LINK = [^\n]*\n[^\n]*\n[^\n]*LOCAL_LIBS)/& -lruby-static -lpthread -lrt -ldl -latomic/' $f ; done
 <% end %>
 
 <% if platform =~ /mingw/ %>
