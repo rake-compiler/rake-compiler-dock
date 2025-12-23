@@ -66,7 +66,7 @@ namespace "gem" do
         # - and to bundle the rake-compiler-dock under test
         RakeCompilerDock.sh <<-EOT, platform: plat, mountdir: Dir.pwd + "/../..", verbose: true
           (cp tmp/gem/gem-*.pem ~/.gem/ || true) &&
-          bundle --local &&
+          bundle install --local &&
           rake native:#{plat} pkg/#{exttask.gem_spec.full_name}-#{plat}.gem "MAKE=make V=1" #{config}
         EOT
       end
@@ -79,7 +79,7 @@ namespace "gem" do
     sh "bundle package"
     RakeCompilerDock.sh <<-EOT, rubyvm: "jruby", platform: "jruby", mountdir: Dir.pwd + "/../..", verbose: true
       mvn archetype:generate -DartifactId=test -DarchetypeVersion=1.4 -DinteractiveMode=false -DgroupId=test -Dpackage=test &&
-      bundle --local &&
+      bundle install --local &&
       bundle exec rake java gem
     EOT
   end
