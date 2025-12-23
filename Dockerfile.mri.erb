@@ -161,17 +161,17 @@ elsif platform =~ /aarch64-mingw-ucrt/
 elsif platform =~ /x64-mingw32/
   [
     # Rubyinstaller prior to 3.1 is platform x64-mingw32
-    ["3.0.7:2.7.8", "3.1.7"],
+    ["3.0.7", "3.1.7"],
   ]
 elsif platform =~ /x86-mingw32/
   [
     # There's no Rubyinstaller-4.x for platform x86-mingw32
-    ["3.3.10:3.2.9:3.1.7:3.0.7:2.7.8", "3.1.7"],
+    ["3.3.10:3.2.9:3.1.7:3.0.7", "3.1.7"],
     ["3.4.8", "4.0.0-preview3"],
   ]
 else
   [
-    ["3.3.10:3.2.9:3.1.7:3.0.7:2.7.8", "3.1.7"],
+    ["3.3.10:3.2.9:3.1.7:3.0.7", "3.1.7"],
     ["4.0.0-preview3:3.4.8", "4.0.0-preview3"],
   ]
 end
@@ -276,6 +276,6 @@ COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 
 RUN bash -c "rbenv global 4.0.0-preview3"
 
-ENV RUBY_CC_VERSION=4.0.0:3.4.8:3.3.10:3.2.9:3.1.7:3.0.7:2.7.8
+ENV RUBY_CC_VERSION=4.0.0:3.4.8:3.3.10:3.2.9:3.1.7:3.0.7
 
 CMD bash

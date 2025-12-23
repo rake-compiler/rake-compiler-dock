@@ -167,7 +167,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        ruby: ["4.0.0-preview3", "3.4", "3.3", "3.2", "3.1", "3.0", "2.7"]
+        ruby: ["4.0.0-preview3", "3.4", "3.3", "3.2", "3.1", "3.0"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -192,11 +192,10 @@ jobs:
       fail-fast: false
       matrix:
         platform: [x86_64-linux, x86_64-linux-gnu]
-        ruby: ["4.0.0-preview3", "3.4", "3.3", "3.2", "3.1", "3.0", "2.7"]
+        ruby: ["4.0.0-preview3", "3.4", "3.3", "3.2", "3.1", "3.0"]
         include:
           # declare rubygems for each ruby version
           - { ruby: "3.0", rubygems: "3.5.23" }
-          - { ruby: "2.7", rubygems: "3.4.22" }
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -235,11 +234,10 @@ jobs:
           - x86_64-linux
           - x86_64-linux-gnu
           - x86_64-linux-musl
-        ruby: ["4.0.0-preview3", "3.4", "3.3", "3.2", "3.1", "3.0", "2.7"]
+        ruby: ["4.0.0-preview3", "3.4", "3.3", "3.2", "3.1", "3.0"]
         include:
           # declare rubygems for each ruby version
           - { ruby: "3.0", rubygems: "3.5.23" }
-          - { ruby: "2.7", rubygems: "3.4.22" }
           # declare docker image for each platform
           - { platform: aarch64-linux-musl, runon: "ubuntu-24.04-arm", docker_tag: "-alpine" }
           - { platform: arm-linux-musl, runon: "ubuntu-24.04-arm", docker_tag: "-alpine" }
@@ -283,7 +281,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-15-intel, macos-15]
-        ruby: ["4.0.0-preview3", "3.4", "3.3", "3.2", "3.1", "3.0", "2.7"]
+        ruby: ["4.0.0-preview3", "3.4", "3.3", "3.2", "3.1", "3.0"]
         include:
           - os: macos-15-intel
             platform: x86_64-darwin
@@ -292,9 +290,6 @@ jobs:
           - os: ubuntu-latest
             ruby: jruby
             platform: jruby
-          - os: windows-latest
-            ruby: "2.7"
-            platform: x64-mingw32
           - os: windows-latest
             ruby: "3.0"
             platform: x64-mingw32
@@ -342,9 +337,6 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            ruby: "2.7"
-            platform: x64-mingw32
-          - os: windows-latest
             ruby: "3.0"
             platform: x64-mingw32
           - os: windows-latest
@@ -391,9 +383,14 @@ jobs:
       matrix:
         include:
           - runon: ubuntu-24.04-arm
-            from_image: navikey/raspbian-bullseye
+            from_image: ghcr.io/dtcooper/raspberrypi-os:latest
+            image_platform: linux/arm64
+            platform: aarch64-linux
+            dockerfile: debian
+          - runon: ubuntu-24.04-arm
+            from_image: ghcr.io/dtcooper/raspberrypi-os:latest
             image_platform: linux/arm/v7
-            platform: arm-linux # bullseye ships ruby 2.7, rubygems won't recognize -gnu suffix
+            platform: arm-linux
             dockerfile: debian
           - runon: ubuntu-24.04-arm
             from_image: arm64v8/ubuntu
