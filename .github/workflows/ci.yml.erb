@@ -1,0 +1,474 @@
+<%= "# This file is generated. Please edit publish-images.yml.erb instead!" %>
+
+name: CI
+concurrency:
+  group: "${{github.workflow}}-${{github.ref}}"
+  cancel-in-progress: true
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 5 * * 3" # At 05:00 on Wednesday # https://crontab.guru/#0_5_*_*_3
+  push:
+    branches:
+      - main
+    tags:
+      - "*.*.*"
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - "*"
+
+jobs:
+<%  parallel_docker_build.tree_deps.to_a.flatten.uniq.each do |tree_dep|
+      dockerfile = parallel_docker_build.final_deps.invert[tree_dep]
+      job = dockerfile ? dockerfile[/[-\w]+$/] : tree_dep
+%>
+  <%= job %>:
+    name: "build <%= job %>, ${{ matrix.os }}"
+    <%= need = parallel_docker_build.tree_deps[tree_dep]; "needs: #{need}" if need %>
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          # - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-<%= job %>-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-on-${{ runner.arch }}-<%= job %>
+            ${{ runner.os }}-on-${{ runner.arch }}-<%= need %>
+          enableCrossOsArchive: true
+
+      - name: Build the image layers <%= job %> on ${{ runner.arch }}
+        env:
+          RCD_TASK_DEPENDENCIES: "false"
+        run: |
+          bundle exec rake build:<%= tree_dep %> RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+
+      - name: Update and prune docker buildx layer cache
+        run: |
+          rm -rf tmp/build-cache-${{ runner.arch }}
+          mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
+<% end %>
+
+  build_source_gem:
+    name: build source
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          working-directory: test/rcd_test
+          bundler-cache: true
+
+      - name: Build source gem
+        run: |
+          cd test/rcd_test/
+          bundle exec rake gem
+
+      - name: Upload source gem
+        uses: actions/upload-artifact@v4
+        with:
+          name: gem-ruby
+          path: test/rcd_test/pkg/rcd_test-?.?.?.gem # e.g. rcd_test-1.0.0.gem
+
+  build_native_gem:
+    name: build native
+    needs: [<%= parallel_docker_build.final_deps.keys.map{|a| a[/[-\w]+$/] }.join(",") %>]
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - aarch64-linux-gnu
+          - aarch64-linux-musl
+          - aarch64-mingw-ucrt
+          - arm-linux-gnu
+          - arm-linux-musl
+          - arm64-darwin
+          - jruby
+          - x64-mingw-ucrt
+          - x64-mingw32
+          - x86-linux-gnu
+          - x86-linux-musl
+          - x86-mingw32
+          - x86_64-darwin
+          - x86_64-linux-gnu
+          - x86_64-linux-musl
+        os:
+          # - ubuntu-latest
+          - ubuntu-24.04-arm
+        include:
+          - platform: aarch64-linux-gnu
+            alias:    aarch64-linux
+          - platform: aarch64-linux-musl
+          - platform: aarch64-mingw-ucrt
+          - platform: arm-linux-gnu
+            alias:    arm-linux
+          - platform: arm-linux-musl
+          - platform: arm64-darwin
+          - platform: jruby
+          - platform: x64-mingw-ucrt
+            static: true
+          - platform: x64-mingw32
+            static: true
+          - platform: x86-linux-gnu
+            alias:    x86-linux
+          - platform: x86-linux-musl
+          - platform: x86-mingw32
+          - platform: x86_64-darwin
+          - platform: x86_64-linux-gnu
+            alias:    x86_64-linux
+          - platform: x86_64-linux-musl
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Fetch docker buildx layer cache
+        uses: actions/cache@v4
+        with:
+          path: tmp/build-cache-${{ runner.arch }}
+          key: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-on-${{ runner.arch }}-${{ matrix.platform }}
+          enableCrossOsArchive: true
+
+      - name: Build the image from already filled cache
+        env:
+          RCD_TASK_DEPENDENCIES: "false"
+        run: |
+          bundle exec rake build:${{ matrix.platform }} RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }}"
+
+      - name: Show docker images
+        run: docker images
+
+      - name: Test the generated image
+        run: bundle exec rake test TEST_PLATFORM=${{ matrix.platform }}
+
+      - name: Build native gem
+        run: |
+          cd test/rcd_test/
+          bundle install
+          bundle exec rake clean clobber
+          bundle exec rake gem:${{ matrix.platform }}
+
+      - name: Upload native gem
+        if: runner.arch == 'ARM64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: gem-${{ matrix.platform }}
+          path: test/rcd_test/pkg/*-*-*.gem
+
+      - if: matrix.static
+        name: Build static native gem
+        env:
+          RCD_TEST_CONFIG: "--link-static"
+        run: |
+          cd test/rcd_test/
+          bundle install
+          bundle exec rake clean clobber
+          bundle exec rake gem:${{ matrix.platform }}
+
+      - if: matrix.static && runner.arch == 'ARM64'
+        name: Upload static native gem
+        uses: actions/upload-artifact@v4
+        with:
+          name: gem-${{ matrix.platform }}-static
+          path: test/rcd_test/pkg/*-*-*.gem
+
+      - if: matrix.alias
+        name: Build native gem ${{ matrix.alias }}
+        run: |
+          cd test/rcd_test/
+          bundle install
+          bundle exec rake clean clobber
+          bundle exec rake gem:${{ matrix.alias }}
+
+      - if: matrix.alias && runner.arch == 'ARM64'
+        name: Upload native gem ${{ matrix.alias }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: gem-${{ matrix.alias }}
+          path: test/rcd_test/pkg/*-*-*.gem
+
+  test_source_gem:
+    name: source gem
+    needs: build_source_gem
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        ruby: ["3.4", "3.3", "3.2", "3.1", "3.0", "2.7"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+      - name: Download source gem
+        uses: actions/download-artifact@v4
+        with:
+          name: gem-ruby
+      - name: Test source gem
+        run: |
+          gem install --local *.gem --verbose
+          cd test/rcd_test/
+          bundle install
+          ruby -rrcd_test -S rake test
+
+  test-x86_64-linux-setup-ruby:
+    name: "${{ matrix.platform }} setup-ruby(${{ matrix.ruby }})"
+    needs: build_native_gem
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [x86_64-linux, x86_64-linux-gnu]
+        ruby: ["3.4", "3.3", "3.2", "3.1", "3.0", "2.7"]
+        include:
+          # declare rubygems for each ruby version
+          - { ruby: "3.0", rubygems: "3.5.23" }
+          - { ruby: "2.7", rubygems: "3.4.22" }
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+      - name: Download gem-${{ matrix.platform }}
+        uses: actions/download-artifact@v4
+        with:
+          name: gem-${{ matrix.platform }}
+      - if: matrix.rubygems
+        run: gem update --system ${{ matrix.rubygems }}
+      - name: Test gem-${{ matrix.platform }}
+        run: |
+          gem install --local *.gem --verbose
+          cd test/rcd_test/
+          bundle install
+          ruby -rrcd_test -S rake test
+
+  test_architecture_matrix:
+    name: "${{ matrix.platform }} ${{ matrix.ruby }}"
+    needs: build_native_gem
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - aarch64-linux
+          - aarch64-linux-gnu
+          - aarch64-linux-musl
+          - arm-linux
+          - arm-linux-gnu
+          - arm-linux-musl
+          - x86-linux
+          - x86-linux-gnu
+          - x86-linux-musl
+          - x86_64-linux
+          - x86_64-linux-gnu
+          - x86_64-linux-musl
+        ruby: ["3.4", "3.3", "3.2", "3.1", "3.0", "2.7"]
+        include:
+          # declare rubygems for each ruby version
+          - { ruby: "3.0", rubygems: "3.5.23" }
+          - { ruby: "2.7", rubygems: "3.4.22" }
+          # declare docker image for each platform
+          - { platform: aarch64-linux-musl, runon: "ubuntu-24.04-arm", docker_tag: "-alpine" }
+          - { platform: arm-linux-musl, runon: "ubuntu-24.04-arm", docker_tag: "-alpine" }
+          - { platform: x86-linux-musl, runon: "ubuntu-latest", docker_tag: "-alpine" }
+          - { platform: x86_64-linux-musl, runon: "ubuntu-latest", docker_tag: "-alpine" }
+          - { platform: x86_64-linux, runon: "ubuntu-latest" }
+          - { platform: x86_64-linux-gnu, runon: "ubuntu-latest" }
+          # declare docker platform for each platform
+          - { platform: aarch64-linux, runon: "ubuntu-24.04-arm", docker_platform: "--platform=linux/arm64" }
+          - { platform: aarch64-linux-gnu, runon: "ubuntu-24.04-arm", docker_platform: "--platform=linux/arm64" }
+          - { platform: aarch64-linux-musl, runon: "ubuntu-24.04-arm", docker_platform: "--platform=linux/arm64" }
+          - { platform: arm-linux, runon: "ubuntu-24.04-arm", docker_platform: "--platform=linux/arm/v7" }
+          - { platform: arm-linux-gnu, runon: "ubuntu-24.04-arm", docker_platform: "--platform=linux/arm/v7" }
+          - { platform: arm-linux-musl, runon: "ubuntu-24.04-arm", docker_platform: "--platform=linux/arm/v7" }
+          - { platform: x86-linux, runon: "ubuntu-latest", docker_platform: "--platform=linux/386" }
+          - { platform: x86-linux-gnu, runon: "ubuntu-latest", docker_platform: "--platform=linux/386" }
+          - { platform: x86-linux-musl, runon: "ubuntu-latest", docker_platform: "--platform=linux/386" }
+    runs-on: ${{ matrix.runon }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download gem-${{ matrix.platform }}
+        uses: actions/download-artifact@v4
+        with:
+          name: gem-${{ matrix.platform }}
+      - name: Run tests
+        run: |
+          docker run --rm -v $PWD:/work -w /work \
+            ${{ matrix.docker_platform}} ruby:${{ matrix.ruby }}${{ matrix.docker_tag }} \
+            sh -c "
+              if test -n '${{ matrix.rubygems }}' ; then gem update --system ${{ matrix.rubygems }} ; fi &&
+              gem install --local *.gem --verbose &&
+              cd test/rcd_test/ &&
+              bundle install &&
+              ruby -rrcd_test -S rake test
+            "
+
+  test_the_rest:
+    name: "${{ matrix.platform }} ${{ matrix.ruby }}"
+    needs: build_native_gem
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-13, macos-14]
+        ruby: ["3.4", "3.3", "3.2", "3.1", "3.0", "2.7"]
+        include:
+          - os: macos-13
+            platform: x86_64-darwin
+          - os: macos-14
+            platform: arm64-darwin
+          - os: ubuntu-latest
+            ruby: jruby
+            platform: jruby
+          - os: windows-latest
+            ruby: "2.7"
+            platform: x64-mingw32
+          - os: windows-latest
+            ruby: "3.0"
+            platform: x64-mingw32
+          - os: windows-latest
+            ruby: "3.1"
+            platform: x64-mingw-ucrt
+          - os: windows-latest
+            ruby: "3.2"
+            platform: x64-mingw-ucrt
+          - os: windows-latest
+            ruby: "3.3"
+            platform: x64-mingw-ucrt
+          - os: windows-latest
+            ruby: "3.4"
+            platform: x64-mingw-ucrt
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+      - name: Print ruby version and gem env
+        run: |
+          ruby --version
+          gem env
+      - name: Download gem-${{ matrix.platform }}
+        uses: actions/download-artifact@v4
+        with:
+          name: gem-${{ matrix.platform }}
+      - name: Test gem-${{ matrix.platform }}
+        run: |
+          gem install --local *.gem --verbose
+          cd test/rcd_test/
+          bundle install
+          ruby -rrcd_test -S rake test
+
+  test_windows_static:
+    name: "static ${{ matrix.platform }} ${{ matrix.ruby }}"
+    needs: build_native_gem
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            ruby: "2.7"
+            platform: x64-mingw32
+          - os: windows-latest
+            ruby: "3.0"
+            platform: x64-mingw32
+          - os: windows-latest
+            ruby: "3.1"
+            platform: x64-mingw-ucrt
+          - os: windows-latest
+            ruby: "3.2"
+            platform: x64-mingw-ucrt
+          - os: windows-latest
+            ruby: "3.3"
+            platform: x64-mingw-ucrt
+          - os: windows-latest
+            ruby: "3.4"
+            platform: x64-mingw-ucrt
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+      - name: Print ruby version and gem env
+        run: |
+          ruby --version
+          gem env
+      - name: Download gem-${{ matrix.platform }}-static
+        uses: actions/download-artifact@v4
+        with:
+          name: gem-${{ matrix.platform }}-static
+      - name: Test gem-${{ matrix.platform }}-static
+        run: |
+          gem install --local *.gem --verbose
+          cd test/rcd_test/
+          bundle install
+          ruby -rrcd_test -S rake test
+
+  test_ad_hoc:
+    name: "${{ matrix.platform }} on ${{ matrix.from_image }}"
+    needs: build_native_gem
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runon: ubuntu-24.04-arm
+            from_image: navikey/raspbian-bullseye
+            image_platform: linux/arm/v7
+            platform: arm-linux # bullseye ships ruby 2.7, rubygems won't recognize -gnu suffix
+            dockerfile: debian
+          - runon: ubuntu-24.04-arm
+            from_image: arm64v8/ubuntu
+            image_platform: linux/aarch64
+            platform: aarch64-linux # arm64v8 ships ruby 3.0, rubygems won't recognize -gnu suffix
+            dockerfile: debian
+          - runon: ubuntu-latest
+            from_image: i386/alpine
+            image_platform: linux/386
+            platform: x86-linux-musl
+            dockerfile: alpine
+          - runon: ubuntu-24.04-arm
+            from_image: arm32v6/alpine
+            image_platform: linux/arm/v6
+            platform: arm-linux-musl
+            dockerfile: alpine
+          - runon: ubuntu-latest
+            from_image: alpine
+            image_platform: linux/amd64
+            platform: x86_64-linux-musl
+            dockerfile: alpine
+    runs-on: ${{ matrix.runon }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download gem-${{ matrix.platform }}
+        uses: actions/download-artifact@v4
+        with:
+          name: gem-${{ matrix.platform }}
+      - name: Build ${{ matrix.from_image }} image
+        run: |
+          docker build --rm --build-arg from_image=${{ matrix.from_image }} --platform=${{ matrix.image_platform }} -t ruby-test -f test/env/Dockerfile.${{ matrix.dockerfile }} .
+      - name: Run tests
+        run: docker run --rm -t --network=host -v `pwd`:/build ruby-test

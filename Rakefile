@@ -231,5 +231,8 @@ namespace :ci do
     sdf = ".github/workflows/release-images.yml"
     release = true
     File.write(sdf, erb.result(binding))
+    erb = ERB.new(File.read(".github/workflows/ci.yml.erb"))
+    sdf = ".github/workflows/ci.yml"
+    File.write(sdf, erb.result(binding))
   end
 end
