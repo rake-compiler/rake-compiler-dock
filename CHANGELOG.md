@@ -2,7 +2,7 @@
 
 ## next / unreleased
 
-- Bump Ruby 4 cross-compilation support to 4.0.0-preview3. Note that ruby@094418a6 bumped the ABI in between preview2 and preview3.
+- Bump Ruby 4 cross-compilation support to 4.0.0. Note that ruby@094418a6 bumped the ABI in between preview2 and preview3.
 
 
 ## 1.11.0.rc1 / 2025-12-19

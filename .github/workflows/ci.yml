@@ -167,7 +167,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        ruby: ["4.0.0-preview3", "3.4", "3.3", "3.2", "3.1", "3.0"]
+        ruby: ["4.0.0", "3.4", "3.3", "3.2", "3.1", "3.0"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -192,7 +192,7 @@ jobs:
       fail-fast: false
       matrix:
         platform: [x86_64-linux, x86_64-linux-gnu]
-        ruby: ["4.0.0-preview3", "3.4", "3.3", "3.2", "3.1", "3.0"]
+        ruby: ["4.0.0", "3.4", "3.3", "3.2", "3.1", "3.0"]
         include:
           # declare rubygems for each ruby version
           - { ruby: "3.0", rubygems: "3.5.23" }
@@ -234,7 +234,7 @@ jobs:
           - x86_64-linux
           - x86_64-linux-gnu
           - x86_64-linux-musl
-        ruby: ["4.0.0-preview3", "3.4", "3.3", "3.2", "3.1", "3.0"]
+        ruby: ["4.0.0", "3.4", "3.3", "3.2", "3.1", "3.0"]
         include:
           # declare rubygems for each ruby version
           - { ruby: "3.0", rubygems: "3.5.23" }
@@ -281,7 +281,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-15-intel, macos-15]
-        ruby: ["4.0.0-preview3", "3.4", "3.3", "3.2", "3.1", "3.0"]
+        ruby: ["4.0.0", "3.4", "3.3", "3.2", "3.1", "3.0"]
         include:
           - os: macos-15-intel
             platform: x86_64-darwin
@@ -306,7 +306,7 @@ jobs:
             ruby: "3.4"
             platform: x64-mingw-ucrt
           - os: windows-latest
-            ruby: "head" # setup-ruby does not have 4.0 previews yet on windows
+            ruby: "head" # setup-ruby does not have 4.0 yet on windows
             platform: x64-mingw-ucrt
     runs-on: ${{ matrix.os }}
     steps:
@@ -352,7 +352,7 @@ jobs:
             ruby: "3.4"
             platform: x64-mingw-ucrt
           - os: windows-latest
-            ruby: "head" # setup-ruby does not have 4.0 previews yet on windows
+            ruby: "head" # setup-ruby does not have 4.0 yet on windows
             platform: x64-mingw-ucrt
     runs-on: ${{ matrix.os }}
     steps:
