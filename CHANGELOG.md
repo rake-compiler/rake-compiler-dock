@@ -2,6 +2,7 @@
 
 ## next / unreleased
 
+- Bump Ruby 4 cross-compilation support to 4.0.0 final. #182
 - Bump Ruby 4 cross-compilation support to 4.0.0-preview3. Note that ruby@094418a6 bumped the ABI in between preview2 and preview3. #179
 - Drop support for Ruby 2.7. #180
 - Remove native Ruby 3.4.8 from the host environment. #178

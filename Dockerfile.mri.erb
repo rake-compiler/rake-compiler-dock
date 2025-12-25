@@ -39,7 +39,7 @@ ENV BASH_ENV=/etc/rubybashrc
 ##
 USER rubyuser
 
-ENV RBENV_RUBIES="3.1.7 4.0.0-preview3"
+ENV RBENV_RUBIES="3.1.7 4.0.0"
 
 # Install the bootstrap rubies
 RUN bash -c " \
@@ -152,11 +152,11 @@ xrubies_build_plan = if platform =~ /x64-mingw-ucrt/
   [
     # Rubyinstaller-3.1+ is platform x64-mingw-ucrt
     ["3.3.10:3.2.9:3.1.7", "3.1.7"],
-    ["4.0.0-preview3:3.4.8", "4.0.0-preview3"],
+    ["4.0.0:3.4.8", "4.0.0"],
   ]
 elsif platform =~ /aarch64-mingw-ucrt/
   [
-    ["4.0.0-preview3:3.4.8", "4.0.0-preview3"],
+    ["4.0.0:3.4.8", "4.0.0"],
   ]
 elsif platform =~ /x64-mingw32/
   [
@@ -167,12 +167,12 @@ elsif platform =~ /x86-mingw32/
   [
     # There's no Rubyinstaller-4.x for platform x86-mingw32
     ["3.3.10:3.2.9:3.1.7:3.0.7", "3.1.7"],
-    ["3.4.8", "4.0.0-preview3"],
+    ["3.4.8", "4.0.0"],
   ]
 else
   [
     ["3.3.10:3.2.9:3.1.7:3.0.7", "3.1.7"],
-    ["4.0.0-preview3:3.4.8", "4.0.0-preview3"],
+    ["4.0.0:3.4.8", "4.0.0"],
   ]
 end
 
@@ -274,7 +274,7 @@ RUN echo 'source /etc/profile.d/rcd-env.sh' >> /etc/rubybashrc
 # Install sudoers configuration
 COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 
-RUN bash -c "rbenv global 4.0.0-preview3"
+RUN bash -c "rbenv global 4.0.0"
 
 ENV RUBY_CC_VERSION=4.0.0:3.4.8:3.3.10:3.2.9:3.1.7:3.0.7
 
