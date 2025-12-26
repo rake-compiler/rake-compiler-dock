@@ -24,10 +24,6 @@ module RakeCompilerDock
       Time.now.strftime("%Y-%m-%d")
     end
 
-    def version_tag
-      "#{version}"
-    end
-
     def update_history
       hin = File.read(hfile)
       hout = hin.sub(/#{headline}/) do
