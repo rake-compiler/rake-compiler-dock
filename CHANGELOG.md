@@ -1,5 +1,10 @@
 # `rake-compiler/rake-compiler-dock` Changelog
 
+## next / unreleased
+
+- Replace JRuby 9.4 with JRuby 10.0 in the JRuby build container.
+
+
 ## 1.11.0 / 2025-12-25
 
 - Bump Ruby 4 cross-compilation support to 4.0.0.

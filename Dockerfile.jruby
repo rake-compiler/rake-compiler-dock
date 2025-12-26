@@ -1,9 +1,9 @@
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -y update && \
     apt-get install -y sudo wget curl git-core build-essential xz-utils unzip dirmngr && \
-    apt-get install -y openjdk-11-jdk-headless maven && \
+    apt-get install -y openjdk-21-jdk-headless maven && \
     rm -rf /var/lib/apt/lists/*
 
 ##
@@ -11,7 +11,7 @@ RUN apt-get -y update && \
 ##
 RUN groupadd -r rubyuser && useradd -r -g rubyuser -G sudo -p "" --create-home rubyuser
 
-ENV RBENV_ROOT=/usr/local/rbenv RBENV_RUBIES="jruby-9.4.0.0"
+ENV RBENV_ROOT=/usr/local/rbenv RBENV_RUBIES="jruby-10.0.0.0"
 
 # chown after running `rbenv init` because that command creates some subdirectories
 RUN git clone https://github.com/rbenv/rbenv.git      ${RBENV_ROOT} && \
@@ -74,6 +74,6 @@ COPY build/runas /usr/local/bin/
 # Install sudoers configuration
 COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 
-RUN bash -c "rbenv global jruby-9.4.0.0"
+RUN bash -c "rbenv global jruby-10.0.0.0"
 
 CMD bash
