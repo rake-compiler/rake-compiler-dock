@@ -8,7 +8,7 @@
 
 ### CRuby container summary
 
-- native rubies: 4.0.0-preview3 (default), 3.1.7
+- native rubies: 4.0.0 (default), 3.1.7
 - `RUBY_CC_VERSION=4.0.0:3.4.8:3.3.10:3.2.9:3.1.7:3.0.7`
 
 
