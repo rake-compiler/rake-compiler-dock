@@ -2,14 +2,19 @@
 
 ## next / unreleased
 
-- Replace JRuby 9.4 with JRuby 10.0 in the JRuby build container.
+...
+
+
+## 1.11.1 / 2025-12-26
+
+- Replace JRuby 9.4 with JRuby 10.0 in the JRuby build container. #185 @flavorjones
 
 
 ## 1.11.0 / 2025-12-25
 
 - Bump Ruby 4 cross-compilation support to 4.0.0.
-- Drop support for Ruby 2.7. #180
-- Remove native Ruby 3.4.8 from the host environment. #178
+- Drop support for Ruby 2.7. #180 @larskanis
+- Remove native Ruby 3.4.8 from the host environment. #178 @larskanis
 
 ### CRuby container summary
 
