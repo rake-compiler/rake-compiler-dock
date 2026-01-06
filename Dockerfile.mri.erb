@@ -9,7 +9,7 @@ ARG TARGETPLATFORM
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -y update && \
     apt-get install -y sudo wget curl git-core build-essential xz-utils unzip dirmngr && \
-    apt-get install -y autoconf cmake pkg-config zlib1g-dev libreadline-dev libsqlite0-dev libssl-dev libyaml-dev libffi-dev && \
+    apt-get install -y autoconf cmake pkg-config zlib1g-dev libreadline-dev libsqlite3-dev libssl-dev libyaml-dev libffi-dev && \
     rm -rf /var/lib/apt/lists/*
 
 ##
