@@ -75,7 +75,7 @@ USER root
 ## Install cross compilers
 ##
 <% if platform =~ /x64-mingw-ucrt/ %>
-COPY --from=larskanis/mingw64-ucrt:20.04 \
+COPY --from=larskanis/mingw64-ucrt:24.04 \
     /build/binutils-mingw-w64-x86-64_*.deb \
     /build/g++-mingw-w64-x86-64_*.deb \
     /build/gcc-mingw-w64-base_*.deb \

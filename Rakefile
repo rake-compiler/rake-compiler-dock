@@ -181,7 +181,7 @@ end
 namespace :prepare do
   desc "Build cross compiler for x64-mingw-ucrt aka RubyInstaller-3.1+"
   task "mingw64-ucrt" do
-    sh(*RakeCompilerDock.docker_build_cmd, "-t", "larskanis/mingw64-ucrt:20.04", ".",
+    sh(*RakeCompilerDock.docker_build_cmd, "-t", "larskanis/mingw64-ucrt:24.04", ".",
        chdir: "mingw64-ucrt")
   end
 end
