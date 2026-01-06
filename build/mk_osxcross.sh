@@ -13,7 +13,7 @@ set -x
 curl -L -o MacOSX11.1.sdk.tar.xz https://github.com/larskanis/MacOSX-SDKs/releases/download/11.1/MacOSX11.1.sdk.tar.xz
 tar -xf MacOSX11.1.sdk.tar.xz -C .
 cp -rf /usr/lib/llvm-18/include/c++ MacOSX11.1.sdk/usr/include/c++
-cp -rf /usr/include/*-linux-gnu/c++/9/bits/ MacOSX11.1.sdk/usr/include/c++/v1/bits
+cp -rf /usr/include/*-linux-gnu/c++/13/bits/ MacOSX11.1.sdk/usr/include/c++/v1/bits
 tar -cJf MacOSX11.1.sdk.tar.xz MacOSX11.1.sdk
 
 set +x
