@@ -12,7 +12,7 @@ cd /opt/osxcross/tarballs
 set -x
 curl -L -o MacOSX11.1.sdk.tar.xz https://github.com/larskanis/MacOSX-SDKs/releases/download/11.1/MacOSX11.1.sdk.tar.xz
 tar -xf MacOSX11.1.sdk.tar.xz -C .
-cp -rf /usr/lib/llvm-10/include/c++ MacOSX11.1.sdk/usr/include/c++
+cp -rf /usr/lib/llvm-18/include/c++ MacOSX11.1.sdk/usr/include/c++
 cp -rf /usr/include/*-linux-gnu/c++/9/bits/ MacOSX11.1.sdk/usr/include/c++/v1/bits
 tar -cJf MacOSX11.1.sdk.tar.xz MacOSX11.1.sdk
 
@@ -36,8 +36,8 @@ rm -f /opt/osxcross/target/bin/*-apple-darwin-*
 find /opt/osxcross/target/bin/ -name '*-apple-darwin[0-9]*' | sort | while read f ; do d=`echo $f | sed s/darwin[0-9\.]*/darwin/`; echo $f '"$@"' | tee $d && chmod +x $d ; done
 
 # There's no objdump in osxcross but we can use llvm's
-ln -s /usr/lib/llvm-10/bin/llvm-objdump /opt/osxcross/target/bin/x86_64-apple-darwin-objdump
-ln -s /usr/lib/llvm-10/bin/llvm-objdump /opt/osxcross/target/bin/aarch64-apple-darwin-objdump
+ln -s /usr/lib/llvm-18/bin/llvm-objdump /opt/osxcross/target/bin/x86_64-apple-darwin-objdump
+ln -s /usr/lib/llvm-18/bin/llvm-objdump /opt/osxcross/target/bin/aarch64-apple-darwin-objdump
 
 # install /usr/bin/codesign and make a symlink for codesign_allocate (the architecture doesn't matter)
 git clone -q --depth=1 https://github.com/flavorjones/sigtool --branch flavorjones-fix-link-line-library-order
