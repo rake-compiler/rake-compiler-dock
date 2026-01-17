@@ -5,6 +5,11 @@
 ...
 
 
+## 1.11.2 / 2026-01-17
+
+- Fix `gem install rdoc` which failed due to insufficient permissions. #187 @larskanis
+
+
 ## 1.11.1 / 2025-12-26
 
 - Replace JRuby 9.4 with JRuby 10.0 in the JRuby build container. #185 @flavorjones
