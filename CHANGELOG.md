@@ -2,11 +2,6 @@
 
 ## next / unreleased
 
-...
-
-
-## 1.11.2 / 2026-01-17
-
 - Fix `gem install rdoc` which failed due to insufficient permissions. #187 @larskanis
 
 
