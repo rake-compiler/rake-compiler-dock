@@ -10,5 +10,5 @@ The image is provided for arm64 and amd64 architectures.
 They are built by the following command:
 
 ```sh
-docker buildx build . -t larskanis/mingw64-ucrt:20.04 --platform linux/arm64,linux/amd64 --push
+docker buildx build . -t larskanis/mingw64-ucrt:24.04 --platform linux/arm64,linux/amd64 --push
 ```

@@ -1,4 +1,4 @@
-<% image = "ubuntu:20.04" %>
+<% image = "ubuntu:24.04" %>
 FROM <%= image %>
 
 ARG TARGETPLATFORM
@@ -9,7 +9,7 @@ ARG TARGETPLATFORM
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -y update && \
     apt-get install -y sudo wget curl git-core build-essential xz-utils unzip dirmngr && \
-    apt-get install -y autoconf cmake pkg-config zlib1g-dev libreadline-dev libsqlite0-dev libssl-dev libyaml-dev libffi-dev && \
+    apt-get install -y autoconf cmake pkg-config zlib1g-dev libreadline-dev libsqlite3-dev libssl-dev libyaml-dev libffi-dev && \
     rm -rf /var/lib/apt/lists/*
 
 ##
@@ -75,7 +75,7 @@ USER root
 ## Install cross compilers
 ##
 <% if platform =~ /x64-mingw-ucrt/ %>
-COPY --from=larskanis/mingw64-ucrt:20.04 \
+COPY --from=larskanis/mingw64-ucrt:24.04 \
     /build/binutils-mingw-w64-x86-64_*.deb \
     /build/g++-mingw-w64-x86-64_*.deb \
     /build/gcc-mingw-w64-base_*.deb \
@@ -110,7 +110,7 @@ RUN /tmp/mk_musl_cross.sh <%= target %>
 <% else %>
 RUN apt-get -y update && \
     apt-get install -y <%
-if platform =~ /darwin/            %> clang python lzma-dev libxml2-dev libssl-dev libc++-10-dev <% end %><%
+if platform =~ /darwin/            %> clang python3 lzma-dev libxml2-dev libssl-dev libc++-18-dev <% end %><%
 if platform =~ /aarch64-linux-gnu/ %> gcc-aarch64-linux-gnu g++-aarch64-linux-gnu <% end %><%
 if platform =~ /arm-linux-gnu/     %> gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf <% end %><%
 if platform =~ /x86-linux-gnu/     %> gcc-i686-linux-gnu g++-i686-linux-gnu <% end %><%
