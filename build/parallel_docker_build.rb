@@ -40,6 +40,12 @@ module RakeCompilerDock
     attr_reader :tree_deps
     attr_reader :final_deps
 
+    # All intermediate build nodes, including isolated ones with no tree dependencies.
+    # Use this instead of tree_deps when iterating all CI build jobs.
+    def all_deps
+      file_deps.keys
+    end
+
     def initialize(dockerfiles, workdir: "tmp/docker", inputdir: ".", task_prefix: "common-")
       FileUtils.mkdir_p(workdir)
 

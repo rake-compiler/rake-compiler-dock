@@ -68,6 +68,27 @@ class TestParallelDockerBuild < Test::Unit::TestCase
     assert_equal "FROM a\n", read_df(hd "File0File1File2File3")
   end
 
+  def test_all_deps_includes_isolated_file
+    # File5 shares no common prefix with File0-File3, simulating the jruby Dockerfile
+    # which shares no common layers with MRI Dockerfiles.
+    Dir.chdir(@tmpdir) do
+      File.write "File5", <<-EOT
+      FROM b
+      RUN x
+      EOT
+    end
+
+    pdb = Dir.chdir(@tmpdir) do
+      RakeCompilerDock::ParallelDockerBuild.new(%w[ File0 File1 File2 File3 File5 ], task_prefix: "y")
+    end
+
+    file5_final_dep = pdb.final_deps["File5"]
+    assert_not_nil file5_final_dep
+
+    assert_operator pdb.all_deps, :include?, file5_final_dep,
+      "all_deps should include every final_dep value so CI generates build jobs for all images"
+  end
+
   def read_df(fn)
     File.read(File.join(@tmpdir, "/tmp/docker", fn)).each_line.map(&:lstrip).join
   end
