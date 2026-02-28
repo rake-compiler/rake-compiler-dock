@@ -25,7 +25,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-<%  parallel_docker_build.tree_deps.to_a.flatten.uniq.each do |tree_dep|
+<%  parallel_docker_build.all_deps.each do |tree_dep|
       dockerfile = parallel_docker_build.final_deps.invert[tree_dep]
       job = dockerfile ? dockerfile[/[-\w]+$/] : tree_dep
 %>
