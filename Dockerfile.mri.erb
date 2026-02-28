@@ -48,7 +48,8 @@ RUN bash -c " \
   for v in ${RBENV_RUBIES} ; do \
     rbenv install \$v -- --disable-install-doc ; \
   done && \
-  find ${RBENV_ROOT} -type d -print0 | sudo xargs -0 chmod g+w \
+  find ${RBENV_ROOT} -type d -print0 | sudo xargs -0 chmod g+w && \
+  find ${RBENV_ROOT} -path '*/plugins/*.rb' -print0 | sudo xargs -0 chmod g+w \
 "
 
 # Install rake-compiler and patch it to build and install static libraries for Linux rubies
@@ -277,8 +278,5 @@ COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 RUN bash -c "rbenv global 4.0.0"
 
 ENV RUBY_CC_VERSION=4.0.0:3.4.8:3.3.10:3.2.9:3.1.7:3.0.7
-
-# TODO: Move to native ruby install above, at the next minor release
-RUN sudo chmod go+w /usr/local/rbenv/versions/*/lib/ruby/gems/*/plugins -R
 
 CMD bash
