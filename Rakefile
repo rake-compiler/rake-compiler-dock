@@ -135,6 +135,13 @@ namespace :release do
     multitask :images => platform
   end
 
+  task :manifests do
+    platforms.each do |platform,|
+      tag = RakeCompilerDock::Starter.container_image_name(platform: platform)
+      sh "docker buildx imagetools create -t #{tag} #{tag}-ARM64 #{tag}-X64"
+    end
+  end
+
   desc "Show download sizes of the release images"
   task :sizes do
     require "yaml"
