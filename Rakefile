@@ -135,10 +135,14 @@ namespace :release do
     multitask :images => platform
   end
 
+  # Add a manifest for automatic selection of ARM64 or X86_64 host image
   task :manifests do
     platforms.each do |platform,|
       tag = RakeCompilerDock::Starter.container_image_name(platform: platform)
       sh "docker buildx imagetools create -t #{tag} #{tag}-ARM64 #{tag}-X64"
+      if tag.include?("linux-gnu")
+        sh "docker buildx imagetools create -t #{tag.sub("linux-gnu", "linux")} #{tag}-ARM64 #{tag}-X64"
+      end
     end
   end
 
