@@ -40,6 +40,11 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
@@ -50,13 +55,15 @@ jobs:
             ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987
             ${{ runner.os }}-on-${{ runner.arch }}-
           enableCrossOsArchive: true
+
+
       - name: Build the image layers common-8c26987 on ${{ runner.arch }}
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-8c26987 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:common-8c26987 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new "
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -82,6 +89,11 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
@@ -92,13 +104,15 @@ jobs:
             ${{ runner.os }}-on-${{ runner.arch }}-aarch64-linux-gnu
             ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987
           enableCrossOsArchive: true
+
+
       - name: Build the image layers aarch64-linux-gnu on ${{ runner.arch }}
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-b45d14a RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:common-b45d14a RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-aarch64-linux-gnu-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -124,6 +138,11 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
@@ -134,13 +153,15 @@ jobs:
             ${{ runner.os }}-on-${{ runner.arch }}-common-7f790bc
             ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987
           enableCrossOsArchive: true
+
+
       - name: Build the image layers common-7f790bc on ${{ runner.arch }}
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-7f790bc RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:common-7f790bc RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new "
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -166,6 +187,11 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
@@ -176,13 +202,15 @@ jobs:
             ${{ runner.os }}-on-${{ runner.arch }}-aarch64-linux-musl
             ${{ runner.os }}-on-${{ runner.arch }}-common-7f790bc
           enableCrossOsArchive: true
+
+
       - name: Build the image layers aarch64-linux-musl on ${{ runner.arch }}
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-723ac6e RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:common-723ac6e RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-aarch64-linux-musl-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -208,6 +236,11 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
@@ -218,13 +251,15 @@ jobs:
             ${{ runner.os }}-on-${{ runner.arch }}-arm-linux-musl
             ${{ runner.os }}-on-${{ runner.arch }}-common-7f790bc
           enableCrossOsArchive: true
+
+
       - name: Build the image layers arm-linux-musl on ${{ runner.arch }}
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-fbc527a RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:common-fbc527a RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-arm-linux-musl-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -250,6 +285,11 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
@@ -260,13 +300,15 @@ jobs:
             ${{ runner.os }}-on-${{ runner.arch }}-x86-linux-musl
             ${{ runner.os }}-on-${{ runner.arch }}-common-7f790bc
           enableCrossOsArchive: true
+
+
       - name: Build the image layers x86-linux-musl on ${{ runner.arch }}
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-63da253 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:common-63da253 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-x86-linux-musl-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -292,6 +334,11 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
@@ -302,13 +349,15 @@ jobs:
             ${{ runner.os }}-on-${{ runner.arch }}-x86_64-linux-musl
             ${{ runner.os }}-on-${{ runner.arch }}-common-7f790bc
           enableCrossOsArchive: true
+
+
       - name: Build the image layers x86_64-linux-musl on ${{ runner.arch }}
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-dc7239b RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:common-dc7239b RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-x86_64-linux-musl-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -334,6 +383,11 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
@@ -344,13 +398,15 @@ jobs:
             ${{ runner.os }}-on-${{ runner.arch }}-aarch64-mingw-ucrt
             ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987
           enableCrossOsArchive: true
+
+
       - name: Build the image layers aarch64-mingw-ucrt on ${{ runner.arch }}
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-2378386 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:common-2378386 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-aarch64-mingw-ucrt-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -376,6 +432,11 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
@@ -386,13 +447,15 @@ jobs:
             ${{ runner.os }}-on-${{ runner.arch }}-arm-linux-gnu
             ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987
           enableCrossOsArchive: true
+
+
       - name: Build the image layers arm-linux-gnu on ${{ runner.arch }}
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-8fd4771 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:common-8fd4771 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-arm-linux-gnu-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -418,6 +481,11 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
@@ -428,13 +496,15 @@ jobs:
             ${{ runner.os }}-on-${{ runner.arch }}-common-d1f4370
             ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987
           enableCrossOsArchive: true
+
+
       - name: Build the image layers common-d1f4370 on ${{ runner.arch }}
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-d1f4370 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:common-d1f4370 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new "
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -460,6 +530,11 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
@@ -470,13 +545,15 @@ jobs:
             ${{ runner.os }}-on-${{ runner.arch }}-arm64-darwin
             ${{ runner.os }}-on-${{ runner.arch }}-common-d1f4370
           enableCrossOsArchive: true
+
+
       - name: Build the image layers arm64-darwin on ${{ runner.arch }}
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-2829589 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:common-2829589 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-arm64-darwin-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -502,6 +579,11 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
@@ -512,13 +594,15 @@ jobs:
             ${{ runner.os }}-on-${{ runner.arch }}-x86_64-darwin
             ${{ runner.os }}-on-${{ runner.arch }}-common-d1f4370
           enableCrossOsArchive: true
+
+
       - name: Build the image layers x86_64-darwin on ${{ runner.arch }}
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-bc54075 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:common-bc54075 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-x86_64-darwin-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -544,6 +628,11 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
@@ -554,13 +643,15 @@ jobs:
             ${{ runner.os }}-on-${{ runner.arch }}-x64-mingw-ucrt
             ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987
           enableCrossOsArchive: true
+
+
       - name: Build the image layers x64-mingw-ucrt on ${{ runner.arch }}
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-fad6604 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:common-fad6604 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-x64-mingw-ucrt-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -586,6 +677,11 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
@@ -596,13 +692,15 @@ jobs:
             ${{ runner.os }}-on-${{ runner.arch }}-x64-mingw32
             ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987
           enableCrossOsArchive: true
+
+
       - name: Build the image layers x64-mingw32 on ${{ runner.arch }}
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-c435c44 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:common-c435c44 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-x64-mingw32-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -628,6 +726,11 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
@@ -638,13 +741,15 @@ jobs:
             ${{ runner.os }}-on-${{ runner.arch }}-x86-linux-gnu
             ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987
           enableCrossOsArchive: true
+
+
       - name: Build the image layers x86-linux-gnu on ${{ runner.arch }}
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-cda3746 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:common-cda3746 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-x86-linux-gnu-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -670,6 +775,11 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
@@ -680,13 +790,15 @@ jobs:
             ${{ runner.os }}-on-${{ runner.arch }}-x86-mingw32
             ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987
           enableCrossOsArchive: true
+
+
       - name: Build the image layers x86-mingw32 on ${{ runner.arch }}
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-697f3ca RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:common-697f3ca RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-x86-mingw32-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -712,6 +824,11 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
@@ -722,13 +839,15 @@ jobs:
             ${{ runner.os }}-on-${{ runner.arch }}-x86_64-linux-gnu
             ${{ runner.os }}-on-${{ runner.arch }}-common-8c26987
           enableCrossOsArchive: true
+
+
       - name: Build the image layers x86_64-linux-gnu on ${{ runner.arch }}
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-7b065f9 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:common-7b065f9 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-x86_64-linux-gnu-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -754,6 +873,11 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
@@ -764,76 +888,29 @@ jobs:
             ${{ runner.os }}-on-${{ runner.arch }}-jruby
             ${{ runner.os }}-on-${{ runner.arch }}-
           enableCrossOsArchive: true
+
+
       - name: Build the image layers jruby on ${{ runner.arch }}
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-58bf949 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:common-58bf949 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-jruby-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
           mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
 
 
-  push:
-    name: push
+  merge:
+    name: merge
     needs: [aarch64-linux-gnu,aarch64-linux-musl,aarch64-mingw-ucrt,arm-linux-gnu,arm-linux-musl,arm64-darwin,x64-mingw-ucrt,x64-mingw32,x86-linux-gnu,x86-linux-musl,x86-mingw32,x86_64-darwin,x86_64-linux-gnu,x86_64-linux-musl,jruby]
     strategy:
       fail-fast: false
-      matrix:
-        platform:
-
-          - aarch64-linux-gnu
-
-          - aarch64-linux-musl
-
-          - aarch64-mingw-ucrt
-
-          - arm-linux-gnu
-
-          - arm-linux-musl
-
-          - arm64-darwin
-
-          - x64-mingw-ucrt
-
-          - x64-mingw32
-
-          - x86-linux-gnu
-
-          - x86-linux-musl
-
-          - x86-mingw32
-
-          - x86_64-darwin
-
-          - x86_64-linux-gnu
-
-          - x86_64-linux-musl
-
-          - jruby
-
     runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
-
-      - name: Use X64 cache from tree pipeline of ${{ matrix.platform }}
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-X64
-          key: ${{ runner.os }}-on-X64-${{ matrix.platform }}-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-X64-${{ matrix.platform }}
-          enableCrossOsArchive: true
-      - name: Use ARM64 cache from tree pipeline of ${{ matrix.platform }}
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-ARM64
-          key: ${{ runner.os }}-on-ARM64-${{ matrix.platform }}-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-ARM64-${{ matrix.platform }}
-          enableCrossOsArchive: true
-          fail-on-cache-miss: true
 
       - uses: ruby/setup-ruby@v1
         with:
@@ -844,11 +921,8 @@ jobs:
           registry: ghcr.io
           username: ${{github.actor}}
           password: ${{secrets.GITHUB_TOKEN}}
-      - name: Use cache and push docker image
-        env:
-          RCD_IMAGE_VERSION: snapshot
-          RCD_DOCKER_BUILD: docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64 --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64
-          RCD_TASK_DEPENDENCIES: "false"
+
+      - name: Merge pushed images and build a manifest for both host platform
+
         run: |
-          docker buildx create --driver docker-container --use
-          bundle exec rake release:${{ matrix.platform }}
+          bundle exec rake release:manifests

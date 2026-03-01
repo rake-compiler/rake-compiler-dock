@@ -49,6 +49,11 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Fetch docker buildx layer cache
         uses: actions/cache@v4
@@ -59,48 +64,36 @@ jobs:
             ${{ runner.os }}-on-${{ runner.arch }}-<%= job %>
             ${{ runner.os }}-on-${{ runner.arch }}-<%= need %>
           enableCrossOsArchive: true
+
+<%
+# push the final per-platform images in order to merge them in the job below
+if dockerfile && (plat = dockerfile[/[-\w]+$/])
+  version = {version: "snapshot"} unless release
+  tag = RakeCompilerDock::Starter.container_image_name(platform: plat, **version)
+  push_tag = "-t #{tag}-${{ runner.arch }} --push"
+end
+%>
       - name: Build the image layers <%= job %> on ${{ runner.arch }}
         env:
           RCD_TASK_DEPENDENCIES: "false"
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:<%= tree_dep %> RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new"
+          bundle exec rake build:<%= tree_dep %> RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new <%= push_tag %>"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
           mv tmp/build-cache-new tmp/build-cache-${{ runner.arch }}
 <% end %>
 
-  push:
-    name: push
+  merge:
+    name: merge
     needs: [<%= parallel_docker_build.final_deps.keys.map{|a| a[/[-\w]+$/] }.join(",") %>]
     strategy:
       fail-fast: false
-      matrix:
-        platform:
-<% parallel_docker_build.final_deps.each do |dockerfile, _| %>
-          - <%= dockerfile[/[-\w]+$/] %>
-<% end %>
     runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
-
-      - name: Use X64 cache from tree pipeline of ${{ matrix.platform }}
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-X64
-          key: ${{ runner.os }}-on-X64-${{ matrix.platform }}-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-X64-${{ matrix.platform }}
-          enableCrossOsArchive: true
-      - name: Use ARM64 cache from tree pipeline of ${{ matrix.platform }}
-        uses: actions/cache/restore@v4
-        with:
-          path: tmp/build-cache-ARM64
-          key: ${{ runner.os }}-on-ARM64-${{ matrix.platform }}-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-on-ARM64-${{ matrix.platform }}
-          enableCrossOsArchive: true
-          fail-on-cache-miss: true
 
       - uses: ruby/setup-ruby@v1
         with:
@@ -111,11 +104,11 @@ jobs:
           registry: ghcr.io
           username: ${{github.actor}}
           password: ${{secrets.GITHUB_TOKEN}}
-      - name: Use cache and push docker image
+
+      - name: Merge pushed images and build a manifest for both host platform
+<% unless release %>
         env:
           RCD_IMAGE_VERSION: snapshot
-          RCD_DOCKER_BUILD: docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-X64 --cache-from=type=local,compression=zstd,src=tmp/build-cache-ARM64
-          RCD_TASK_DEPENDENCIES: "false"
+<% end %>
         run: |
-          docker buildx create --driver docker-container --use
-          bundle exec rake release:${{ matrix.platform }}
+          bundle exec rake release:manifests
