@@ -3,6 +3,7 @@
 ## next / unreleased
 
 - Fix `gem install rdoc` which failed due to insufficient permissions. #187 #192 @larskanis @flavorjones
+- Fix musl cross-compiler build by removing dead mirror URL for linux-headers. @flavorjones
 - Bump Ruby 4.0 to v4.0.2 (from v4.0.0). @marcoroth @flavorjones
 - Bump Ruby 3.4 to v3.4.9 (from v3.4.8). @flavorjones
 - Bump Ruby 3.3 to v3.3.11 (from v3.3.10). @flavorjones
