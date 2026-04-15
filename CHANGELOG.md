@@ -1,6 +1,6 @@
 # `rake-compiler/rake-compiler-dock` Changelog
 
-## next / unreleased
+## 1.12.0 / 2026-04-15
 
 - Fix `gem install rdoc` which failed due to insufficient permissions. #187 #192 @larskanis @flavorjones
 - Fix musl cross-compiler build by removing dead mirror URL for linux-headers. @flavorjones
