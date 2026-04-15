@@ -2,9 +2,11 @@
 
 ## next / unreleased
 
-- Fix `gem install rdoc` which failed due to insufficient permissions. #187 @larskanis
-- Bump Ruby 4.0 to v4.0.1 (from v4.0.0). @marcoroth
-- Bump Ruby 3.2 to v3.2.10 (from v3.2.9). @marcoroth
+- Fix `gem install rdoc` which failed due to insufficient permissions. #187 #192 @larskanis @flavorjones
+- Bump Ruby 4.0 to v4.0.2 (from v4.0.0). @marcoroth @flavorjones
+- Bump Ruby 3.4 to v3.4.9 (from v3.4.8). @flavorjones
+- Bump Ruby 3.3 to v3.3.11 (from v3.3.10). @flavorjones
+- Bump Ruby 3.2 to v3.2.11 (from v3.2.9). @marcoroth @flavorjones
 
 
 ## 1.11.1 / 2025-12-26
