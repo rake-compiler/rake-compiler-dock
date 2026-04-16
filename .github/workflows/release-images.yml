@@ -112,7 +112,7 @@ jobs:
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-b45d14a RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-aarch64-linux-gnu-${{ runner.arch }} --push"
+          bundle exec rake build:common-b45d14a RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.12.0-mri-aarch64-linux-gnu-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -210,7 +210,7 @@ jobs:
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-723ac6e RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-aarch64-linux-musl-${{ runner.arch }} --push"
+          bundle exec rake build:common-723ac6e RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.12.0-mri-aarch64-linux-musl-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -259,7 +259,7 @@ jobs:
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-fbc527a RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-arm-linux-musl-${{ runner.arch }} --push"
+          bundle exec rake build:common-fbc527a RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.12.0-mri-arm-linux-musl-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -308,7 +308,7 @@ jobs:
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-63da253 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-x86-linux-musl-${{ runner.arch }} --push"
+          bundle exec rake build:common-63da253 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.12.0-mri-x86-linux-musl-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -357,7 +357,7 @@ jobs:
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-dc7239b RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-x86_64-linux-musl-${{ runner.arch }} --push"
+          bundle exec rake build:common-dc7239b RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.12.0-mri-x86_64-linux-musl-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -406,7 +406,7 @@ jobs:
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-2378386 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-aarch64-mingw-ucrt-${{ runner.arch }} --push"
+          bundle exec rake build:common-2378386 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.12.0-mri-aarch64-mingw-ucrt-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -455,7 +455,7 @@ jobs:
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-8fd4771 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-arm-linux-gnu-${{ runner.arch }} --push"
+          bundle exec rake build:common-8fd4771 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.12.0-mri-arm-linux-gnu-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -553,7 +553,7 @@ jobs:
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-2829589 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-arm64-darwin-${{ runner.arch }} --push"
+          bundle exec rake build:common-2829589 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.12.0-mri-arm64-darwin-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -602,7 +602,7 @@ jobs:
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-bc54075 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-x86_64-darwin-${{ runner.arch }} --push"
+          bundle exec rake build:common-bc54075 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.12.0-mri-x86_64-darwin-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -651,7 +651,7 @@ jobs:
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-fad6604 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-x64-mingw-ucrt-${{ runner.arch }} --push"
+          bundle exec rake build:common-fad6604 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.12.0-mri-x64-mingw-ucrt-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -700,7 +700,7 @@ jobs:
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-c435c44 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-x64-mingw32-${{ runner.arch }} --push"
+          bundle exec rake build:common-c435c44 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.12.0-mri-x64-mingw32-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -749,7 +749,7 @@ jobs:
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-cda3746 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-x86-linux-gnu-${{ runner.arch }} --push"
+          bundle exec rake build:common-cda3746 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.12.0-mri-x86-linux-gnu-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -798,7 +798,7 @@ jobs:
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-697f3ca RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-x86-mingw32-${{ runner.arch }} --push"
+          bundle exec rake build:common-697f3ca RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.12.0-mri-x86-mingw32-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -847,7 +847,7 @@ jobs:
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-7b065f9 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-mri-x86_64-linux-gnu-${{ runner.arch }} --push"
+          bundle exec rake build:common-7b065f9 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.12.0-mri-x86_64-linux-gnu-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
@@ -896,7 +896,7 @@ jobs:
         run: |
           # Change docker to a cache-able driver
           docker buildx create --driver docker-container --use
-          bundle exec rake build:common-58bf949 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.11.2-jruby-${{ runner.arch }} --push"
+          bundle exec rake build:common-58bf949 RCD_DOCKER_BUILD="docker buildx build --cache-from=type=local,compression=zstd,src=tmp/build-cache-${{ runner.arch }} --cache-to=type=local,compression=zstd,dest=tmp/build-cache-new -t ghcr.io/rake-compiler/rake-compiler-dock-image:1.12.0-jruby-${{ runner.arch }} --push"
       - name: Update and prune docker buildx layer cache
         run: |
           rm -rf tmp/build-cache-${{ runner.arch }}
