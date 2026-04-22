@@ -5,7 +5,7 @@ source "https://rubygems.org"
 # No rcd_test gem, since "bundle package" fails on bundler-2.7+, if the extension isn't built
 # gemspec
 
-gem "rake", "~> 13.0"
+gem "rake"
 gem "rake-compiler"
 gem "rake-compiler-dock", path: "../.."
-gem "minitest", "~> 5.0"
+gem "minitest"

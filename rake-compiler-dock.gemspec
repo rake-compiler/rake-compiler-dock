@@ -28,7 +28,7 @@ Use rake-compiler-dock to enter an interactive shell session or add a task to yo
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler", ">= 1.7", "< 3.0"
+  spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake", ">= 12"
   spec.add_development_dependency "test-unit", "~> 3.0"
 end
