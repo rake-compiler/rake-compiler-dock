@@ -144,6 +144,9 @@ namespace :release do
         sh "docker buildx imagetools create -t #{tag.sub("linux-gnu", "linux")} #{tag}-ARM64 #{tag}-X64"
       end
     end
+
+    jruby_tag = RakeCompilerDock::Starter.container_image_name(rubyvm: "jruby")
+    sh "docker buildx imagetools create -t #{jruby_tag} #{jruby_tag}-ARM64 #{jruby_tag}-X64"
   end
 
   desc "Show download sizes of the release images"
