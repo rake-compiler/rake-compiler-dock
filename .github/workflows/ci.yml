@@ -239,10 +239,10 @@ jobs:
           # declare rubygems for each ruby version
           - { ruby: "3.0", rubygems: "3.5.23" }
           # declare docker image for each platform
-          - { platform: aarch64-linux-musl, runon: "ubuntu-24.04-arm", docker_tag: "-alpine" }
-          - { platform: arm-linux-musl, runon: "ubuntu-24.04-arm", docker_tag: "-alpine" }
-          - { platform: x86-linux-musl, runon: "ubuntu-latest", docker_tag: "-alpine" }
-          - { platform: x86_64-linux-musl, runon: "ubuntu-latest", docker_tag: "-alpine" }
+          - { platform: aarch64-linux-musl, runon: "ubuntu-24.04-arm", docker_tag: "-alpine", bootstrap: "apk add build-base &&" }
+          - { platform: arm-linux-musl, runon: "ubuntu-24.04-arm", docker_tag: "-alpine", bootstrap: "apk add build-base &&" }
+          - { platform: x86-linux-musl, runon: "ubuntu-latest", docker_tag: "-alpine", bootstrap: "apk add build-base &&" }
+          - { platform: x86_64-linux-musl, runon: "ubuntu-latest", docker_tag: "-alpine", bootstrap: "apk add build-base &&" }
           - { platform: x86_64-linux, runon: "ubuntu-latest" }
           - { platform: x86_64-linux-gnu, runon: "ubuntu-latest" }
           # declare docker platform for each platform
@@ -267,6 +267,7 @@ jobs:
           docker run --rm -v $PWD:/work -w /work \
             ${{ matrix.docker_platform}} ruby:${{ matrix.ruby }}${{ matrix.docker_tag }} \
             sh -c "
+              ${{ matrix.bootstrap }}
               if test -n '${{ matrix.rubygems }}' ; then gem update --system ${{ matrix.rubygems }} ; fi &&
               gem install --local *.gem --verbose &&
               cd test/rcd_test/ &&
