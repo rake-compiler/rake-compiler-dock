@@ -40,6 +40,8 @@ ln -s /usr/lib/llvm-10/bin/llvm-objdump /opt/osxcross/target/bin/x86_64-apple-da
 ln -s /usr/lib/llvm-10/bin/llvm-objdump /opt/osxcross/target/bin/aarch64-apple-darwin-objdump
 
 # install /usr/bin/codesign and make a symlink for codesign_allocate (the architecture doesn't matter)
-git clone -q --depth=1 https://github.com/flavorjones/sigtool --branch flavorjones-fix-link-line-library-order
-make -C sigtool install
+git clone -q https://github.com/nix-community/sigtool
+cd sigtool
+git checkout db019411a2770436d677533a097f63285831ca75
+make install
 ln -s /opt/osxcross/target/bin/x86_64-apple-darwin[0-9]*-codesign_allocate /usr/bin/codesign_allocate
