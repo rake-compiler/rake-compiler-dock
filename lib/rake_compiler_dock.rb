@@ -82,8 +82,8 @@ module RakeCompilerDock
   #
   #   RakeCompilerDock.cross_rubies
   #   # => {
-  #   #      "3.4" => "3.4.9",
-  #   #      "3.3" => "3.3.11",
+  #   #      "3.4" => "3.4.11",
+  #   #      "3.3" => "3.3.12",
   #   #      "3.2" => "3.2.11",
   #   #      "3.1" => "3.1.7",
   #   #      "3.0" => "3.0.7",
@@ -91,9 +91,9 @@ module RakeCompilerDock
   #
   def cross_rubies
     {
-      "4.0" => "4.0.2",
-      "3.4" => "3.4.9",
-      "3.3" => "3.3.11",
+      "4.0" => "4.0.7",
+      "3.4" => "3.4.11",
+      "3.3" => "3.3.12",
       "3.2" => "3.2.11",
       "3.1" => "3.1.7",
       "3.0" => "3.0.7",
@@ -111,13 +111,13 @@ module RakeCompilerDock
   #
   # For example:
   #   RakeCompilerDock.ruby_cc_version("3.0", "3.4")
-  #   # => "3.4.9:3.0.7"
+  #   # => "3.4.11:3.0.7"
   #
   #   RakeCompilerDock.ruby_cc_version("~> 3.2")
-  #   # => "3.4.9:3.3.11:3.2.11"
+  #   # => "3.4.11:3.3.12:3.2.11"
   #
   #   RakeCompilerDock.ruby_cc_version(Gem::Requirement.new("~> 3.2"))
-  #   # => "3.4.9:3.3.11:3.2.11"
+  #   # => "3.4.11:3.3.12:3.2.11"
   #
   def ruby_cc_version(*requirements)
     cross = cross_rubies

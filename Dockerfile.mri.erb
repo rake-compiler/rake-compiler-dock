@@ -39,7 +39,7 @@ ENV BASH_ENV=/etc/rubybashrc
 ##
 USER rubyuser
 
-ENV RBENV_RUBIES="3.1.7 4.0.2"
+ENV RBENV_RUBIES="4.0.7 3.1.7"
 
 # Install the bootstrap rubies
 RUN bash -c " \
@@ -97,7 +97,7 @@ RUN <<EOF
         echo "Unsupported platform $TARGETPLATFORM";
         exit 1;
     fi &&
-    wget https://github.com/mstorsjo/llvm-mingw/releases/download/20250114/llvm-mingw-20250114-ucrt-ubuntu-20.04-$DOWNLOAD_PLATFORM.tar.xz &&
+    wget https://github.com/mstorsjo/llvm-mingw/releases/download/20250402/llvm-mingw-20250402-ucrt-ubuntu-20.04-$DOWNLOAD_PLATFORM.tar.xz &&
     tar xf llvm-mingw*.tar.xz &&
     mv `ls -d llvm-mingw-*/` /llvm-mingw &&
     echo "export PATH=/llvm-mingw/bin:\$PATH" >> /etc/rubybashrc &&
@@ -192,12 +192,12 @@ USER rubyuser
 xrubies_build_plan = if platform =~ /x64-mingw-ucrt/
   [
     # Rubyinstaller-3.1+ is platform x64-mingw-ucrt
-    ["3.3.11:3.2.11:3.1.7", "3.1.7"],
-    ["4.0.2:3.4.9", "4.0.2"],
+    ["3.3.12:3.2.11:3.1.7", "3.1.7"],
+    ["4.0.7:3.4.11", "4.0.7"],
   ]
 elsif platform =~ /aarch64-mingw-ucrt/
   [
-    ["4.0.2:3.4.9", "4.0.2"],
+    ["4.0.7:3.4.11", "4.0.7"],
   ]
 elsif platform =~ /x64-mingw32/
   [
@@ -207,13 +207,13 @@ elsif platform =~ /x64-mingw32/
 elsif platform =~ /x86-mingw32/
   [
     # There's no Rubyinstaller-4.x for platform x86-mingw32
-    ["3.3.11:3.2.11:3.1.7:3.0.7", "3.1.7"],
-    ["3.4.9", "4.0.2"],
+    ["3.3.12:3.2.11:3.1.7:3.0.7", "3.1.7"],
+    ["3.4.11", "4.0.7"],
   ]
 else
   [
-    ["3.3.11:3.2.11:3.1.7:3.0.7", "3.1.7"],
-    ["4.0.2:3.4.9", "4.0.2"],
+    ["3.3.12:3.2.11:3.1.7:3.0.7", "3.1.7"],
+    ["4.0.7:3.4.11", "4.0.7"],
   ]
 end
 
@@ -315,8 +315,8 @@ RUN echo 'source /etc/profile.d/rcd-env.sh' >> /etc/rubybashrc
 # Install sudoers configuration
 COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 
-RUN bash -c "rbenv global 4.0.2"
+RUN bash -c "rbenv global 4.0.7"
 
-ENV RUBY_CC_VERSION=4.0.2:3.4.9:3.3.11:3.2.11:3.1.7:3.0.7
+ENV RUBY_CC_VERSION=4.0.7:3.4.11:3.3.12:3.2.11:3.1.7:3.0.7
 
 CMD bash
