@@ -39,7 +39,7 @@ ENV BASH_ENV=/etc/rubybashrc
 ##
 USER rubyuser
 
-ENV RBENV_RUBIES="3.1.7 4.0.2"
+ENV RBENV_RUBIES="4.0.7 3.1.7"
 
 # Install the bootstrap rubies
 RUN bash -c " \
@@ -97,7 +97,7 @@ RUN <<EOF
         echo "Unsupported platform $TARGETPLATFORM";
         exit 1;
     fi &&
-    wget https://github.com/mstorsjo/llvm-mingw/releases/download/20250114/llvm-mingw-20250114-ucrt-ubuntu-20.04-$DOWNLOAD_PLATFORM.tar.xz &&
+    wget https://github.com/mstorsjo/llvm-mingw/releases/download/20250402/llvm-mingw-20250402-ucrt-ubuntu-20.04-$DOWNLOAD_PLATFORM.tar.xz &&
     tar xf llvm-mingw*.tar.xz &&
     mv `ls -d llvm-mingw-*/` /llvm-mingw &&
     echo "export PATH=/llvm-mingw/bin:\$PATH" >> /etc/rubybashrc &&
@@ -109,16 +109,56 @@ COPY build/mk_musl_cross.sh /tmp
 RUN /tmp/mk_musl_cross.sh <%= target %>
 
 <% else %>
+<% if platform =~ /darwin/ %>
+RUN apt-get -y update && \
+    apt-get install -y wget && \
+    wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor > /usr/share/keyrings/llvm-snapshot.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/llvm-snapshot.gpg] http://apt.llvm.org/focal/ llvm-toolchain-focal-14 main" \
+        > /etc/apt/sources.list.d/llvm14.list && \
+    apt-get update && \
+    apt-get install -y clang-14 llvm-14-dev libc++-14-dev libc++abi-14-dev python3 lzma-dev libxml2-dev libssl-dev && \
+    update-alternatives --install /usr/bin/clang clang /usr/bin/clang-14 100 && \
+    update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-14 100 && \
+    rm -rf /var/lib/apt/lists/*
+<% else %>
 RUN apt-get -y update && \
     apt-get install -y <%
-if platform =~ /darwin/            %> clang python lzma-dev libxml2-dev libssl-dev libc++-10-dev <% end %><%
-if platform =~ /aarch64-linux-gnu/ %> gcc-aarch64-linux-gnu g++-aarch64-linux-gnu <% end %><%
-if platform =~ /arm-linux-gnu/     %> gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf <% end %><%
-if platform =~ /x86-linux-gnu/     %> gcc-i686-linux-gnu g++-i686-linux-gnu <% end %><%
-if platform =~ /x86_64-linux-gnu/  %> gcc-x86-64-linux-gnu g++-x86-64-linux-gnu <% end %><%
+if platform =~ /arm-linux-gnu/     %> gcc-10-arm-linux-gnueabihf g++-10-arm-linux-gnueabihf <% end %><%
+if platform =~ /x86-linux-gnu/     %> gcc-10-i686-linux-gnu g++-10-i686-linux-gnu <% end %><%
 if platform =~ /x86-mingw32/       %> gcc-mingw-w64-i686 g++-mingw-w64-i686 <% end %><%
 if platform =~ /x64-mingw32/       %> gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 <% end %> && \
+<% if platform =~ /aarch64-linux-gnu/ %>
+    if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+        apt-get install -y gcc-10 g++-10 && \
+        update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/gcc-10 100 && \
+        update-alternatives --install /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ /usr/bin/g++-10 100 ; \
+    else \
+        apt-get install -y gcc-10-aarch64-linux-gnu g++-10-aarch64-linux-gnu && \
+        update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-10 100 && \
+        update-alternatives --install /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ /usr/bin/aarch64-linux-gnu-g++-10 100 ; \
+    fi && \
+<% end %>
+<% if platform =~ /arm-linux-gnu/ %>
+    update-alternatives --install /usr/bin/arm-linux-gnueabihf-gcc arm-linux-gnueabihf-gcc /usr/bin/arm-linux-gnueabihf-gcc-10 100 && \
+    update-alternatives --install /usr/bin/arm-linux-gnueabihf-g++ arm-linux-gnueabihf-g++ /usr/bin/arm-linux-gnueabihf-g++-10 100 && \
+<% end %>
+<% if platform =~ /x86-linux-gnu/ %>
+    update-alternatives --install /usr/bin/i686-linux-gnu-gcc i686-linux-gnu-gcc /usr/bin/i686-linux-gnu-gcc-10 100 && \
+    update-alternatives --install /usr/bin/i686-linux-gnu-g++ i686-linux-gnu-g++ /usr/bin/i686-linux-gnu-g++-10 100 && \
+<% end %>
+<% if platform =~ /x86_64-linux-gnu/ %>
+    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
+        apt-get install -y gcc-10 g++-10 && \
+        update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 && \
+        update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100 && \
+        update-alternatives --install /usr/bin/x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc /usr/bin/gcc-10 100 && \
+        update-alternatives --install /usr/bin/x86_64-linux-gnu-g++ x86_64-linux-gnu-g++ /usr/bin/g++-10 100 ; \
+    else \
+        apt-get install -y gcc-x86-64-linux-gnu g++-x86-64-linux-gnu ; \
+    fi && \
+<% end %>
     rm -rf /var/lib/apt/lists/*
+<% end %>
 <% end %>
 
 <% if platform =~ /darwin/ %>
@@ -152,12 +192,12 @@ USER rubyuser
 xrubies_build_plan = if platform =~ /x64-mingw-ucrt/
   [
     # Rubyinstaller-3.1+ is platform x64-mingw-ucrt
-    ["3.3.11:3.2.11:3.1.7", "3.1.7"],
-    ["4.0.2:3.4.9", "4.0.2"],
+    ["3.3.12:3.2.11:3.1.7", "3.1.7"],
+    ["4.0.7:3.4.11", "4.0.7"],
   ]
 elsif platform =~ /aarch64-mingw-ucrt/
   [
-    ["4.0.2:3.4.9", "4.0.2"],
+    ["4.0.7:3.4.11", "4.0.7"],
   ]
 elsif platform =~ /x64-mingw32/
   [
@@ -167,13 +207,13 @@ elsif platform =~ /x64-mingw32/
 elsif platform =~ /x86-mingw32/
   [
     # There's no Rubyinstaller-4.x for platform x86-mingw32
-    ["3.3.11:3.2.11:3.1.7:3.0.7", "3.1.7"],
-    ["3.4.9", "4.0.2"],
+    ["3.3.12:3.2.11:3.1.7:3.0.7", "3.1.7"],
+    ["3.4.11", "4.0.7"],
   ]
 else
   [
-    ["3.3.11:3.2.11:3.1.7:3.0.7", "3.1.7"],
-    ["4.0.2:3.4.9", "4.0.2"],
+    ["3.3.12:3.2.11:3.1.7:3.0.7", "3.1.7"],
+    ["4.0.7:3.4.11", "4.0.7"],
   ]
 end
 
@@ -275,8 +315,8 @@ RUN echo 'source /etc/profile.d/rcd-env.sh' >> /etc/rubybashrc
 # Install sudoers configuration
 COPY build/sudoers /etc/sudoers.d/rake-compiler-dock
 
-RUN bash -c "rbenv global 4.0.2"
+RUN bash -c "rbenv global 4.0.7"
 
-ENV RUBY_CC_VERSION=4.0.2:3.4.9:3.3.11:3.2.11:3.1.7:3.0.7
+ENV RUBY_CC_VERSION=4.0.7:3.4.11:3.3.12:3.2.11:3.1.7:3.0.7
 
 CMD bash
