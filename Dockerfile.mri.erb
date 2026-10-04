@@ -88,9 +88,10 @@ RUN <<EOF
     fi &&
     wget https://github.com/xpack-dev-tools/mingw-w64-gcc-xpack/releases/download/v12.4.0-1/xpack-mingw-w64-gcc-12.4.0-1-linux-$DOWNLOAD_PLATFORM.tar.gz &&
     tar xf xpack-mingw*.tar.gz &&
+    rm xpack-mingw*.tar.gz &&
     mv `ls -d xpack-mingw-*/` /xpack-mingw &&
     echo "export PATH=/xpack-mingw/bin:\$PATH" >> /etc/rubybashrc &&
-    rm -r /xpack-mingw/bin/i686-w64* /xpack-mingw/i686-w64*
+    rm -r /xpack-mingw/bin/i686-w64* /xpack-mingw/i686-w64* /xpack-mingw/lib/gcc/i686-w64*
 EOF
 
 <% elsif platform =~ /aarch64-mingw-ucrt/ %>
@@ -106,6 +107,7 @@ RUN <<EOF
     fi &&
     wget https://github.com/mstorsjo/llvm-mingw/releases/download/20260922/llvm-mingw-20260922-ucrt-ubuntu-22.04-$DOWNLOAD_PLATFORM.tar.xz &&
     tar xf llvm-mingw*.tar.xz &&
+    rm llvm-mingw*.tar.xz &&
     mv `ls -d llvm-mingw-*/` /llvm-mingw &&
     echo "export PATH=/llvm-mingw/bin:\$PATH" >> /etc/rubybashrc &&
     rm -r /llvm-mingw/bin/i686-w64* /llvm-mingw/bin/armv7-w64* /llvm-mingw/bin/x86_64-w64* /llvm-mingw/i686-w64* /llvm-mingw/armv7-w64* /llvm-mingw/x86_64-w64*
