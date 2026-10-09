@@ -27,6 +27,7 @@ OUTPUT = /usr
 
 # Recommended options for faster/simpler build:
 COMMON_CONFIG += --disable-nls
+COMMON_CONFIG += LDFLAGS="-s"
 GCC_CONFIG += --enable-languages=c,c++
 GCC_CONFIG += --disable-libquadmath --disable-decimal-float
 GCC_CONFIG += --disable-multilib
