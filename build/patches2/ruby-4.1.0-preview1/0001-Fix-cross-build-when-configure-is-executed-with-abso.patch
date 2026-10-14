@@ -1,0 +1,30 @@
+From 0267e7b65262a383691c672f3c2de085911912f7 Mon Sep 17 00:00:00 2001
+From: Lars Kanis <lars@greiz-reinsdorf.de>
+Date: Wed, 14 Oct 2026 21:12:40 +0200
+Subject: [PATCH] Fix cross build when configure is executed with absolute path
+
+Error was like:
+```
+ /usr/local/rake-compiler/sources/ruby-4.1.0-preview1/tool/dump_ast.mkmf.rb:8:
+  in 'Pathname#relative_path_from': different prefix: "/" and "build-tool" (ArgumentError)
+```
+---
+ tool/dump_ast.mkmf.rb | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tool/dump_ast.mkmf.rb b/tool/dump_ast.mkmf.rb
+index 8382fe2b52..5ec2aa6ba4 100755
+--- a/tool/dump_ast.mkmf.rb
++++ b/tool/dump_ast.mkmf.rb
+@@ -5,7 +5,7 @@
+ 
+ workdir, src, *objs = ARGV
+ src = Pathname(src)
+-tooldir = src.parent.relative_path_from(workdir)
++tooldir = src.parent.expand_path.relative_path_from(File.expand_path(workdir))
+ srcdir = tooldir.parent
+ target = src.basename.sub_ext('')
+ dirs = objs.map {|obj| File.dirname(obj)}.uniq - %w[.]
+-- 
+2.53.0
+

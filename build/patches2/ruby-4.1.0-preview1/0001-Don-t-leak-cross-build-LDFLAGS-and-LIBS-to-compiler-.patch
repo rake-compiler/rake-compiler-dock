@@ -1,0 +1,31 @@
+From 86aa59201f89254095e0543cfaf29a5c9de8d74a Mon Sep 17 00:00:00 2001
+From: Lars Kanis <lars@greiz-reinsdorf.de>
+Date: Thu, 15 Oct 2026 21:16:46 +0200
+Subject: [PATCH] Don't leak cross build LDFLAGS and LIBS to compiler of native
+ dump_ast executable
+
+This patch hides LDFLAGS and LIB from passing them to dump_ast build.
+LDFLAGS can contain "-fdeclspec", which is added by configure.ac if cross compiling
+for Windows and this option is not recognized on other platforms.
+LIBS can contain libraries specific to the cross environment, not available
+for native build.
+---
+ common.mk | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/common.mk b/common.mk
+index 8f16e3afda..b9c4026169 100644
+--- a/common.mk
++++ b/common.mk
+@@ -1349,7 +1349,7 @@ build-tool/Makefile: $(tooldir)/dump_ast.mkmf.rb prism-srcs prism-incs
+ 	    build-tool $(tooldir)/dump_ast.c dump_ast.$(OBJEXT) $(LIBPRISM_OBJS)
+ 
+ build-tool/dump_ast$(BUILD_EXEEXT): build-tool/Makefile
+-	cd build-tool && MAKEFLAGS= MFLAGS= && unset MAKEFLAGS MFLAGS && $(MAKE) Q=$(Q)
++	cd build-tool && MAKEFLAGS= MFLAGS= LDFLAGS= LIBS= && unset MAKEFLAGS MFLAGS LDFLAGS LIBS && $(MAKE) Q=$(Q)
+ 
+ clean-local:: clean-build-tool
+ clean-build-tool:
+-- 
+2.53.0
+
