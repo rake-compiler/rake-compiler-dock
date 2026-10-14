@@ -8,30 +8,45 @@ class TestParallelDockerBuild < Test::Unit::TestCase
 
     Dir.chdir(@tmpdir) do
       File.write "File0", <<-EOT
-      FROM a
-      RUN a
-      RUN d
-    EOT
+        FROM a
+        RUN a
+        RUN d
+      EOT
       File.write "File1", <<-EOT
-      FROM a
-      RUN a
-      RUN d
-      RUN f \\
-          g
-    EOT
+        FROM a
+        RUN a
+        RUN d
+        RUN f \\
+            g
+      EOT
       File.write "File2", <<-EOT
-      FROM a
-      RUN b
-      RUN c
-      RUN d
-    EOT
+        FROM a
+        RUN b
+        RUN c
+        RUN d
+      EOT
       File.write "File3", <<-EOT
-      FROM a
-      RUN b
-      RUN c
-      RUN d
-    EOT
-    end
+        FROM a
+        RUN b
+        RUN c
+        RUN d
+      EOT
+
+      File.write "Heredoc1", <<-EOT
+        FROM a
+        RUN <<EOC
+          abc
+          def
+        EOC
+      EOT
+      File.write "Heredoc2", <<-EOT
+        FROM a
+        RUN <<EOC
+          abc
+          ghi
+        EOC
+      EOT
+      end
   end
 
   def teardown
@@ -44,17 +59,17 @@ class TestParallelDockerBuild < Test::Unit::TestCase
 
   def test_tasks
     Dir.chdir(@tmpdir) do
-      RakeCompilerDock::ParallelDockerBuild.new(%w[ File0 File1 File2 File3 ], task_prefix: "y").define_rake_tasks
+      RakeCompilerDock::ParallelDockerBuild.new(%w[ File0 File1 File2 File3 Heredoc1 ], task_prefix: "y").define_rake_tasks
     end
 
     assert_operator Rake::Task["File0"].prerequisites, :include?, hd("File0File1")
     assert_operator Rake::Task["File1"].prerequisites, :include?, hd("File1")
     assert_operator Rake::Task[hd "File1"].prerequisites, :include?, hd("File0File1")
-    assert_operator Rake::Task[hd "File0File1"].prerequisites, :include?, hd("File0File1File2File3")
+    assert_operator Rake::Task[hd "File0File1"].prerequisites, :include?, hd("File0File1File2File3Heredoc1")
 
     assert_operator Rake::Task["File2"].prerequisites, :include?, hd("File2File3")
     assert_operator Rake::Task["File3"].prerequisites, :include?, hd("File2File3")
-    assert_operator Rake::Task[hd "File2File3"].prerequisites, :include?, hd("File0File1File2File3")
+    assert_operator Rake::Task[hd "File2File3"].prerequisites, :include?, hd("File0File1File2File3Heredoc1")
   end
 
   def test_common_files
@@ -87,6 +102,15 @@ class TestParallelDockerBuild < Test::Unit::TestCase
 
     assert_operator pdb.all_deps, :include?, file5_final_dep,
       "all_deps should include every final_dep value so CI generates build jobs for all images"
+  end
+
+  def test_heredoc
+    Dir.chdir(@tmpdir) do
+      RakeCompilerDock::ParallelDockerBuild.new(%w[ File0 Heredoc1 Heredoc2 ], task_prefix: "y")
+    end
+    assert_equal "FROM a\n", read_df(hd("File0Heredoc1Heredoc2"))
+    assert_equal "FROM a\nRUN <<EOC\nabc\ndef\nEOC\n", read_df(hd("Heredoc1"))
+    assert_equal "FROM a\nRUN <<EOC\nabc\nghi\nEOC\n", read_df(hd("Heredoc2"))
   end
 
   def read_df(fn)

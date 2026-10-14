@@ -72,9 +72,18 @@ module RakeCompilerDock
       dockerfiles.map do |fn|
         [fn, File.read(File.join(inputdir, fn))]
       end.map do |fn, f|
-        # Split file contant in lines unless line ends with backslash
+        heredoc = nil
+        # Split file content in lines unless line ends with backslash or uses a heredoc
         fc = f.each_line.with_object([]) do |line, lines|
-          if lines.last=~/\\\n\z/
+          if heredoc && line.strip == heredoc # heredoc finishes at this line?
+            heredoc = nil
+            lines.last << line
+          elsif heredoc # next document line in a heredoc?
+            lines.last << line
+          elsif lines.last=~/\\\n\z/ # line ending with backslash?
+            lines.last << line
+          elsif lines.last=~/<<(\w+)\n\z/ # heredoc start?
+            heredoc = $1
             lines.last << line
           else
             lines << line
