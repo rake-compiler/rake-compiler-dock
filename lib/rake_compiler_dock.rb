@@ -82,6 +82,8 @@ module RakeCompilerDock
   #
   #   RakeCompilerDock.cross_rubies
   #   # => {
+  #   #      "4.1" => "4.1.0",
+  #   #      "4.0" => "4.0.7",
   #   #      "3.4" => "3.4.11",
   #   #      "3.3" => "3.3.12",
   #   #      "3.2" => "3.2.11",
@@ -91,6 +93,7 @@ module RakeCompilerDock
   #
   def cross_rubies
     {
+      "4.1" => "4.1.0",
       "4.0" => "4.0.7",
       "3.4" => "3.4.11",
       "3.3" => "3.3.12",
