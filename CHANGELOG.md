@@ -1,5 +1,10 @@
 # `rake-compiler/rake-compiler-dock` Changelog
 
+## Unreleased
+
+- Bump rake-compiler dependency to v1.3.3 (from v1.3.1) @jenshenny
+
+
 ## 1.12.0 / 2026-04-15
 
 - Fix `gem install rdoc` which failed due to insufficient permissions. #187 #192 @larskanis @flavorjones
